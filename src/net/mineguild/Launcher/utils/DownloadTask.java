@@ -1,5 +1,9 @@
 package net.mineguild.Launcher.utils;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -7,31 +11,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DownloadTask extends SwingWorker<Void, Void> {
     private static final int BUFFER_SIZE = 1024;
     private HashMap<String, File> url_file;
     private DownloadDialog gui;
 
-    public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file){
+    public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file) {
         this.gui = gui;
         this.url_file = url_file;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
+        ssl_hack();
         List<HTTPDownloadUtil> utils = HTTPDownloadUtil.prepareHashMap(url_file);
         long totalSize = HTTPDownloadUtil.calcSize(utils);
         long overallRead = 0;
         int overallFiles = utils.size();
         int overallPercentCompleted = 0;
         int currentFile = 1;
-        for(HTTPDownloadUtil util : utils){
+        for (HTTPDownloadUtil util : utils) {
             try {
-
                 String saveFilePath = util.getFilePath();
-
                 InputStream inputStream = util.getInputStream();
                 // opens an output stream to save into file
                 FileOutputStream outputStream = new FileOutputStream(saveFilePath);
@@ -51,7 +53,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                         if (!((bytesRead = inputStream.read(buffer, 0, BUFFER_SIZE)) >= 0)) {
                             break;
                         }
-                    } catch (IOException e){
+                    } catch (IOException e) {
                         tryNum++;
                         if (tryNum > 5) {
                             outputStream.close();
@@ -82,8 +84,12 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                 }
 
                 outputStream.close();
-
                 util.disconnect();
+
+                if(gui.canceled){
+                    break;
+                }
+
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(gui, "Error downloading file: " + ex.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -95,5 +101,32 @@ public class DownloadTask extends SwingWorker<Void, Void> {
         }
 
         return null;
+    }
+
+    public static void ssl_hack() {
+        // Create a new trust manager that trust all certificates
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+        };
+
+        // Activate the new trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception ignored) {
+        }
     }
 }
