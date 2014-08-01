@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DownloadTask extends SwingWorker<Void, Void> {
@@ -19,7 +18,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
     private DownloadDialog gui;
     long totalSize = 0;
 
-    public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file){
+    public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file) {
         this.gui = gui;
         this.url_file = url_file;
     }
@@ -30,7 +29,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
     }
 
     @Override
-    protected Void doInBackground() throws Exception{
+    protected Void doInBackground() throws Exception {
         ssl_hack();
         long totalRead = 0;
         int totalFiles = url_file.size();
@@ -59,7 +58,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
 
                 HashMap<String, Object> info = new HashMap<>();
                 info.put("fileName", util.getFileName());
-                info.put("currentFile", currentFile+1);
+                info.put("currentFile", currentFile + 1);
                 info.put("overallFiles", totalFiles);
                 firePropertyChange("info", null, info);
 
@@ -104,7 +103,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                 outputStream.close();
                 util.disconnect();
 
-                if(gui.canceled){
+                if (gui.canceled) {
                     break;
                 }
 

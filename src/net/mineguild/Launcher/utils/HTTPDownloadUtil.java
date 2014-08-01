@@ -1,14 +1,9 @@
 package net.mineguild.Launcher.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 public class HTTPDownloadUtil {
@@ -27,8 +22,7 @@ public class HTTPDownloadUtil {
     /**
      * Downloads a file from a URL
      *
-     * @param fileURL
-     *            HTTP URL of the file to be downloaded
+     * @param fileURL HTTP URL of the file to be downloaded
      * @throws IOException
      */
     public void downloadFile(String fileURL) throws IOException {
@@ -75,7 +69,6 @@ public class HTTPDownloadUtil {
         downloadFile(fileURL);
         this.filePath = filePath;
     }
-
 
 
     public void disconnect() throws IOException {

@@ -13,7 +13,7 @@ public class ChecksumUtil {
     public long getChecksum(File file) throws Exception {
         CheckedInputStream cis = new CheckedInputStream(new FileInputStream(file), new Adler32());
         byte[] buffer = new byte[128];
-        while (cis.read(buffer) >= 0){
+        while (cis.read(buffer) >= 0) {
             //Reading
         }
         return cis.getChecksum().getValue();
@@ -24,7 +24,7 @@ public class ChecksumUtil {
         try (InputStream is = new FileInputStream(file)) {
             DigestInputStream dis = new DigestInputStream(is, md);
             byte[] buffer = new byte[1024];
-            while (dis.read(buffer) >= 0){
+            while (dis.read(buffer) >= 0) {
                 //Reading
             }
         }
