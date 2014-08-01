@@ -1,17 +1,11 @@
 package net.mineguild.Launcher.utils;
 
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.*;
-import java.net.URL;
+import java.io.File;
 import java.util.HashMap;
 
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
@@ -26,7 +20,12 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
 
     public DownloadDialog(HashMap<String, File> url_dest, String title) {
         setContentPane(contentPane);
+
         this.url_dest = url_dest;
+        setResizable(false);
+        pack();
+        setTitle(title);
+        setLocationRelativeTo(null);
         getRootPane().setDefaultButton(buttonCancel);
         buttonCancel.addActionListener(new ActionListener() {
             @Override
@@ -44,12 +43,10 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     }
 
     public static void main(String[] args) {
-        HashMap<String, File> test = new HashMap<String, File>();
+        HashMap<String, File> test = new HashMap<>();
         test.put("https://mineguild.net/uploadscript/uploads/AC2.mp4", new File("AC2.mp4"));
         test.put("https://mineguild.net/uploadscript/uploads/BAnzServiceDevSpace.zip", new File("BAnzServiceDevSpace.zip"));
         DownloadDialog dialog = new DownloadDialog(test, "Test");
-
-        dialog.pack();
         dialog.setVisible(true);
         dialog.start();
         System.exit(0);
@@ -60,9 +57,17 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
         if (evt.getPropertyName().equals("progress")) {
             int progress = (Integer) evt.getNewValue();
             current.setValue(progress);
-        } else if(evt.getPropertyName().equals("overall")){
+        } else if (evt.getPropertyName().equals("overall")) {
             int progress = (Integer) evt.getNewValue();
             overall.setValue(progress);
+        } else if (evt.getPropertyName().equals("info")) {
+            @SuppressWarnings("unchecked")
+            HashMap<String, Object> info = (HashMap<String, Object>) evt.getNewValue();
+            status.setText(String.format("Downloading %s (%d of %d)", (String) info.get("fileName"),
+                    (int) info.get("currentFile"), (int) info.get("overallFiles")));
+            pack();
+        } else if (evt.getPropertyName().equals("speed")) {
+            speedLabel.setText(String.format("%.2f KB/s", (float) evt.getNewValue()));
         }
     }
 }

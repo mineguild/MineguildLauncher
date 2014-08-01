@@ -11,28 +11,36 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DownloadTask extends SwingWorker<Void, Void> {
     private static final int BUFFER_SIZE = 1024;
     private HashMap<String, File> url_file;
     private DownloadDialog gui;
+    long totalSize = 0;
 
-    public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file) {
+    public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file){
         this.gui = gui;
         this.url_file = url_file;
     }
 
+    public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file, long totalSize) {
+        this(gui, url_file);
+        this.totalSize = totalSize;
+    }
+
     @Override
-    protected Void doInBackground() throws Exception {
+    protected Void doInBackground() throws Exception{
         ssl_hack();
-        List<HTTPDownloadUtil> utils = HTTPDownloadUtil.prepareHashMap(url_file);
-        long totalSize = HTTPDownloadUtil.calcSize(utils);
-        long overallRead = 0;
-        int overallFiles = utils.size();
-        int overallPercentCompleted = 0;
-        int currentFile = 1;
-        for (HTTPDownloadUtil util : utils) {
+        long totalRead = 0;
+        int totalFiles = url_file.size();
+        int lastTotalProgress, totalProgress;
+        lastTotalProgress = totalProgress = 0;
+        int currentFile = 0;
+        for (Map.Entry<String, File> entry : url_file.entrySet()) {
             try {
+                HTTPDownloadUtil util = new HTTPDownloadUtil();
+                util.downloadFile(entry.getKey(), entry.getValue().getAbsolutePath());
                 String saveFilePath = util.getFilePath();
                 InputStream inputStream = util.getInputStream();
                 // opens an output stream to save into file
@@ -41,6 +49,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 long totalBytesRead = 0;
                 int percentCompleted;
+
                 long fileSize = util.getContentLength();
                 long lastTime = System.currentTimeMillis();
                 float lastFileSize = 0;
@@ -48,7 +57,14 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                 int tryNum = 0;
                 int bytesRead;
 
+                HashMap<String, Object> info = new HashMap<>();
+                info.put("fileName", util.getFileName());
+                info.put("currentFile", currentFile+1);
+                info.put("overallFiles", totalFiles);
+                firePropertyChange("info", null, info);
+
                 while (!gui.canceled) {
+
                     try {
                         if (!((bytesRead = inputStream.read(buffer, 0, BUFFER_SIZE)) >= 0)) {
                             break;
@@ -66,21 +82,23 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                         speed = ((totalBytesRead - lastFileSize) / BUFFER_SIZE) / (System.currentTimeMillis() - lastTime) * 1000;
                         lastTime = System.currentTimeMillis();
                         lastFileSize = totalBytesRead;
+                        firePropertyChange("speed", null, speed);
                     }
-                    gui.status.setText(String.format("Downloading %s (%d of %d)", util.getFileName(), currentFile, overallFiles));
-                    gui.speedLabel.setText(String.format("%.2f KB/s", speed));
-                    gui.pack();
-
 
                     totalBytesRead += bytesRead;
-                    overallRead += bytesRead;
+                    totalRead += bytesRead;
                     outputStream.write(buffer, 0, bytesRead);
+
                     percentCompleted = (int) ((totalBytesRead * 100) / fileSize);
                     setProgress(percentCompleted);
                     if (totalSize > 0) {
-                        overallPercentCompleted = (int) ((overallRead * 100) / totalSize);
+                        totalProgress = (int) ((totalRead * 100) / totalSize);
+                    } else {
+                        float percentPerFile = 100 / totalFiles;
+                        totalProgress = (int) (((totalBytesRead * (percentPerFile)) / fileSize) + percentPerFile * currentFile);
                     }
-                    firePropertyChange("overall", null, overallPercentCompleted);
+                    firePropertyChange("overall", lastTotalProgress, totalProgress);
+                    lastTotalProgress = totalProgress;
                 }
 
                 outputStream.close();
@@ -102,6 +120,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
 
         return null;
     }
+
 
     public static void ssl_hack() {
         // Create a new trust manager that trust all certificates

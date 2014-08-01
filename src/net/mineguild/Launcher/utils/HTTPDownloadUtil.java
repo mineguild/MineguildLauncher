@@ -71,6 +71,11 @@ public class HTTPDownloadUtil {
         }
     }
 
+    public void downloadFile(String fileURL, String filePath) throws IOException {
+        downloadFile(fileURL);
+        this.filePath = filePath;
+    }
+
 
 
     public void disconnect() throws IOException {
@@ -88,26 +93,6 @@ public class HTTPDownloadUtil {
 
     public InputStream getInputStream() {
         return this.inputStream;
-    }
-
-    public static List<HTTPDownloadUtil> prepareHashMap(HashMap<String, File> map) throws Exception {
-        List<HTTPDownloadUtil> list = new ArrayList<HTTPDownloadUtil>();
-        for (Map.Entry<String, File> entry : map.entrySet()) {
-            HTTPDownloadUtil util = new HTTPDownloadUtil();
-            util.downloadFile(entry.getKey());
-            util.fileName = entry.getValue().getName();
-            util.filePath = entry.getValue().getAbsolutePath();
-            list.add(util);
-        }
-        return list;
-    }
-
-    public static long calcSize(List<HTTPDownloadUtil> list){
-        long size = 0;
-        for(HTTPDownloadUtil util : list){
-            size += util.getContentLength();
-        }
-        return size;
     }
 
     public String getFilePath() {
