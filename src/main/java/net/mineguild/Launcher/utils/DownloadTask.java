@@ -36,6 +36,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
         int lastTotalProgress, totalProgress;
         lastTotalProgress = totalProgress = 0;
         int currentFile = 0;
+
         for (Map.Entry<String, File> entry : url_file.entrySet()) {
             try {
                 HTTPDownloadUtil util = new HTTPDownloadUtil();

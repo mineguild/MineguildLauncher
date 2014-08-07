@@ -1,4 +1,4 @@
-package net.mineguild.Launcher.utils;
+package net.mineguild;
 
 import java.io.File;
 import java.io.FileInputStream;
