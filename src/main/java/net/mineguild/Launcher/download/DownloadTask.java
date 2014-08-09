@@ -1,4 +1,6 @@
-package net.mineguild.Launcher.utils;
+package net.mineguild.Launcher.download;
+
+import net.mineguild.Launcher.utils.HTTPDownloadUtil;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;

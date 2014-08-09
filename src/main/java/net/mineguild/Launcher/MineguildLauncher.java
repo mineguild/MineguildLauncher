@@ -1,13 +1,10 @@
 package net.mineguild.Launcher;
 
 import net.mineguild.Launcher.utils.ChecksumUtil;
-import net.mineguild.Launcher.utils.DownloadDialog;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.net.URL;
 import java.util.*;
 
 public class MineguildLauncher {

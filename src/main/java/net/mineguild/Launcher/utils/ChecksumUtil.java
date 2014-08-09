@@ -1,8 +1,15 @@
 package net.mineguild.Launcher.utils;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.List;
@@ -39,54 +46,25 @@ public class ChecksumUtil {
         return results;
     }
 
-    public static long getChecksum(File file) throws Exception {
-        CheckedInputStream cis = new CheckedInputStream(new FileInputStream(file), new Adler32());
-        byte[] buffer = new byte[128];
-        int bytesRead;
-        do {
-            bytesRead = cis.read(buffer);
-        } while (bytesRead >= 0);
-        return cis.getChecksum().getValue();
+    public static long getChecksum(File file) throws IOException {
+        return Files.hash(file, Hashing.adler32()).asLong();
     }
 
-    public static String getMD5(File file) throws Exception {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        try (InputStream is = new FileInputStream(file)) {
-            DigestInputStream dis = new DigestInputStream(is, md);
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            do {
-                bytesRead = dis.read(buffer);
-            } while (bytesRead >= 0);
-        }
-        byte[] hash = md.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte aHash : hash) {
-            if ((0xff & aHash) < 0x10) {
-                hexString.append("0").append(Integer.toHexString((0xFF & aHash)));
-            } else {
-                hexString.append(Integer.toHexString(0xFF & aHash));
-            }
-        }
-        return hexString.toString();
+    public static String getMD5(File file) throws IOException {
+        return Files.hash(file, Hashing.md5()).toString();
+    }
+
+    public static String getSHA(File file) throws IOException {
+        return Files.hash(file, Hashing.sha1()).toString();
     }
 
     public static String getMD5(String str) {
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(str.getBytes());
-            byte[] hash = md.digest();
-            StringBuilder hexString = new StringBuilder();
-            for (byte aHash : hash) {
-                if ((0xff & aHash) < 0x10) {
-                    hexString.append("0").append(Integer.toHexString((0xFF & aHash)));
-                } else {
-                    hexString.append(Integer.toHexString(0xFF & aHash));
-                }
-            }
-            return hexString.toString();
+            HashFunction hf = Hashing.md5();
+            HashCode hc = hf.hashString(str, Charset.forName("utf-8"));
+            return hc.toString();
         } catch (Exception ignored){}
-        return  null;
+        return null;
     }
 
     public static class WorkerTask implements Runnable {
