@@ -1,9 +1,0 @@
-{
-    "Version": "1.0",
-    "VersionHash": "e4c2e8edac362acab7123654b9e73432",
-    "PackedSize": 120000,
-    "Files": {
-        "mods":{"test.jar": "777d45bbbcdf50d49c42c70ad7acf5fe"},
-        "config":{"test.cfg": "777d45bbbcdf50d49c42c70ad7acf5fe"}
-    }
-}
