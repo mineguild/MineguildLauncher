@@ -1,0 +1,12 @@
+syntax: glob
+.gradle/*
+.idea/*
+*.iml
+build/*
+*.pyc
+mods/*
+testPack/*
+out/*
+upload/*
+jssecacerts
+hash.py
