@@ -20,7 +20,8 @@ public class ModpackBuilder {
         newPack.addModpackFiles(ChecksumUtil.getChecksum(list, Hashing.md5()));
         Gson g = new GsonBuilder().setPrettyPrinting().create();
         System.out.println(g.toJson(Modpack.getNew(oldPack, newPack)));
-        placeUploadFiles(new File("testPack").getAbsolutePath(), Modpack.getNew(oldPack, newPack));
+        fromUploadFiles(newPack.getModpackFiles());
+        //placeUploadFiles(new File("testPack").getAbsolutePath(), Modpack.getNew(oldPack, newPack));
         //System.out.println(g.toJson(Modpack.getOld(oldPack, newPack)));
         /*
         Modpack m = new Modpack();
@@ -50,6 +51,28 @@ public class ModpackBuilder {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+    }
+
+    public static void fromUploadFiles(Map<String, String> files) {
+        File modpack = new File("modpack");
+        File upload = new File("upload");
+        modpack.mkdir();
+        try {
+            FileUtils.cleanDirectory(modpack);
+        } catch (IOException ignored) {}
+        for(Map.Entry<String, String> entry : files.entrySet()){
+            String hash = entry.getValue();
+            File fileDir = new File(upload, hash.substring(0, 2));
+            File file = new File(fileDir, hash);
+            String path = entry.getKey();
+            File filePath = new File(modpack, path);
+            try {
+                System.out.printf("Copying %s to %s\n", file.toString(), filePath.toString());
+                FileUtils.copyFile(file, filePath);
+            } catch (IOException e){
+                e.printStackTrace();
             }
         }
     }
