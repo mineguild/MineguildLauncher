@@ -6,12 +6,13 @@ import com.intellij.uiDesigner.core.Spacer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.HashMap;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
     private JPanel contentPane;
@@ -22,6 +23,9 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     public JLabel speedLabel;
     Boolean canceled = false;
     private HashMap<String, File> url_dest;
+    private ArrayList<DownloadInfo> info;
+    private AssetDownloader task;
+    int longest;
 
     public DownloadDialog(HashMap<String, File> url_dest, String title) {
         setContentPane(contentPane);
@@ -36,13 +40,39 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 canceled = true;
+                task.cancel(true);
                 setVisible(false);
             }
         });
     }
 
+    public DownloadDialog(ArrayList<DownloadInfo> info, String title) {
+        this.info = info;
+        setTitle(title);
+        setContentPane(contentPane);
+        pack();
+        setLocationRelativeTo(null);
+        getRootPane().setDefaultButton(buttonCancel);
+        buttonCancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                canceled = true;
+                setVisible(false);
+                task.cancel(false);
+            }
+        });
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+                canceled = true;
+                task.cancel(false);
+            }
+        });
+    }
+
     public void start() {
-        DownloadTask task = new DownloadTask(this, url_dest);
+        task = new AssetDownloader(info);
         task.addPropertyChangeListener(this);
         task.run();
     }
@@ -70,6 +100,10 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
             HashMap<String, Object> info = (HashMap<String, Object>) evt.getNewValue();
             status.setText(String.format("Downloading %s (%d of %d)", (String) info.get("fileName"),
                     (int) info.get("currentFile"), (int) info.get("overallFiles")));
+            if (((String) info.get("fileName")).length() > longest) {
+                longest = ((String) info.get("fileName")).length();
+                System.out.println(longest);
+            }
             pack();
         } else if (evt.getPropertyName().equals("note")) {
             status.setText((String) evt.getNewValue());

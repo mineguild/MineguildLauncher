@@ -80,6 +80,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                         }
                         continue;
                     }
+
                     if (System.currentTimeMillis() - lastTime > 1000) {
                         speed = ((totalBytesRead - lastFileSize) / BUFFER_SIZE) / (System.currentTimeMillis() - lastTime) * 1000;
                         lastTime = System.currentTimeMillis();

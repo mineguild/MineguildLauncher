@@ -14,12 +14,14 @@ import java.util.Map;
 public class ModpackBuilder {
 
     public static void main(String[] args) throws Exception {
-        Modpack oldPack = Modpack.fromJson(FileUtils.readFileToString(new File("test.json")));
+        //Modpack oldPack = Modpack.fromJson(FileUtils.readFileToString(new File("test.json")));
         Modpack newPack = new Modpack();
+        File modpack_json = new File("new_test.json");
         List<File> list = (List<File>) FileUtils.listFiles(new File("testPack"), FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.trueFileFilter());
         newPack.addModpackFiles(ChecksumUtil.getChecksum(list, Hashing.md5()));
         Gson g = new GsonBuilder().setPrettyPrinting().create();
-        System.out.println(g.toJson(Modpack.getNew(oldPack, newPack)));
+        FileUtils.write(modpack_json, newPack.toJson());
+        //System.out.println(g.toJson(Modpack.getNew(oldPack, newPack)));
         fromUploadFiles(newPack.getModpackFiles());
         //placeUploadFiles(new File("testPack").getAbsolutePath(), Modpack.getNew(oldPack, newPack));
         //System.out.println(g.toJson(Modpack.getOld(oldPack, newPack)));
