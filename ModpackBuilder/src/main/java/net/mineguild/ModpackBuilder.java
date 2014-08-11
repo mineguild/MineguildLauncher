@@ -1,5 +1,6 @@
 package net.mineguild;
 
+import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
@@ -16,7 +17,7 @@ public class ModpackBuilder {
         Modpack oldPack = Modpack.fromJson(FileUtils.readFileToString(new File("test.json")));
         Modpack newPack = new Modpack();
         List<File> list = (List<File>) FileUtils.listFiles(new File("testPack"), FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.trueFileFilter());
-        newPack.addModpackFiles(ChecksumUtil.getChecksum(list));
+        newPack.addModpackFiles(ChecksumUtil.getChecksum(list, Hashing.md5()));
         Gson g = new GsonBuilder().setPrettyPrinting().create();
         System.out.println(g.toJson(Modpack.getNew(oldPack, newPack)));
         placeUploadFiles(new File("testPack").getAbsolutePath(), Modpack.getNew(oldPack, newPack));
@@ -31,7 +32,7 @@ public class ModpackBuilder {
     }
 
 
-    public static void placeUploadFiles(String basePath, Map<String, Long> files) {
+    public static void placeUploadFiles(String basePath, Map<String, String> files) {
         File uploadDir = new File("upload");
         uploadDir.mkdir();
         try {
@@ -39,9 +40,10 @@ public class ModpackBuilder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for (Map.Entry<String, Long> entry : files.entrySet()) {
+        for (Map.Entry<String, String> entry : files.entrySet()) {
             File file = new File(basePath, entry.getKey());
-            File newFile = new File(uploadDir, entry.getValue().toString());
+            File newDirectory = new File(uploadDir, entry.getValue().substring(0, 2));
+            File newFile = new File(newDirectory, entry.getValue());
             if (file.exists()) {
                 try {
                     FileUtils.copyFile(file, newFile);

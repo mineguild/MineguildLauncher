@@ -1,25 +1,21 @@
 package net.mineguild;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Modpack {
     private long build;
     private String version;
     private String hash;
     private long releaseTime;
-    private Map<String, Long> modpackFiles = new HashMap<>();
+    private Map<String, String> modpackFiles = new HashMap<>();
 
-    public Modpack(long build, String version, long releaseTime, Map<String, Long> modpackFiles) {
+    public Modpack(long build, String version, long releaseTime, Map<String, String> modpackFiles) {
         this.build = build;
         this.version = version;
         this.hash = ChecksumUtil.getMD5(version);
@@ -40,11 +36,11 @@ public class Modpack {
         return g.fromJson(json, Modpack.class);
     }
 
-    public static BiMap<String, Long> getNew(Modpack oldPack, Modpack newPack) {
-        BiMap<String, Long> newFiles = HashBiMap.create();
-        for (Map.Entry<String, Long> newEntry : newPack.getModpackFiles().entrySet()) {
+    public static HashMap<String, String> getNew(Modpack oldPack, Modpack newPack) {
+        HashMap<String, String> newFiles = new HashMap<>();
+        for (Map.Entry<String, String> newEntry : newPack.getModpackFiles().entrySet()) {
             if (oldPack.getModpackFiles().containsKey(newEntry.getKey())) {
-                if (!((long) oldPack.getModpackFiles().get(newEntry.getKey()) == newEntry.getValue())) {
+                if (!oldPack.getModpackFiles().get(newEntry.getKey()).equals(newEntry.getValue())) {
                     newFiles.put(newEntry.getKey(), newEntry.getValue());
                 }
             } else {
@@ -56,9 +52,9 @@ public class Modpack {
 
     public static List<String> getOld(Modpack oldPack, Modpack newPack) {
         List<String> oldFiles = new ArrayList<>();
-        for (Map.Entry<String, Long> oldEntry : oldPack.getModpackFiles().entrySet()) {
+        for (Map.Entry<String, String> oldEntry : oldPack.getModpackFiles().entrySet()) {
             if (newPack.getModpackFiles().containsKey(oldEntry.getKey())) {
-                if (!((long) newPack.getModpackFiles().get(oldEntry.getKey()) == oldEntry.getValue())) {
+                if (!newPack.getModpackFiles().get(oldEntry.getKey()).equals(oldEntry.getValue())) {
                     oldFiles.add(oldEntry.getKey());
                 }
             } else {
@@ -76,16 +72,16 @@ public class Modpack {
         this.version = version;
     }
 
-    public Map<String, Long> getModpackFiles() {
+    public Map<String, String> getModpackFiles() {
         return modpackFiles;
     }
 
-    public void setModpackFiles(BiMap<String, Long> modpackFiles) {
+    public void setModpackFiles(BiMap<String, String> modpackFiles) {
         this.modpackFiles = modpackFiles;
     }
 
-    public void addModpackFiles(Map<File, Long> modpackFiles) {
-        for (Map.Entry<File, Long> entry : modpackFiles.entrySet()) {
+    public void addModpackFiles(Map<File, String> modpackFiles) {
+        for (Map.Entry<File, String> entry : modpackFiles.entrySet()) {
             this.addFile(entry.getKey(), entry.getValue());
         }
     }
@@ -120,31 +116,36 @@ public class Modpack {
         return g.toJson(this);
     }
 
-    public void addFile(File file, long checkSum){
-        if (checkSum != 1) {
-            String path = FilenameUtils.separatorsToUnix(file.getPath());
-            String relPath = "";
-            String[] split = path.split("/");
-            boolean hitPath = false;
-            for (String s : split) {
-                if (hitPath) {
-                    relPath += "/" + s;
-                } else if (s.equals("config") || s.equals("mods")) {
-                    relPath += s;
-                    hitPath = true;
-                }
-            }
-            try {
-                modpackFiles.put(relPath, checkSum);
-            } catch (IllegalArgumentException e) {
-                System.out.println("File already added!");
-            }
+    public void addFile(File file, String checkSum) {
 
+        String path = FilenameUtils.separatorsToUnix(file.getPath());
+        String relPath = "";
+        String[] split = path.split("/");
+        boolean hitPath = false;
+        for (String s : split) {
+            if (hitPath) {
+                relPath += "/" + s;
+            } else if (s.equals("config") || s.equals("mods")) {
+                relPath += s;
+                hitPath = true;
+            }
         }
+        try {
+            modpackFiles.put(relPath, checkSum);
+        } catch (IllegalArgumentException e) {
+            System.out.println("File already added!");
+        }
+
     }
 
-    public String getFileBySum(Long sum) {
-        return ((BiMap<String, Long>) modpackFiles).inverse().get(sum);
+    public Collection<String> getFilesBySum(String sum) {
+        Collection<String> files = new ArrayList<>();
+        for (Map.Entry<String, String> entry : modpackFiles.entrySet()) {
+            if (entry.getValue().equals(sum)) {
+                files.add(entry.getKey());
+            }
+        }
+        return files;
     }
 
 

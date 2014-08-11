@@ -21,10 +21,9 @@ version = '1.0'
 repositories {
     mavenCentral()
 }
-
-/*launch4j {
+/*
+launch4j {
     mainClassName = "net.mineguild.Launcher.utils.DownloadDialog"
-    jar = "lib/"
 }*/
 
 

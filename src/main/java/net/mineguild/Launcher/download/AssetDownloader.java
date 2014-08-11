@@ -1,24 +1,20 @@
 package net.mineguild.Launcher.download;
 
+import com.google.common.collect.Lists;
+import lombok.Getter;
+import net.mineguild.Launcher.download.DownloadInfo.DLType;
+import net.mineguild.Launcher.utils.DownloadUtils;
+
+import javax.swing.*;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.List;
 
-import javax.swing.ProgressMonitor;
-import javax.swing.SwingWorker;
-
-import com.google.common.collect.Lists;
-import lombok.Getter;
-
-import net.mineguild.Launcher.download.DownloadInfo.DLType;
-import net.mineguild.Launcher.utils.DownloadUtils;
-
 public class AssetDownloader extends SwingWorker<Boolean, Void> {
     private List<DownloadInfo> downloads;
-    private final ProgressMonitor monitor;
     private int progressIndex = 0;
     private boolean allDownloaded = true;
 
@@ -27,9 +23,9 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     @Getter
     private int ready = 0;
 
-    public AssetDownloader(final ProgressMonitor monitor, List<DownloadInfo> downloads) {
+    public AssetDownloader(List<DownloadInfo> downloads) {
         this.downloads = downloads;
-        this.monitor = monitor;
+
     }
 
     @Override

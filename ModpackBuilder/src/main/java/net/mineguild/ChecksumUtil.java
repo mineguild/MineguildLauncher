@@ -1,29 +1,29 @@
 package net.mineguild;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.Adler32;
-import java.util.zip.CheckedInputStream;
 
 public class ChecksumUtil {
 
-    private static ConcurrentHashMap<File, Long> results;
+    private static ConcurrentHashMap<File, String> results;
 
-    public static Map<File, Long> getChecksum(List<File> files){
+    public static Map<File, String> getChecksum(List<File> files, HashFunction hf) {
         ExecutorService executor = Executors.newFixedThreadPool(4);
         results = new ConcurrentHashMap<>();
         for (File file : files) {
             try {
-                Runnable worker = new WorkerTask(file);
+                Runnable worker = new WorkerTask(file, hf);
                 executor.execute(worker);
             } catch (Exception ignored){
             }
@@ -39,68 +39,41 @@ public class ChecksumUtil {
         return results;
     }
 
-    public static long getChecksum(File file) throws Exception {
-        CheckedInputStream cis = new CheckedInputStream(new FileInputStream(file), new Adler32());
-        byte[] buffer = new byte[128];
-        int bytesRead;
-        do {
-            bytesRead = cis.read(buffer);
-        } while (bytesRead >= 0);
-        return cis.getChecksum().getValue();
+    public static String getHash(HashFunction hf, String str) {
+        return hf.hashString(str, Charset.forName("utf-8")).toString();
     }
 
-    public static String getMD5(File file) throws Exception {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        try (InputStream is = new FileInputStream(file)) {
-            DigestInputStream dis = new DigestInputStream(is, md);
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            do {
-                bytesRead = dis.read(buffer);
-            } while (bytesRead >= 0);
-        }
-        byte[] hash = md.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte aHash : hash) {
-            if ((0xff & aHash) < 0x10) {
-                hexString.append("0").append(Integer.toHexString((0xFF & aHash)));
-            } else {
-                hexString.append(Integer.toHexString(0xFF & aHash));
-            }
-        }
-        return hexString.toString();
+    public static String getChecksum(File file) throws IOException {
+        return Files.hash(file, Hashing.adler32()).toString();
+    }
+
+    public static String getMD5(File file) throws IOException {
+        return Files.hash(file, Hashing.md5()).toString();
+    }
+
+    public static String getSHA(File file) throws IOException {
+        return Files.hash(file, Hashing.sha1()).toString();
     }
 
     public static String getMD5(String str) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(str.getBytes());
-            byte[] hash = md.digest();
-            StringBuilder hexString = new StringBuilder();
-            for (byte aHash : hash) {
-                if ((0xff & aHash) < 0x10) {
-                    hexString.append("0").append(Integer.toHexString((0xFF & aHash)));
-                } else {
-                    hexString.append(Integer.toHexString(0xFF & aHash));
-                }
-            }
-            return hexString.toString();
-        } catch (Exception ignored){}
-        return  null;
+        HashFunction hf = Hashing.md5();
+        return hf.hashString(str, Charset.forName("utf-8")).toString();
     }
 
     public static class WorkerTask implements Runnable {
 
         File file;
+        HashFunction hf;
 
-        WorkerTask(File file){
+        WorkerTask(File file, HashFunction hf) {
             this.file = file;
+            this.hf = hf;
         }
 
         @Override
         public void run(){
             try {
-                results.put(file, getChecksum(file));
+                results.put(file, Files.hash(file, hf).toString());
             } catch (Exception ignored){}
 
         }
