@@ -22,35 +22,24 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     private JProgressBar current;
     public JLabel speedLabel;
     Boolean canceled = false;
-    private HashMap<String, File> url_dest;
-    private ArrayList<DownloadInfo> info;
+    private List<DownloadInfo> info;
+    private long totalFilesSize = 0;
     private AssetDownloader task;
-    int longest;
+    private final int statusTextSize = 40;
 
-    public DownloadDialog(HashMap<String, File> url_dest, String title) {
-        setContentPane(contentPane);
 
-        this.url_dest = url_dest;
-        setResizable(false);
-        pack();
-        setTitle(title);
-        setLocationRelativeTo(null);
-        getRootPane().setDefaultButton(buttonCancel);
-        buttonCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                canceled = true;
-                task.cancel(true);
-                setVisible(false);
-            }
-        });
-    }
-
-    public DownloadDialog(ArrayList<DownloadInfo> info, String title) {
+    public DownloadDialog(List<DownloadInfo> info, String title) {
         this.info = info;
         setTitle(title);
         setContentPane(contentPane);
+        char[] statusChars = new char[statusTextSize];
+        Arrays.fill(statusChars, 'x');
+        status.setText(String.copyValueOf(statusChars));
+        setResizable(false);
         pack();
+        setMinimumSize(getSize());
+        setResizable(true);
+        status.setText("Working...");
         setLocationRelativeTo(null);
         getRootPane().setDefaultButton(buttonCancel);
         buttonCancel.addActionListener(new ActionListener() {
@@ -71,20 +60,24 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
         });
     }
 
-    public void start() {
-        task = new AssetDownloader(info);
-        task.addPropertyChangeListener(this);
-        task.run();
+    public DownloadDialog(List<DownloadInfo> info, String title, long totalFilesSize) {
+        this(info, title);
+        this.totalFilesSize = totalFilesSize;
     }
 
-    public static void main(String[] args) {
-        HashMap<String, File> test = new HashMap<>();
-        test.put("https://mineguild.net/uploadscript/uploads/AC2.mp4", new File("AC2.mp4"));
-        test.put("https://mineguild.net/uploadscript/uploads/BAnzServiceDevSpace.zip", new File("BAnzServiceDevSpace.zip"));
-        DownloadDialog dialog = new DownloadDialog(test, "Test");
-        dialog.setVisible(true);
-        dialog.start();
-        System.exit(0);
+    public void start() {
+        task = new AssetDownloader(info, totalFilesSize);
+        task.addPropertyChangeListener(this);
+        task.run();
+        try {
+            boolean success = task.get();
+            if(success)
+                JOptionPane.showMessageDialog(this, "All files were successfully downloaded!", "Success!", JOptionPane.INFORMATION_MESSAGE);
+            else
+                JOptionPane.showMessageDialog(this, "Files are missing!", "Error!", JOptionPane.ERROR_MESSAGE);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -98,13 +91,15 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
         } else if (evt.getPropertyName().equals("info")) {
             @SuppressWarnings("unchecked")
             HashMap<String, Object> info = (HashMap<String, Object>) evt.getNewValue();
-            status.setText(String.format("Downloading %s (%d of %d)", (String) info.get("fileName"),
-                    (int) info.get("currentFile"), (int) info.get("overallFiles")));
-            if (((String) info.get("fileName")).length() > longest) {
-                longest = ((String) info.get("fileName")).length();
-                System.out.println(longest);
+            String noName = String.format("Downloading  (%d of %d)",
+                    (int) info.get("currentFile"), (int) info.get("overallFiles"));
+            int sizeLeft = statusTextSize - noName.length();
+            String name = (String) info.get("fileName");
+            if (name.length() > sizeLeft) {
+                name = name.substring(0, sizeLeft - 2) + "...";
             }
-            pack();
+            status.setText(String.format("Downloading %s (%d of %d)", name,
+                    (int) info.get("currentFile"), (int) info.get("overallFiles")));
         } else if (evt.getPropertyName().equals("note")) {
             status.setText((String) evt.getNewValue());
         } else if (evt.getPropertyName().equals("speed")) {
@@ -147,27 +142,25 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
         status.setText("Working...");
         panel3.add(status, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel4.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         overall = new JProgressBar();
-        panel4.add(overall, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label1 = new JLabel();
-        label1.setText("Overall Progress");
-        panel4.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        overall.setStringPainted(true);
+        overall.setToolTipText("Overall Download Progress");
+        panel4.add(overall, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel5 = new JPanel();
-        panel5.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel5.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(panel5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         current = new JProgressBar();
-        panel5.add(current, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label2 = new JLabel();
-        label2.setText("Current File Progress");
-        panel5.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        current.setStringPainted(true);
+        current.setToolTipText("Current File Download Progress");
+        panel5.add(current, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel6 = new JPanel();
         panel6.setLayout(new BorderLayout(0, 0));
         contentPane.add(panel6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JLabel label3 = new JLabel();
-        label3.setText("Current Speed:  ");
-        panel6.add(label3, BorderLayout.WEST);
+        final JLabel label1 = new JLabel();
+        label1.setText("Current Speed:  ");
+        panel6.add(label1, BorderLayout.WEST);
         speedLabel = new JLabel();
         speedLabel.setText("0 kb/s");
         panel6.add(speedLabel, BorderLayout.CENTER);

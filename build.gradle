@@ -35,11 +35,12 @@ dependencies {
     compile "org.projectlombok:lombok:1.14.4"
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.guava:guava:17.0'
+    compile group: 'com.seaglasslookandfeel', name: 'seaglasslookandfeel', version: '0.2'
 
 }
 
 jar {
     manifest {
-        attributes 'Main-Class': 'net.mineguild.Launcher.utils.DownloadDialog'
+        attributes 'Main-Class': 'net.mineguild.Launcher.MineguildLauncher'
     }
 }

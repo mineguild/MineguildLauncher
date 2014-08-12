@@ -15,16 +15,17 @@ import java.util.HashMap;
 import java.util.List;
 
 public class AssetDownloader extends SwingWorker<Boolean, Void> {
+    private static final int BUFFER_SIZE = 1024;
+    private static final int SPEED_UPDATE_INTERVAL = 500;
     private List<DownloadInfo> downloads;
     private int progressIndex = 0;
     private boolean allDownloaded = true;
-    private static final int BUFFER_SIZE = 1024;
-    private static final int SPEED_UPDATE_INTERVAL = 500;
-
-    private int lastTotalProgress, totalProgress;
+    private int totalProgress = 0;
     private long totalSize = 0;
     private int currentFile = 0;
     private float percentPerFile = 0;
+    private float speed;
+    private long totalBytesRead = 0;
 
     @Getter
     private String status;
@@ -33,19 +34,22 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
 
     public AssetDownloader(List<DownloadInfo> downloads) {
         this.downloads = downloads;
-        lastTotalProgress = totalProgress = 0;
         this.percentPerFile = 100 / (float) downloads.size();
     }
 
+    public AssetDownloader(List<DownloadInfo> downloads, long totalSize){
+        this(downloads);
+        this.totalSize = totalSize;
+    }
+
     @Override
-    protected Boolean doInBackground () throws Exception {
+    protected Boolean doInBackground() throws Exception {
         for (DownloadInfo download : downloads) {
             if (isCancelled()) {
                 return false;
             }
-            setProgress(0);
             doDownload(download);
-            setTotalProgress((int) percentPerFile * currentFile+1);
+            setTotalProgress((int) (percentPerFile + percentPerFile * currentFile));
             currentFile++;
             setProgress(100);
         }
@@ -53,18 +57,34 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         return allDownloaded;
     }
 
-    public synchronized void setStatus (String newStatus) {
+    public synchronized void setStatus(String newStatus) {
         String oldStatus = status;
         status = newStatus;
         firePropertyChange("note", oldStatus, status);
     }
 
-    public synchronized void updateStatus(String filename){
+    public synchronized void updateStatus(String filename) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("fileName", filename);
-        data.put("currentFile", currentFile+1);
+        data.put("currentFile", currentFile + 1);
         data.put("overallFiles", downloads.size());
         firePropertyChange("info", null, data);
+    }
+
+    public synchronized void setSpeed(float newSpeed) {
+        float oldSpeed = speed;
+        speed = newSpeed;
+        firePropertyChange("speed", oldSpeed, speed);
+    }
+
+    public int calculateTotalProgress(long currentSize, long remoteSize){
+        if(totalSize > 0){
+           return (int) ((totalBytesRead * 100) / totalSize);
+        } else if (currentSize > 0 && remoteSize > 0) {
+            return (int) (((currentSize * (percentPerFile)) / remoteSize) + percentPerFile * currentFile);
+        } else {
+            return (int) (percentPerFile * (currentFile + 1));
+        }
     }
 
     public synchronized void setTotalProgress(int newProgress) {
@@ -73,7 +93,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         firePropertyChange("overall", oldProgress, totalProgress);
     }
 
-    private void doDownload (DownloadInfo asset) {
+    private void doDownload(DownloadInfo asset) {
         byte[] buffer = new byte[BUFFER_SIZE];
         boolean downloadSuccess = false;
         List<String> remoteHash = asset.hash;
@@ -84,7 +104,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
 
         while (!downloadSuccess && (attempt < attempts)) {
             try {
-                if(remoteHash == null)
+                if (remoteHash == null)
                     remoteHash = Lists.newArrayList();
                 hashType = asset.hashType;
                 if (attempt++ > 0) {
@@ -96,7 +116,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 URLConnection con = asset.url.openConnection();
                 if (con instanceof HttpURLConnection) {
                     con.setRequestProperty("Cache-Control", "no-cache, no-transform");
-                    if(asset.url.toString().contains(DownloadInfo.GET_SCRIPT)){
+                    if (asset.url.toString().contains(DownloadInfo.GET_SCRIPT)) {
                         ((HttpURLConnection) con).setRequestMethod("GET");
                     } else {
                         ((HttpURLConnection) con).setRequestMethod("HEAD");
@@ -106,7 +126,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
 
                 // gather data for basic checks
                 long remoteSize = Long.parseLong(con.getHeaderField("Content-Length"));
-                if(remoteSize == 0){
+                if (remoteSize == 0) {
                     downloadSuccess = true;
                     break;
                 }
@@ -142,12 +162,12 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 if (asset.local.exists()) {
                     downloadSuccess = true;
                     progressIndex += 1;
+                    totalBytesRead += remoteSize;
                     continue;
                 }
 
                 //download if needed
                 setProgress(0);
-                //setStatus("Downloading " + asset.name + "...");
                 con = asset.url.openConnection();
                 if (con instanceof HttpURLConnection) {
                     con.setRequestProperty("Cache-Control", "no-cache, no-transform");
@@ -165,26 +185,23 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                     output.write(buffer, 0, readLen);
                     currentSize += readLen;
 
-                    int prog = (int) ((currentSize*100) / remoteSize);
+                    int prog = (int) ((currentSize * 100) / remoteSize);
                     if (prog > 100)
                         prog = 100;
                     if (prog < 0)
                         prog = 0;
 
                     if (System.currentTimeMillis() - lastTime > SPEED_UPDATE_INTERVAL) {
-                        float speed = ((currentSize - lastSize) / BUFFER_SIZE) / (System.currentTimeMillis() - lastTime) * 1000;
+                        setSpeed(((currentSize - lastSize) / BUFFER_SIZE) / (System.currentTimeMillis() - lastTime) * 1024);
                         lastTime = System.currentTimeMillis();
                         lastSize = currentSize;
-                        firePropertyChange("speed", null, speed);
                     }
-
                     setProgress(prog);
+                    setTotalProgress(calculateTotalProgress(currentSize, remoteSize));
+                    totalBytesRead += readLen;
 
-                    setTotalProgress((int) (((currentSize * (percentPerFile)) / remoteSize) + percentPerFile * currentFile));
-
-                    //monitor.setProgress(prog);
-                    //setStatus(status);
                 }
+
                 input.close();
                 output.close();
 
@@ -208,7 +225,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
     }
 
-    public boolean doHashCheck (DownloadInfo asset, final List<String> remoteHash) throws IOException {
+    public boolean doHashCheck(DownloadInfo asset, final List<String> remoteHash) throws IOException {
         String hash = DownloadUtils.fileHash(asset.local, asset.hashType).toLowerCase();
         List<String> assetHash = asset.hash;
         boolean good = false;
