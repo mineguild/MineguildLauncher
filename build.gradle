@@ -15,17 +15,22 @@ apply plugin: 'launch4j'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 
-sourceCompatibility = 1.7
+
 version = '1.0'
 
 repositories {
     mavenCentral()
 }
-/*
-launch4j {
-    mainClassName = "net.mineguild.Launcher.utils.DownloadDialog"
-}*/
 
+launch4j {
+    mainClassName = "net.mineguild.Launcher.MineguildLauncher"
+    jar = "lib/MineguildLauncher-"+project.version+".jar"
+}
+
+shadowJar {
+    baseName = "MineguildLauncher"
+    classifier = ''
+}
 
 dependencies {
     compile group: 'com.jgoodies', name: 'forms', version: '1.2.1'
@@ -39,8 +44,28 @@ dependencies {
 
 }
 
+
+
+task fixJars(type: Copy) {
+    from("${buildDir}/libs/")
+    destinationDir = file("${buildDir}/libs/")
+    rename { String fileName ->
+        fileName.replace('-all', '')
+    }
+    rename(/(.+)-all(.+)/, '$1$2')
+}
+
+tasks.copyL4jLib.dependsOn.remove(tasks.jar)
+tasks.copyL4jLib.dependsOn tasks.shadowJar
+tasks.shadowJar.shouldRunAfter jar
+sourceCompatibility = 1.7
+
 jar {
     manifest {
         attributes 'Main-Class': 'net.mineguild.Launcher.MineguildLauncher'
     }
+    //from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
+
+
+

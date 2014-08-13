@@ -1,8 +1,11 @@
 package net.mineguild.Launcher;
 
 import com.google.common.collect.BiMap;
+import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 import org.apache.commons.io.FilenameUtils;
 
@@ -10,29 +13,35 @@ import java.io.File;
 import java.util.*;
 
 public class Modpack {
-    private long build;
-    private String version;
+    private
+    @Getter
+    @Setter
+    String version;
     private String hash;
-    private long releaseTime;
+    private
+    @Getter
+    @Setter
+    long releaseTime;
+    private List<File> unprocessedFiles = new ArrayList<>();
     private Map<String, String> modpackFiles = new HashMap<>();
 
-    public Modpack(long build, String version, long releaseTime, Map<String, String> modpackFiles) {
-        this.build = build;
+    public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
+
         this.version = version;
         this.hash = ChecksumUtil.getMD5(version);
         this.releaseTime = releaseTime;
         this.modpackFiles = modpackFiles;
     }
 
-    public Modpack(long build){
-        this.build = build;
+    public Modpack(long releaseTime) {
+        this.releaseTime = releaseTime;
     }
 
-    public Modpack(){
-        this.build = -1;
+    public Modpack() {
+        this.releaseTime = -1;
     }
 
-    public static Modpack fromJson(String json){
+    public static Modpack fromJson(String json) {
         Gson g = new Gson();
         return g.fromJson(json, Modpack.class);
     }
@@ -51,26 +60,26 @@ public class Modpack {
         return newFiles;
     }
 
-    public static List<String> getOld(Modpack oldPack, Modpack newPack) {
-        List<String> oldFiles = new ArrayList<>();
+    public static Map<String, String> getOld(Modpack oldPack, Modpack newPack) {
+        Map<String, String> oldFiles = new HashMap<>();
         for (Map.Entry<String, String> oldEntry : oldPack.getModpackFiles().entrySet()) {
             if (newPack.getModpackFiles().containsKey(oldEntry.getKey())) {
                 if (!newPack.getModpackFiles().get(oldEntry.getKey()).equals(oldEntry.getValue())) {
-                    oldFiles.add(oldEntry.getKey());
+                    oldFiles.put(oldEntry.getKey(), oldEntry.getValue());
                 }
             } else {
-                oldFiles.add(oldEntry.getKey());
+                oldFiles.put(oldEntry.getKey(), oldEntry.getValue());
             }
         }
         return oldFiles;
     }
 
-    public String getVersion() {
-        return version;
+    public HashMap<String, String> getNew(Modpack newPack) {
+        return Modpack.getNew(this, newPack);
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public Map<String, String> getOld(Modpack newPack) {
+        return Modpack.getOld(this, newPack);
     }
 
     public Map<String, String> getModpackFiles() {
@@ -87,23 +96,6 @@ public class Modpack {
         }
     }
 
-    public long getReleaseTime() {
-
-        return releaseTime;
-    }
-
-    public void setReleaseTime(long releaseTime) {
-        this.releaseTime = releaseTime;
-    }
-
-    public long getBuild() {
-        return build;
-    }
-
-    public void setBuild(long build) {
-        this.build = build;
-    }
-
     public String getHash() {
         return hash;
     }
@@ -112,13 +104,19 @@ public class Modpack {
         this.hash = hash;
     }
 
+    public boolean isNewer(Modpack otherPack) {
+        return otherPack.getReleaseTime() >= this.getReleaseTime();
+    }
+
     public String toJson() {
+        if(unprocessedFiles.size() > 0){
+            processFiles();
+        }
         Gson g = new GsonBuilder().setPrettyPrinting().create();
         return g.toJson(this);
     }
 
     public void addFile(File file, String checkSum) {
-
         String path = FilenameUtils.separatorsToUnix(file.getPath());
         String relPath = "";
         String[] split = path.split("/");
@@ -136,7 +134,24 @@ public class Modpack {
         } catch (IllegalArgumentException e) {
             System.out.println("File already added!");
         }
+    }
 
+    public void processFiles(){
+        Map<File, String> result = ChecksumUtil.getChecksum(unprocessedFiles, Hashing.md5());
+        for(Map.Entry<File, String> entry : result.entrySet()){
+            addFile(entry.getKey(), entry.getValue());
+        }
+        unprocessedFiles.clear();
+    }
+
+    public void addFile(File file){
+        unprocessedFiles.add(file);
+        processFiles();
+    }
+
+    public void addFiles(Collection<File> files){
+        unprocessedFiles.addAll(files);
+        processFiles();
     }
 
     public Collection<String> getFilesBySum(String sum) {

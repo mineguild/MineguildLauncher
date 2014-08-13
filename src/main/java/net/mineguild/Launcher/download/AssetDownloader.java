@@ -49,9 +49,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 return false;
             }
             doDownload(download);
-            setTotalProgress((int) (percentPerFile + percentPerFile * currentFile));
+            setTotalProgress(calculateTotalProgress(0, 0));
             currentFile++;
-            setProgress(100);
         }
         setStatus(allDownloaded ? "Success" : "Downloads failed");
         return allDownloaded;
@@ -87,6 +86,10 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
     }
 
+    public synchronized void setIndeterminate(){
+        firePropertyChange("current_inter", null, true);
+    }
+
     public synchronized void setTotalProgress(int newProgress) {
         int oldProgress = totalProgress;
         totalProgress = newProgress;
@@ -101,7 +104,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         int attempt = 0;
         final int attempts = 5;
         updateStatus(asset.name);
-
+        setIndeterminate();
+        attempting:
         while (!downloadSuccess && (attempt < attempts)) {
             try {
                 if (remoteHash == null)
@@ -128,7 +132,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 long remoteSize = Long.parseLong(con.getHeaderField("Content-Length"));
                 if (remoteSize == 0) {
                     downloadSuccess = true;
-                    break;
+                    continue;
                 }
                 if (asset.hash == null && asset.getPrimaryDLType() == DLType.ETag) {
                     remoteHash.clear();
@@ -141,10 +145,11 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                     hashType = "md5";
                 }
 
-                //System.out.println("RemoteSize: " + remoteSize);
-                //System.out.println("asset.hash: " + asset.hash);
-                //System.out.println("remoteHash: " + remoteHash);
-                //System.out.println("------------");
+                System.out.println(asset.name);
+                System.out.println("RemoteSize: " + remoteSize);
+                System.out.println("asset.hash: " + asset.hash);
+                System.out.println("remoteHash: " + remoteHash);
+                System.out.println("------------");
 
                 // existing file are only added when we want to check file integrity with force update
                 if (asset.local.exists()) {
@@ -167,7 +172,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 }
 
                 //download if needed
-                setProgress(0);
+
                 con = asset.url.openConnection();
                 if (con instanceof HttpURLConnection) {
                     con.setRequestProperty("Cache-Control", "no-cache, no-transform");
@@ -182,6 +187,12 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 InputStream input = con.getInputStream();
                 FileOutputStream output = new FileOutputStream(asset.local);
                 while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                    if(isCancelled()){
+                        input.close();
+                        output.close();
+                        asset.local.delete();
+                        break attempting;
+                    }
                     output.write(buffer, 0, readLen);
                     currentSize += readLen;
 
@@ -204,6 +215,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
 
                 input.close();
                 output.close();
+
+                setIndeterminate();
 
                 //file downloaded check size
                 if (!(con instanceof HttpURLConnection && currentSize > 0 && currentSize == remoteSize)) {

@@ -16,14 +16,14 @@ public class ModpackBuilder {
     public static void main(String[] args) throws Exception {
         //Modpack oldPack = Modpack.fromJson(FileUtils.readFileToString(new File("test.json")));
         Modpack newPack = new Modpack();
-        File modpack_json = new File("new_test.json");
-        List<File> list = (List<File>) FileUtils.listFiles(new File("testPack"), FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.trueFileFilter());
-        newPack.addModpackFiles(ChecksumUtil.getChecksum(list, Hashing.md5()));
+        File modpack_json = new File("newer_test.json");
+        Modpack oldPack = Modpack.fromJson(FileUtils.readFileToString(new File("new_test.json")));
+        newPack.addFiles(FileUtils.listFiles(new File("testPack"), FileFilterUtils.and(FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
         Gson g = new GsonBuilder().setPrettyPrinting().create();
         FileUtils.write(modpack_json, newPack.toJson());
-        //System.out.println(g.toJson(Modpack.getNew(oldPack, newPack)));
-        fromUploadFiles(newPack.getModpackFiles());
-        //placeUploadFiles(new File("testPack").getAbsolutePath(), Modpack.getNew(oldPack, newPack));
+        System.out.println(g.toJson(oldPack.getNew(newPack)));
+        //fromUploadFiles(newPack.getModpackFiles());
+        placeUploadFiles(new File("testPack").getAbsolutePath(), oldPack.getNew(newPack));
         //System.out.println(g.toJson(Modpack.getOld(oldPack, newPack)));
         /*
         Modpack m = new Modpack();
