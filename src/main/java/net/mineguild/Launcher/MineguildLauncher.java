@@ -1,19 +1,14 @@
 package net.mineguild.Launcher;
 
-import com.google.common.hash.Hashing;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadTask;
-import net.mineguild.Launcher.utils.ChecksumUtil;
-import net.mineguild.Launcher.utils.DownloadUtils;
-import net.mineguild.Launcher.utils.HTTPDownloadUtil;
+import net.mineguild.Launcher.utils.ModpackUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
@@ -30,22 +25,22 @@ public class MineguildLauncher {
             if(args[0].equals("old")){
                 FileUtils.cleanDirectory(modpack);
                 Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
-                neededFiles = DownloadUtils.getNeededFiles(modpack, m.getModpackFiles(), false);
+                neededFiles = ModpackUtils.getNeededFiles(modpack, m.getModpackFiles(), false);
                 info = DownloadInfo.getDownloadInfo(modpack, neededFiles);
             }  else {
                 Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
                 Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
-                neededFiles = DownloadUtils.getNeededFiles(modpack, newPack.getModpackFiles(), false);
-                info = (ArrayList<DownloadInfo>) DownloadInfo.getDownloadInfo(modpack, neededFiles);
-                DownloadUtils.deleteUnneededFiles(modpack, newPack.getModpackFiles(), m.getOld(newPack));
+                neededFiles = ModpackUtils.getNeededFiles(modpack, newPack.getModpackFiles(), false);
+                info = DownloadInfo.getDownloadInfo(modpack, neededFiles);
+                ModpackUtils.deleteUnneededFiles(modpack, newPack.getModpackFiles(), m.getOld(newPack));
             }
         }
         else {
             Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
             Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
-            neededFiles = DownloadUtils.getNeededFiles(modpack, newPack.getModpackFiles(), false);
-            info = (ArrayList<DownloadInfo>) DownloadInfo.getDownloadInfo(modpack, neededFiles);
-            DownloadUtils.deleteUnneededFiles(modpack, newPack.getModpackFiles(), m.getOld(newPack));
+            neededFiles = ModpackUtils.getNeededFiles(modpack, newPack.getModpackFiles(), false);
+            info = DownloadInfo.getDownloadInfo(modpack, neededFiles);
+            ModpackUtils.deleteUnneededFiles(modpack, newPack.getModpackFiles(), m.getOld(newPack));
         }
         DownloadTask.ssl_hack();
         try {

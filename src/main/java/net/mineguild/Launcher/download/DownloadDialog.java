@@ -4,6 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.jar.JarInputStream;
 
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
     private JPanel contentPane;
@@ -26,9 +28,16 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     private long totalFilesSize = 0;
     private AssetDownloader task;
     private final int statusTextSize = 40;
+    private static Image icon = null;
 
 
     public DownloadDialog(List<DownloadInfo> info, String title) {
+        try {
+            icon = ImageIO.read(DownloadDialog.class.getResourceAsStream("/icon.png"));
+            setIconImage(icon);
+        } catch (Exception ignored){
+            ignored.printStackTrace();
+        }
         this.info = info;
         setTitle(title);
         setContentPane(contentPane);

@@ -15,7 +15,6 @@ apply plugin: 'launch4j'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 
-
 version = '1.0'
 
 repositories {
@@ -25,12 +24,14 @@ repositories {
 launch4j {
     mainClassName = "net.mineguild.Launcher.MineguildLauncher"
     jar = "lib/MineguildLauncher-"+project.version+".jar"
+    icon = sourceSets.main.resources.srcDirs[0].getAbsolutePath()+File.separator+"icon.ico"
 }
 
 shadowJar {
     baseName = "MineguildLauncher"
     classifier = ''
 }
+
 
 dependencies {
     compile group: 'com.jgoodies', name: 'forms', version: '1.2.1'
@@ -45,7 +46,6 @@ dependencies {
 }
 
 
-
 task fixJars(type: Copy) {
     from("${buildDir}/libs/")
     destinationDir = file("${buildDir}/libs/")
@@ -57,7 +57,6 @@ task fixJars(type: Copy) {
 
 tasks.copyL4jLib.dependsOn.remove(tasks.jar)
 tasks.copyL4jLib.dependsOn tasks.shadowJar
-tasks.shadowJar.shouldRunAfter jar
 sourceCompatibility = 1.7
 
 jar {
