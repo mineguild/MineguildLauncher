@@ -35,7 +35,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
         try {
             icon = ImageIO.read(DownloadDialog.class.getResourceAsStream("/icon.png"));
             setIconImage(icon);
-        } catch (Exception ignored){
+        } catch (Exception ignored) {
             ignored.printStackTrace();
         }
         this.info = info;

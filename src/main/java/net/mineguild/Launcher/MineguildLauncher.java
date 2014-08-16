@@ -13,41 +13,41 @@ import java.net.URL;
 import java.util.*;
 
 public class MineguildLauncher {
+
+    public static File baseDirectory;
+    public static boolean doExactCheck;
+
     public static void main(String[] args) throws Exception{
         //DownloadDialog d = new DownloadDialog(new HashMap<String, File>(0), "Test");
         //d.setVisible(true); //STUFF...
-        DownloadTask.ssl_hack();
-        File modpack = new File("modpack");
-        modpack.mkdirs();
-        List<DownloadInfo> info;
-        Map<String, String> neededFiles;
-        if(args.length == 1){
-            if(args[0].equals("old")){
-                FileUtils.cleanDirectory(modpack);
-                Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
-                neededFiles = ModpackUtils.getNeededFiles(modpack, m.getModpackFiles(), false);
-                info = DownloadInfo.getDownloadInfo(modpack, neededFiles);
-            }  else {
-                Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
-                Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
-                neededFiles = ModpackUtils.getNeededFiles(modpack, newPack.getModpackFiles(), false);
-                info = DownloadInfo.getDownloadInfo(modpack, neededFiles);
-                ModpackUtils.deleteUnneededFiles(modpack, newPack.getModpackFiles(), m.getOld(newPack));
-            }
-        }
-        else {
-            Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
-            Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
-            neededFiles = ModpackUtils.getNeededFiles(modpack, newPack.getModpackFiles(), false);
-            info = DownloadInfo.getDownloadInfo(modpack, neededFiles);
-            ModpackUtils.deleteUnneededFiles(modpack, newPack.getModpackFiles(), m.getOld(newPack));
-        }
-        DownloadTask.ssl_hack();
         try {
             UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        DownloadTask.ssl_hack();
+        baseDirectory = new File("modpack");
+        baseDirectory.mkdirs();
+        //args = new String[]{"old"};
+        if(args.length == 1){
+            if(args[0].equals("old")){
+                FileUtils.cleanDirectory(baseDirectory);
+                Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
+                ModpackUtils.updateModpack(m);
+
+            }  else {
+                Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
+                Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
+                ModpackUtils.updateModpack(m, newPack);
+            }
+        }
+        else {
+            Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
+            Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
+            ModpackUtils.updateModpack(m, newPack);
+        }
+        DownloadTask.ssl_hack();
+
         //List<File> files = (List<File>) FileUtils.listFiles(new File("testPack"), FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.trueFileFilter());
         //long startTime = System.currentTimeMillis();
         //Map<File, String> result = ChecksumUtil.getChecksum(files, Hashing.md5());
@@ -67,12 +67,12 @@ public class MineguildLauncher {
             FileUtils.deleteQuietly(new File(modpack, f));
         }*/
         //
+        /*
         long totalSize = DownloadInfo.getTotalSize(neededFiles.values());
         DownloadDialog d = new DownloadDialog(info, "Downloading Configs&Mods [Early Beta]", totalSize);
         d.setVisible(true);
         d.start();
-        d.dispose();
-
+        d.dispose();*/
         System.exit(0);
     }
 }
