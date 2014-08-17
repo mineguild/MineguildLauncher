@@ -32,20 +32,20 @@ public class DownloadTask extends SwingWorker<Void, Void> {
 
     public static void ssl_hack() {
         // Create a new trust manager that trust all certificates
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-
-                    public void checkClientTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-
-                    public void checkServerTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
+        TrustManager[] trustAllCerts = new TrustManager[] {
+            new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
                 }
+
+                public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+                }
+
+                public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+                }
+            }
         };
 
         // Activate the new trust manager
@@ -109,7 +109,8 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                     }
 
                     if (System.currentTimeMillis() - lastTime > 1000) {
-                        speed = ((totalBytesRead - lastFileSize) / BUFFER_SIZE) / (System.currentTimeMillis() - lastTime) * 1000;
+                        speed = ((totalBytesRead - lastFileSize) / BUFFER_SIZE) / (
+                            System.currentTimeMillis() - lastTime) * 1000;
                         lastTime = System.currentTimeMillis();
                         lastFileSize = totalBytesRead;
                         firePropertyChange("speed", null, speed);
@@ -125,7 +126,8 @@ public class DownloadTask extends SwingWorker<Void, Void> {
                         totalProgress = (int) ((totalRead * 100) / totalSize);
                     } else {
                         float percentPerFile = 100 / totalFiles;
-                        totalProgress = (int) (((totalBytesRead * (percentPerFile)) / fileSize) + percentPerFile * currentFile);
+                        totalProgress = (int) (((totalBytesRead * (percentPerFile)) / fileSize)
+                            + percentPerFile * currentFile);
                     }
                     firePropertyChange("overall", lastTotalProgress, totalProgress);
                     lastTotalProgress = totalProgress;
@@ -140,7 +142,7 @@ public class DownloadTask extends SwingWorker<Void, Void> {
 
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(gui, "Error downloading file: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                    "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
                 setProgress(0);
                 cancel(true);

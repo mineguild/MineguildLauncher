@@ -95,10 +95,14 @@ public class ModpackBuilder {
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selected = fileChooser.getSelectedFile();
-            if ((new File(selected, "config")).exists() && new File(selected, "config").isDirectory() && (new File(selected, "mods")).exists() && (new File(selected, "mods")).isDirectory()) {
+            if ((new File(selected, "config")).exists() && new File(selected, "config")
+                .isDirectory() && (new File(selected, "mods")).exists() && (new File(selected,
+                "mods")).isDirectory()) {
                 modpackDirectory = selected;
             } else {
-                JOptionPane.showMessageDialog(null, "Invalid directory selected, please select a one containing mods and config folder.", "Invalid directory!", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                    "Invalid directory selected, please select a one containing mods and config folder.",
+                    "Invalid directory!", JOptionPane.ERROR_MESSAGE);
                 getModpackDirectory();
             }
         } else {

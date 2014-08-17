@@ -80,7 +80,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         if (totalSize > 0) {
             return (int) ((totalBytesRead * 100) / totalSize);
         } else if (currentSize > 0 && remoteSize > 0) {
-            return (int) (((currentSize * (percentPerFile)) / remoteSize) + percentPerFile * currentFile);
+            return (int) (((currentSize * (percentPerFile)) / remoteSize)
+                + percentPerFile * currentFile);
         } else {
             return (int) (percentPerFile * (currentFile + 1));
         }
@@ -108,11 +109,13 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         attempting:
         while (!downloadSuccess && (attempt < attempts)) {
             try {
-                if (remoteHash == null)
+                if (remoteHash == null) {
                     remoteHash = Lists.newArrayList();
+                }
                 hashType = asset.hashType;
                 if (attempt++ > 0) {
-                    System.out.println("Connecting.. Try " + attempt + " of " + attempts + " for: " + asset.url);
+                    System.out.println(
+                        "Connecting.. Try " + attempt + " of " + attempts + " for: " + asset.url);
                 }
 
                 // Will this break something?
@@ -156,7 +159,9 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                     long localSize = asset.local.length();
                     if (!(con instanceof HttpURLConnection && localSize == remoteSize)) {
                         asset.local.delete();
-                        System.out.println("Local asset size differs from remote size: " + asset.name + " remote: " + remoteSize + " local: " + localSize);
+                        System.out.println(
+                            "Local asset size differs from remote size: " + asset.name + " remote: "
+                                + remoteSize + " local: " + localSize);
                     }
                 }
 
@@ -197,13 +202,17 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                     currentSize += readLen;
 
                     int prog = (int) ((currentSize * 100) / remoteSize);
-                    if (prog > 100)
+                    if (prog > 100) {
                         prog = 100;
-                    if (prog < 0)
+                    }
+                    if (prog < 0) {
                         prog = 0;
+                    }
 
                     if (System.currentTimeMillis() - lastTime > SPEED_UPDATE_INTERVAL) {
-                        setSpeed(((currentSize - lastSize) / BUFFER_SIZE) / (System.currentTimeMillis() - lastTime) * 1024);
+                        setSpeed(
+                            ((currentSize - lastSize) / BUFFER_SIZE) / (System.currentTimeMillis()
+                                - lastTime) * 1024);
                         lastTime = System.currentTimeMillis();
                         lastSize = currentSize;
                     }
@@ -219,9 +228,12 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 setIndeterminate();
 
                 //file downloaded check size
-                if (!(con instanceof HttpURLConnection && currentSize > 0 && currentSize == remoteSize)) {
+                if (!(con instanceof HttpURLConnection && currentSize > 0
+                    && currentSize == remoteSize)) {
                     asset.local.delete();
-                    System.out.println("Local asset size differs from remote size: " + asset.name + " remote: " + remoteSize + " local: " + currentSize);
+                    System.out.println(
+                        "Local asset size differs from remote size: " + asset.name + " remote: "
+                            + remoteSize + " local: " + currentSize);
                 }
 
                 if (downloadSuccess = doHashCheck(asset, remoteHash)) {
@@ -238,7 +250,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
     }
 
-    public boolean doHashCheck(DownloadInfo asset, final List<String> remoteHash) throws IOException {
+    public boolean doHashCheck(DownloadInfo asset, final List<String> remoteHash)
+        throws IOException {
         String hash = DownloadUtils.fileHash(asset.local, asset.hashType).toLowerCase();
         List<String> assetHash = asset.hash;
         boolean good = false;
@@ -247,9 +260,11 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 assetHash = remoteHash;
             }
         }
-        if (good || assetHash != null && assetHash.contains(hash))
+        if (good || assetHash != null && assetHash.contains(hash)) {
             return true;
-        System.out.println("Asset hash checking failed: " + asset.name + " " + asset.hashType + " " + hash);//unhashed DL's are not allowed!!!
+        }
+        System.out.println("Asset hash checking failed: " + asset.name + " " + asset.hashType + " "
+            + hash);//unhashed DL's are not allowed!!!
         asset.local.delete();
         return false;
     }

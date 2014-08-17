@@ -29,17 +29,22 @@ public class MineguildLauncher {
         if (args.length == 1) {
             if (args[0].equals("old")) {
                 FileUtils.cleanDirectory(baseDirectory);
-                Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
+                Modpack m = Modpack.fromJson(
+                    IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
                 ModpackUtils.updateModpack(m);
 
             } else {
-                Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
-                Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
+                Modpack m = Modpack.fromJson(
+                    IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
+                Modpack newPack = Modpack.fromJson(IOUtils
+                    .toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
                 ModpackUtils.updateModpack(m, newPack);
             }
         } else {
-            Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
-            Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
+            Modpack m = Modpack.fromJson(
+                IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
+            Modpack newPack = Modpack.fromJson(
+                IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
             ModpackUtils.updateModpack(m, newPack);
         }
         DownloadTask.ssl_hack();

@@ -41,12 +41,12 @@ public class HTTPDownloadUtil {
                 int index = disposition.indexOf("filename=");
                 if (index > 0) {
                     fileName = disposition.substring(index + 10,
-                            disposition.length() - 1);
+                        disposition.length() - 1);
                 }
             } else {
                 // extracts file name from URL
                 fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
-                        fileURL.length());
+                    fileURL.length());
             }
 
             // output for debugging purpose only
@@ -60,8 +60,8 @@ public class HTTPDownloadUtil {
 
         } else {
             throw new IOException(
-                    "No file to download. Server replied HTTP code: "
-                            + responseCode);
+                "No file to download. Server replied HTTP code: "
+                    + responseCode);
         }
     }
 

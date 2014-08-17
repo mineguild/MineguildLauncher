@@ -14,21 +14,12 @@ import java.io.File;
 import java.util.*;
 
 public class Modpack {
-    private
-    @Getter
-    @Setter
-    String version;
+    private @Getter @Setter String version;
     private String hash;
-    private
-    @Getter
-    @Setter
-    long releaseTime;
+    private @Getter @Setter long releaseTime;
     private List<File> unprocessedFiles = new ArrayList<>();
     private Map<String, String> modpackFiles = new HashMap<>();
-    private
-    @Getter
-    @Setter
-    File basePath;
+    private @Getter @Setter File basePath;
 
 
     public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
@@ -104,7 +95,9 @@ public class Modpack {
     }
 
     public void addModpackFiles() {
-        this.addFiles(FileUtils.listFiles(basePath, FileFilterUtils.and(FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
+        this.addFiles(FileUtils.listFiles(basePath, FileFilterUtils
+            .and(FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")),
+                FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
     }
 
     public String getHash() {
@@ -128,7 +121,9 @@ public class Modpack {
     }
 
     public void addFile(File file, String checkSum) {
-        modpackFiles.put(FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)), checkSum);
+        modpackFiles
+            .put(FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)),
+                checkSum);
     }
 
     public void processFiles() {

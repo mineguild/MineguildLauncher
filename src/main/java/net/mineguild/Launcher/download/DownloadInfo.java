@@ -40,12 +40,15 @@ public class DownloadInfo {
         this(url, local, name, null, "md5");
     }
 
-    public DownloadInfo(URL url, File local, String name, List<String> hash, String hashType, DLType primary, DLType backup) {
+    public DownloadInfo(URL url, File local, String name, List<String> hash, String hashType,
+        DLType primary, DLType backup) {
         this(url, local, name, hash, hashType);
-        if (primary != null)
+        if (primary != null) {
             this.primaryDLType = primary;
-        if (backup != null)
+        }
+        if (backup != null) {
             this.backupDLType = backup;
+        }
     }
 
     public DownloadInfo(URL url, File local, String name, List<String> hash, String hashType) {
@@ -62,7 +65,8 @@ public class DownloadInfo {
         //System.out.println(json_hashes);
         URL script = null;
         try {
-            script = new URL(DownloadInfo.INFO_SCRIPT + "?data=" + URLEncoder.encode(json_hashes, "utf-8"));
+            script = new URL(
+                DownloadInfo.INFO_SCRIPT + "?data=" + URLEncoder.encode(json_hashes, "utf-8"));
         } catch (Exception e) {
             e.printStackTrace();
             return -1l;
@@ -122,7 +126,8 @@ public class DownloadInfo {
 
     @Override
     public String toString() {
-        return String.format("Local File: %s, URL: %s, Name: %s", local.getPath(), url.toString(), name);
+        return String
+            .format("Local File: %s, URL: %s, Name: %s", local.getPath(), url.toString(), name);
     }
 
     public enum DLType {

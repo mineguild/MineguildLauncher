@@ -19,10 +19,15 @@ public class ModpackUtils {
     public static Map<String, String> needed;
 
     public static void updateModpack(Modpack currentPack, Modpack newPack) throws Exception {
-        deleteOldFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), currentPack.getOld(newPack));
-        Map<String, String> neededFiles = getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), MineguildLauncher.doExactCheck);
-        List<DownloadInfo> info = DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
-        DownloadDialog dialog = new DownloadDialog(info, "Updating...", DownloadInfo.getTotalSize(neededFiles.values()));
+        deleteOldFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(),
+            currentPack.getOld(newPack));
+        Map<String, String> neededFiles =
+            getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(),
+                MineguildLauncher.doExactCheck);
+        List<DownloadInfo> info =
+            DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
+        DownloadDialog dialog = new DownloadDialog(info, "Updating...",
+            DownloadInfo.getTotalSize(neededFiles.values()));
         dialog.setVisible(true);
         dialog.start();
         dialog.dispose();
@@ -30,20 +35,26 @@ public class ModpackUtils {
 
     public static void updateModpack(Modpack newPack) throws Exception {
         FileUtils.cleanDirectory(MineguildLauncher.baseDirectory);
-        Map<String, String> neededFiles = getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), false);
-        List<DownloadInfo> info = DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
-        DownloadDialog dialog = new DownloadDialog(info, "Updating...", DownloadInfo.getTotalSize(neededFiles.values()));
+        Map<String, String> neededFiles =
+            getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), false);
+        List<DownloadInfo> info =
+            DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
+        DownloadDialog dialog = new DownloadDialog(info, "Updating...",
+            DownloadInfo.getTotalSize(neededFiles.values()));
         dialog.setVisible(true);
         dialog.start();
         dialog.dispose();
     }
 
-    public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files, boolean exactCheck) {
+    public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files,
+        boolean exactCheck) {
         needed = new HashMap<>();
         ExecutorService executorService = Executors.newFixedThreadPool(4);
         for (Map.Entry<String, String> entry : files.entrySet()) {
             try {
-                Runnable worker = new NeededFilesTask(new File(baseDirectory, entry.getKey()), entry.getKey(), entry.getValue(), exactCheck);
+                Runnable worker =
+                    new NeededFilesTask(new File(baseDirectory, entry.getKey()), entry.getKey(),
+                        entry.getValue(), exactCheck);
                 executorService.execute(worker);
             } catch (Exception ignored) {
             }
@@ -58,7 +69,8 @@ public class ModpackUtils {
         return needed;
     }
 
-    public static void deleteOldFiles(File baseDirectory, Map<String, String> allFiles, Map<String, String> oldFiles) throws IOException {
+    public static void deleteOldFiles(File baseDirectory, Map<String, String> allFiles,
+        Map<String, String> oldFiles) throws IOException {
         for (Map.Entry<String, String> entry : oldFiles.entrySet()) {
             File currentFile = new File(baseDirectory, entry.getKey());
             if (currentFile.exists()) {

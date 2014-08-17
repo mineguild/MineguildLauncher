@@ -14,10 +14,12 @@ public class DownloadUtils {
         if (!file.exists()) {
             return "";
         }
-        if (type.equalsIgnoreCase("md5"))
+        if (type.equalsIgnoreCase("md5")) {
             return ChecksumUtil.getMD5(file);
-        if (type.equalsIgnoreCase("sha1"))
+        }
+        if (type.equalsIgnoreCase("sha1")) {
             return ChecksumUtil.getSHA(file);
+        }
         URL fileUrl = file.toURI().toURL();
         MessageDigest dgest = null;
         try {
