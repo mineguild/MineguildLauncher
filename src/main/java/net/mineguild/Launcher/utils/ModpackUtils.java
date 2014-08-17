@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class ModpackUtils {
     public static Map<String, String> needed;
 
-    public static void updateModpack(Modpack currentPack, Modpack newPack) throws Exception{
+    public static void updateModpack(Modpack currentPack, Modpack newPack) throws Exception {
         deleteOldFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), currentPack.getOld(newPack));
         Map<String, String> neededFiles = getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), MineguildLauncher.doExactCheck);
         List<DownloadInfo> info = DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
@@ -28,7 +28,7 @@ public class ModpackUtils {
         dialog.dispose();
     }
 
-    public static void updateModpack(Modpack newPack) throws Exception{
+    public static void updateModpack(Modpack newPack) throws Exception {
         FileUtils.cleanDirectory(MineguildLauncher.baseDirectory);
         Map<String, String> neededFiles = getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), false);
         List<DownloadInfo> info = DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
@@ -66,11 +66,11 @@ public class ModpackUtils {
                     String hash = ChecksumUtil.getMD5(new File(baseDirectory, entry.getKey()));
                     if (!hash.equals(allFiles.get(entry.getKey()))) {
                         FileUtils.deleteQuietly(currentFile);
-                        System.out.println("Deleting: "+currentFile.getName());
+                        System.out.println("Deleting: " + currentFile.getName());
                     }
                 } else {
                     FileUtils.deleteQuietly(currentFile);
-                    System.out.println("Deleting: "+currentFile.getName());
+                    System.out.println("Deleting: " + currentFile.getName());
                 }
             }
         }

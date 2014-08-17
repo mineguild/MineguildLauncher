@@ -37,7 +37,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         this.percentPerFile = 100 / (float) downloads.size();
     }
 
-    public AssetDownloader(List<DownloadInfo> downloads, long totalSize){
+    public AssetDownloader(List<DownloadInfo> downloads, long totalSize) {
         this(downloads);
         this.totalSize = totalSize;
     }
@@ -76,9 +76,9 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         firePropertyChange("speed", oldSpeed, speed);
     }
 
-    public int calculateTotalProgress(long currentSize, long remoteSize){
-        if(totalSize > 0){
-           return (int) ((totalBytesRead * 100) / totalSize);
+    public int calculateTotalProgress(long currentSize, long remoteSize) {
+        if (totalSize > 0) {
+            return (int) ((totalBytesRead * 100) / totalSize);
         } else if (currentSize > 0 && remoteSize > 0) {
             return (int) (((currentSize * (percentPerFile)) / remoteSize) + percentPerFile * currentFile);
         } else {
@@ -86,7 +86,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
     }
 
-    public synchronized void setIndeterminate(){
+    public synchronized void setIndeterminate() {
         firePropertyChange("current_inter", null, true);
     }
 
@@ -187,7 +187,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 InputStream input = con.getInputStream();
                 FileOutputStream output = new FileOutputStream(asset.local);
                 while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {
-                    if(isCancelled()){
+                    if (isCancelled()) {
                         input.close();
                         output.close();
                         asset.local.delete();

@@ -16,9 +16,9 @@ import java.util.Map;
 
 public class DownloadTask extends SwingWorker<Void, Void> {
     private static final int BUFFER_SIZE = 1024;
+    long totalSize = 0;
     private HashMap<String, File> url_file;
     private DownloadDialog gui;
-    long totalSize = 0;
 
     public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file) {
         this.gui = gui;
@@ -28,6 +28,33 @@ public class DownloadTask extends SwingWorker<Void, Void> {
     public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file, long totalSize) {
         this(gui, url_file);
         this.totalSize = totalSize;
+    }
+
+    public static void ssl_hack() {
+        // Create a new trust manager that trust all certificates
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+        };
+
+        // Activate the new trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -122,33 +149,5 @@ public class DownloadTask extends SwingWorker<Void, Void> {
         }
 
         return null;
-    }
-
-
-    public static void ssl_hack() {
-        // Create a new trust manager that trust all certificates
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-
-                    public void checkClientTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-
-                    public void checkServerTrusted(
-                            java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                }
-        };
-
-        // Activate the new trust manager
-        try {
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (Exception ignored) {
-        }
     }
 }

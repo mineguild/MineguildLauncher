@@ -5,9 +5,13 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.util.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class DownloadInfo {
     public static final String INFO_SCRIPT = "https://mineguild.net/download/mmp/php/info.php";
@@ -19,23 +23,6 @@ public class DownloadInfo {
     public List<String> hash;
     public String hashType;
     private DLType primaryDLType = DLType.ETag;
-
-    public DLType getPrimaryDLType() {
-        return primaryDLType;
-    }
-
-    public void setPrimaryDLType(DLType primaryDLType) {
-        this.primaryDLType = primaryDLType;
-    }
-
-    public DLType getBackupDLType() {
-        return backupDLType;
-    }
-
-    public void setBackupDLType(DLType backupDLType) {
-        this.backupDLType = backupDLType;
-    }
-
     private DLType backupDLType = DLType.NONE;
 
     public DownloadInfo() {
@@ -69,22 +56,13 @@ public class DownloadInfo {
         this.hashType = hashType;
     }
 
-    public enum DLType {
-        ETag, ContentMD5, FTBBackup, NONE
-    }
-
-    @Override
-    public String toString(){
-        return String.format("Local File: %s, URL: %s, Name: %s", local.getPath(), url.toString(), name);
-    }
-
-    public static long getTotalSize(Collection<String> hashes){
+    public static long getTotalSize(Collection<String> hashes) {
         Gson g = new Gson();
         String json_hashes = g.toJson(hashes);
         //System.out.println(json_hashes);
         URL script = null;
         try {
-            script = new URL(DownloadInfo.INFO_SCRIPT+"?data="+URLEncoder.encode(json_hashes, "utf-8"));
+            script = new URL(DownloadInfo.INFO_SCRIPT + "?data=" + URLEncoder.encode(json_hashes, "utf-8"));
         } catch (Exception e) {
             e.printStackTrace();
             return -1l;
@@ -96,7 +74,7 @@ public class DownloadInfo {
             con.connect();
             try {
                 List<String> lines = IOUtils.readLines(con.getInputStream());
-                return Long.parseLong(lines.get(lines.size()-1));
+                return Long.parseLong(lines.get(lines.size() - 1));
             } catch (NumberFormatException e) {
                 System.out.println("Invalid file(s)!");
             }
@@ -109,20 +87,45 @@ public class DownloadInfo {
 
     }
 
-    public static List<DownloadInfo> getDownloadInfo(File base, Map<String, String> map){
+    public static List<DownloadInfo> getDownloadInfo(File base, Map<String, String> map) {
         List<DownloadInfo> infoList = new ArrayList<>();
-        for(Map.Entry<String, String> entry : map.entrySet()) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
             String reqURL = null;
-            reqURL = DownloadInfo.GET_SCRIPT+"?data="+entry.getValue();
+            reqURL = DownloadInfo.GET_SCRIPT + "?data=" + entry.getValue();
             try {
                 File local = new File(base, entry.getKey());
                 DownloadInfo info = new DownloadInfo(new URL(reqURL), local, local.getName());
                 info.setPrimaryDLType(DLType.ContentMD5);
                 infoList.add(info);
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return infoList;
+    }
+
+    public DLType getPrimaryDLType() {
+        return primaryDLType;
+    }
+
+    public void setPrimaryDLType(DLType primaryDLType) {
+        this.primaryDLType = primaryDLType;
+    }
+
+    public DLType getBackupDLType() {
+        return backupDLType;
+    }
+
+    public void setBackupDLType(DLType backupDLType) {
+        this.backupDLType = backupDLType;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Local File: %s, URL: %s, Name: %s", local.getPath(), url.toString(), name);
+    }
+
+    public enum DLType {
+        ETag, ContentMD5, FTBBackup, NONE
     }
 }

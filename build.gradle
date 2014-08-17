@@ -1,4 +1,3 @@
-
 buildscript {
     repositories {
         jcenter()
@@ -23,8 +22,8 @@ repositories {
 
 launch4j {
     mainClassName = "net.mineguild.Launcher.MineguildLauncher"
-    jar = "lib/MineguildLauncher-"+project.version+".jar"
-    icon = sourceSets.main.resources.srcDirs[0].getAbsolutePath()+File.separator+"icon.ico"
+    jar = "lib/MineguildLauncher-" + project.version + ".jar"
+    icon = sourceSets.main.resources.srcDirs[0].getAbsolutePath() + File.separator + "icon.ico"
 }
 
 shadowJar {

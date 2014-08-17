@@ -1,7 +1,5 @@
 package net.mineguild.Launcher;
 
-import net.mineguild.Launcher.download.DownloadDialog;
-import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadTask;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import org.apache.commons.io.FileUtils;
@@ -10,14 +8,13 @@ import org.apache.commons.io.IOUtils;
 import javax.swing.*;
 import java.io.File;
 import java.net.URL;
-import java.util.*;
 
 public class MineguildLauncher {
 
     public static File baseDirectory;
     public static boolean doExactCheck;
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         //DownloadDialog d = new DownloadDialog(new HashMap<String, File>(0), "Test");
         //d.setVisible(true); //STUFF...
         try {
@@ -29,19 +26,18 @@ public class MineguildLauncher {
         baseDirectory = new File("modpack");
         baseDirectory.mkdirs();
         //args = new String[]{"old"};
-        if(args.length == 1){
-            if(args[0].equals("old")){
+        if (args.length == 1) {
+            if (args[0].equals("old")) {
                 FileUtils.cleanDirectory(baseDirectory);
                 Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
                 ModpackUtils.updateModpack(m);
 
-            }  else {
+            } else {
                 Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
                 Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
                 ModpackUtils.updateModpack(m, newPack);
             }
-        }
-        else {
+        } else {
             Modpack m = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack.json")));
             Modpack newPack = Modpack.fromJson(IOUtils.toString(new URL("https://mineguild.net/download/mmp/test_pack_new.json")));
             ModpackUtils.updateModpack(m, newPack);

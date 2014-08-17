@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 
 import java.io.File;
 import java.util.*;
@@ -26,7 +25,10 @@ public class Modpack {
     long releaseTime;
     private List<File> unprocessedFiles = new ArrayList<>();
     private Map<String, String> modpackFiles = new HashMap<>();
-    private @Getter @Setter File basePath;
+    private
+    @Getter
+    @Setter
+    File basePath;
 
 
     public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
@@ -101,7 +103,7 @@ public class Modpack {
         }
     }
 
-    public void addModpackFiles(){
+    public void addModpackFiles() {
         this.addFiles(FileUtils.listFiles(basePath, FileFilterUtils.and(FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
     }
 
@@ -118,7 +120,7 @@ public class Modpack {
     }
 
     public String toJson() {
-        if(unprocessedFiles.size() > 0){
+        if (unprocessedFiles.size() > 0) {
             processFiles();
         }
         Gson g = new GsonBuilder().setPrettyPrinting().create();
@@ -129,20 +131,20 @@ public class Modpack {
         modpackFiles.put(FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)), checkSum);
     }
 
-    public void processFiles(){
+    public void processFiles() {
         Map<File, String> result = ChecksumUtil.getChecksum(unprocessedFiles, Hashing.md5());
-        for(Map.Entry<File, String> entry : result.entrySet()){
+        for (Map.Entry<File, String> entry : result.entrySet()) {
             addFile(entry.getKey(), entry.getValue());
         }
         unprocessedFiles.clear();
     }
 
-    public void addFile(File file){
+    public void addFile(File file) {
         unprocessedFiles.add(file);
         processFiles();
     }
 
-    public void addFiles(Collection<File> files){
+    public void addFiles(Collection<File> files) {
         unprocessedFiles.addAll(files);
         processFiles();
     }

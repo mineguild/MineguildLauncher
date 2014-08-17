@@ -25,7 +25,7 @@ public class ChecksumUtil {
             try {
                 Runnable worker = new WorkerTask(file, hf);
                 executor.execute(worker);
-            } catch (Exception ignored){
+            } catch (Exception ignored) {
             }
 
         }
@@ -71,10 +71,11 @@ public class ChecksumUtil {
         }
 
         @Override
-        public void run(){
+        public void run() {
             try {
                 results.put(file, Files.hash(file, hf).toString());
-            } catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
 
         }
     }
