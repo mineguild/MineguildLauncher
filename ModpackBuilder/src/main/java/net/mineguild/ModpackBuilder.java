@@ -6,6 +6,10 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.FileChooserUI;
+import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -13,17 +17,24 @@ import java.util.Map;
 
 public class ModpackBuilder {
 
+    public static File modpackDirectory;
+
     public static void main(String[] args) throws Exception {
-        //Modpack oldPack = Modpack.fromJson(FileUtils.readFileToString(new File("test.json")));
-        Modpack newPack = new Modpack();
+        try {
+            UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        getModpackDirectory();
+        Modpack newPack = new Modpack(modpackDirectory);
         File modpack_json = new File("newer_test.json");
         Modpack oldPack = Modpack.fromJson(FileUtils.readFileToString(new File("new_test.json")));
-        newPack.addFiles(FileUtils.listFiles(new File("testPack"), FileFilterUtils.and(FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
+        newPack.addModpackFiles();
         Gson g = new GsonBuilder().setPrettyPrinting().create();
         FileUtils.write(modpack_json, newPack.toJson());
         System.out.println(g.toJson(oldPack.getNew(newPack)));
         //fromUploadFiles(newPack.getModpackFiles());
-        placeUploadFiles(new File("testPack").getAbsolutePath(), oldPack.getNew(newPack));
+        placeUploadFiles(modpackDirectory.getAbsolutePath(), oldPack.getNew(newPack));
         //System.out.println(g.toJson(Modpack.getOld(oldPack, newPack)));
         /*
         Modpack m = new Modpack();
@@ -76,6 +87,26 @@ public class ModpackBuilder {
             } catch (IOException e){
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static void getModpackDirectory(){
+        JFileChooser fileChooser = new JFileChooser(new File("."));
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Modpack_Json", "json", "mmp");
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        //fileChooser.setFileFilter(filter);
+        fileChooser.setDialogTitle("Select the directory of the modpack you want to update to.");
+        int returnValue = fileChooser.showOpenDialog(null);
+        if(returnValue == JFileChooser.APPROVE_OPTION){
+            File selected = fileChooser.getSelectedFile();
+            if((new File(selected, "config")).exists() && new File(selected, "config").isDirectory() && (new File(selected, "mods")).exists() && (new File(selected, "mods")).isDirectory()){
+                modpackDirectory = selected;
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid directory selected, please select a one containing mods and config folder.", "Invalid directory!", JOptionPane.ERROR_MESSAGE);
+                getModpackDirectory();
+            }
+        } else {
+            System.exit(0);
         }
     }
 }

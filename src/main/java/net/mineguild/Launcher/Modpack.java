@@ -7,7 +7,10 @@ import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
+import net.mineguild.Launcher.utils.RelativePath;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import java.io.File;
 import java.util.*;
@@ -24,6 +27,8 @@ public class Modpack {
     long releaseTime;
     private List<File> unprocessedFiles = new ArrayList<>();
     private Map<String, String> modpackFiles = new HashMap<>();
+    private @Getter @Setter File basePath;
+
 
     public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
 
@@ -37,8 +42,9 @@ public class Modpack {
         this.releaseTime = releaseTime;
     }
 
-    public Modpack() {
+    public Modpack(File basePath) {
         this.releaseTime = -1;
+        this.basePath = basePath;
     }
 
     public static Modpack fromJson(String json) {
@@ -96,6 +102,10 @@ public class Modpack {
         }
     }
 
+    public void addModpackFiles(){
+        this.addFiles(FileUtils.listFiles(basePath, FileFilterUtils.and(FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
+    }
+
     public String getHash() {
         return hash;
     }
@@ -117,23 +127,7 @@ public class Modpack {
     }
 
     public void addFile(File file, String checkSum) {
-        String path = FilenameUtils.separatorsToUnix(file.getPath());
-        String relPath = "";
-        String[] split = path.split("/");
-        boolean hitPath = false;
-        for (String s : split) {
-            if (hitPath) {
-                relPath += "/" + s;
-            } else if (s.equals("config") || s.equals("mods")) {
-                relPath += s;
-                hitPath = true;
-            }
-        }
-        try {
-            modpackFiles.put(relPath, checkSum);
-        } catch (IllegalArgumentException e) {
-            System.out.println("File already added!");
-        }
+        modpackFiles.put(FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)), checkSum);
     }
 
     public void processFiles(){

@@ -27,6 +27,7 @@ dependencies {
     compile 'commons-io:commons-io:2.4'
     compile 'com.google.guava:guava:17.0'
     compile "org.projectlombok:lombok:1.14.4"
+    compile group: 'com.seaglasslookandfeel', name: 'seaglasslookandfeel', version: '0.2'
 }
 
 jar {
