@@ -4,8 +4,11 @@ import com.google.common.collect.BiMap;
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -15,17 +18,18 @@ import java.util.*;
 
 public class Modpack {
   private @Getter @Setter String version;
-  private String hash;
-  private @Getter @Setter long releaseTime;
-  private List<File> unprocessedFiles = new ArrayList<>();
+  private @Getter String hash;
+  private @Getter long releaseTime;
   private Map<String, String> modpackFiles = new HashMap<>();
-  private @Getter @Setter File basePath;
+  
+  private @Expose List<File> unprocessedFiles = new ArrayList<>(); // Local variable
+  private @Expose @Getter @Setter File basePath; // Local variable -- doesn't belong to json.
 
 
   public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
 
     this.version = version;
-    this.hash = ChecksumUtil.getMD5(version);
+    this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
     this.releaseTime = releaseTime;
     this.modpackFiles = modpackFiles;
   }
@@ -42,6 +46,11 @@ public class Modpack {
   public static Modpack fromJson(String json) {
     Gson g = new Gson();
     return g.fromJson(json, Modpack.class);
+  }
+  
+  public void setReleaseTime(long releaseTime) {
+    this.releaseTime = releaseTime;
+    this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
   }
 
   public static HashMap<String, String> getNew(Modpack oldPack, Modpack newPack) {
@@ -98,14 +107,6 @@ public class Modpack {
     this.addFiles(FileUtils.listFiles(basePath, FileFilterUtils.and(
         FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")),
         FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
-  }
-
-  public String getHash() {
-    return hash;
-  }
-
-  public void setHash(String hash) {
-    this.hash = hash;
   }
 
   public boolean isNewer(Modpack otherPack) {

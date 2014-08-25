@@ -1,6 +1,5 @@
 package net.mineguild.Launcher;
 
-import com.google.common.collect.BiMap;
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,7 +16,7 @@ import java.util.*;
 
 public class Modpack {
   private @Getter @Setter String version;
-  private String hash;
+  private @Getter String hash;
   private @Getter @Setter long releaseTime;
   private List<File> unprocessedFiles = new ArrayList<>();
   private Map<String, String> modpackFiles = new HashMap<>();
@@ -25,9 +24,8 @@ public class Modpack {
 
 
   public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
-
     this.version = version;
-    this.hash = ChecksumUtil.getMD5(version);
+    this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
     this.releaseTime = releaseTime;
     this.modpackFiles = modpackFiles;
   }
@@ -86,7 +84,7 @@ public class Modpack {
     return modpackFiles;
   }
 
-  public void setModpackFiles(BiMap<String, String> modpackFiles) {
+  public void setModpackFiles(Map<String, String> modpackFiles) {
     this.modpackFiles = modpackFiles;
   }
 
@@ -100,14 +98,6 @@ public class Modpack {
     this.addFiles(FileUtils.listFiles(basePath, FileFilterUtils.and(
         FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")),
         FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
-  }
-
-  public String getHash() {
-    return hash;
-  }
-
-  public void setHash(String hash) {
-    this.hash = hash;
   }
 
   public boolean isNewer(Modpack otherPack) {

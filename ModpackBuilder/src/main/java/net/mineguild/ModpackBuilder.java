@@ -1,36 +1,44 @@
 package net.mineguild;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import javax.swing.InputVerifier;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.event.TableModelListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.text.JTextComponent;
+
+import org.apache.commons.io.FileUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.CellConstraints.Alignment;
 import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.Size;
-
-import org.apache.commons.io.FileUtils;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.JTextComponent;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.PopupMenu;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputMethodEvent;
-import java.awt.event.InputMethodListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
 
 @SuppressWarnings("serial")
 public class ModpackBuilder extends JFrame {
@@ -101,6 +109,7 @@ public class ModpackBuilder extends JFrame {
         if (file.exists() && file.isDirectory()) {
           if (new File(file, "mods").exists() && new File(file, "config").exists()) {
             if (versionField.getText().length() > 0) {
+              modpackDirectory = new File(pathField.getText());
               createUpdatedPack(ModpackBuilder.instance);
             } else {
               JOptionPane.showMessageDialog(ModpackBuilder.instance,
@@ -119,8 +128,73 @@ public class ModpackBuilder extends JFrame {
 
   }
 
-  public void createUpdatedPack(Component parent) {
+  public void createUpdatedPack(JFrame parent) {
+    Modpack modPack = new Modpack(modpackDirectory);
+    modPack.setVersion(ModpackBuilder.instance.versionField.getText());
+    modPack.setReleaseTime(System.currentTimeMillis());
+    WorkDialog dialog = new WorkDialog(parent);
+    dialog.start(modPack);
+    Gson g = new GsonBuilder().setPrettyPrinting().create();
+    System.out.println(g.toJson(modPack));
+    JDialog showFilesDialog = new JDialog(parent);
+    String[] columnNames = {"Path", "Checksum"};
+    DefaultTableModel tableModel = new DefaultTableModel() {
 
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        // all cells false
+        return false;
+      }
+    };
+    tableModel.setDataVector(mapToArray(modPack.getModpackFiles()), columnNames);
+    final JTable table = new JTable(tableModel);
+    JScrollPane scrollPane = new JScrollPane(table);
+    JButton removeButton = new JButton("Remove selected entry/entries");
+    removeButton.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        int[] rows = table.getSelectedColumns();
+        for (int row : rows) {
+          table.remove(row);
+        }
+        
+      }
+    });
+    showFilesDialog.add(scrollPane, BorderLayout.PAGE_START);
+    showFilesDialog.add(removeButton, BorderLayout.PAGE_END);
+    showFilesDialog.pack();
+    showFilesDialog.setModal(true);
+    showFilesDialog.setVisible(true);
+    System.exit(0);
+  }
+
+  @SuppressWarnings("rawtypes")
+  public String[][] mapToArray(Map map) {
+    String [][] array = new String[map.size()][2];
+    Set entriesSet = map.entrySet();
+    Iterator entriesIterator = entriesSet.iterator();
+    int i = 0;
+    while (entriesIterator.hasNext()) {
+
+      Map.Entry mapping = (Map.Entry) entriesIterator.next();
+
+      array[i][0] = (String) mapping.getKey();
+      array[i][1] = (String) mapping.getValue();
+      i++;
+    }
+    Comparator c = new Comparator<String[]>() {
+
+      @Override
+      public int compare(String[] s1, String[] s2) {
+        return s1[0].compareTo(s2[0]);
+      }
+      
+    };
+    
+    Arrays.sort(array, c);
+    
+    return array;
   }
 
   public static void main(String[] args) throws Exception {
@@ -219,5 +293,6 @@ public class ModpackBuilder extends JFrame {
     }
     return false;
   }
+
 
 }
