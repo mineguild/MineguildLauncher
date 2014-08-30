@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ChecksumUtil {
 
-  private static ConcurrentHashMap<File, String> results;
+  public static ConcurrentHashMap<File, String> results;
 
   public static Map<File, String> getChecksum(List<File> files, HashFunction hf) {
     ExecutorService executor = Executors.newFixedThreadPool(4);

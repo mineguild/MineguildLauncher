@@ -5,12 +5,15 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.Vector;
 
 import javax.swing.InputVerifier;
 import javax.swing.JButton;
@@ -24,15 +27,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.event.TableModelListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.DefaultMutableTreeNode;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -48,7 +48,7 @@ public class ModpackBuilder extends JFrame {
   JButton startButton;
   JTextField pathField;
   JTextField versionField;
-  JPanel sndPanel;
+  JPanel formPanel;
   public static ModpackBuilder instance;
 
   public ModpackBuilder() {
@@ -69,7 +69,7 @@ public class ModpackBuilder extends JFrame {
     builder.add(selectFolderButton, cc.xy(5, 1));
     builder.addLabel("Version", cc.xy(1, 3));
     builder.add(versionField, cc.xy(3, 3));
-    sndPanel = builder.getPanel();
+    formPanel = builder.getPanel();
     selectFolderButton.addActionListener(new ActionListener() {
 
       @Override
@@ -94,7 +94,7 @@ public class ModpackBuilder extends JFrame {
         return false;
       }
     });
-    add(sndPanel, BorderLayout.CENTER);
+    add(formPanel, BorderLayout.CENTER);
     add(startButton, BorderLayout.SOUTH);
     pack();
     setLocationRelativeTo(null);
@@ -134,68 +134,41 @@ public class ModpackBuilder extends JFrame {
     modPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
     dialog.start(modPack);
-    Gson g = new GsonBuilder().setPrettyPrinting().create();
-    System.out.println(g.toJson(modPack));
-    JDialog showFilesDialog = new JDialog(parent);
-    String[] columnNames = {"Path", "Checksum"};
-    DefaultTableModel tableModel = new DefaultTableModel() {
-
-      @Override
-      public boolean isCellEditable(int row, int column) {
-        // all cells false
-        return false;
-      }
-    };
-    tableModel.setDataVector(mapToArray(modPack.getModpackFiles()), columnNames);
-    final JTable table = new JTable(tableModel);
-    JScrollPane scrollPane = new JScrollPane(table);
+    final JDialog showFilesDialog = new JDialog(parent);
+    final ModpackTableModel mTableModel = new ModpackTableModel(modPack);
+    final JTable table = new JTable(mTableModel);
+    table.setLayout(new BorderLayout());
+    JScrollPane tableView = new JScrollPane(table);
     JButton removeButton = new JButton("Remove selected entry/entries");
-    removeButton.addActionListener(new ActionListener() {
+    JButton doneButton = new JButton("Done");
+    doneButton.addActionListener(new ActionListener() {
       
       @Override
       public void actionPerformed(ActionEvent e) {
-        int[] rows = table.getSelectedColumns();
-        for (int row : rows) {
-          table.remove(row);
-        }
-        
+        showFilesDialog.dispose();
       }
     });
-    showFilesDialog.add(scrollPane, BorderLayout.PAGE_START);
-    showFilesDialog.add(removeButton, BorderLayout.PAGE_END);
+    removeButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        int[] rows = table.getSelectedRows();
+        mTableModel.removeFiles(rows);
+        table.clearSelection();
+      }
+    });
+    
+    showFilesDialog.add(tableView, BorderLayout.NORTH);
+    showFilesDialog.add(removeButton, BorderLayout.CENTER);
+    showFilesDialog.add(doneButton, BorderLayout.SOUTH);
     showFilesDialog.pack();
+    showFilesDialog.setLocationRelativeTo(null);
     showFilesDialog.setModal(true);
     showFilesDialog.setVisible(true);
+    System.out.println(modPack.toJson());
     System.exit(0);
   }
 
-  @SuppressWarnings("rawtypes")
-  public String[][] mapToArray(Map map) {
-    String [][] array = new String[map.size()][2];
-    Set entriesSet = map.entrySet();
-    Iterator entriesIterator = entriesSet.iterator();
-    int i = 0;
-    while (entriesIterator.hasNext()) {
 
-      Map.Entry mapping = (Map.Entry) entriesIterator.next();
-
-      array[i][0] = (String) mapping.getKey();
-      array[i][1] = (String) mapping.getValue();
-      i++;
-    }
-    Comparator c = new Comparator<String[]>() {
-
-      @Override
-      public int compare(String[] s1, String[] s2) {
-        return s1[0].compareTo(s2[0]);
-      }
-      
-    };
-    
-    Arrays.sort(array, c);
-    
-    return array;
-  }
 
   public static void main(String[] args) throws Exception {
     try {
@@ -204,75 +177,80 @@ public class ModpackBuilder extends JFrame {
       e.printStackTrace();
     }
     new ModpackBuilder();
-    /*
-     * System.exit(0); //getModpackDirectory(); Modpack newPack = new Modpack(modpackDirectory);
-     * File modpack_json = new File("newer_test.json"); Modpack oldPack =
-     * Modpack.fromJson(FileUtils.readFileToString(new File("new_test.json")));
-     * newPack.addModpackFiles(); Gson g = new GsonBuilder().setPrettyPrinting().create();
-     * FileUtils.write(modpack_json, newPack.toJson());
-     * System.out.println(g.toJson(oldPack.getNew(newPack)));
-     * //fromUploadFiles(newPack.getModpackFiles());
-     * placeUploadFiles(modpackDirectory.getAbsolutePath(), oldPack.getNew(newPack));
-     */
-    // System.out.println(g.toJson(Modpack.getOld(oldPack, newPack)));
-    /*
-     * Modpack m = new Modpack(); m.setReleaseTime(System.currentTimeMillis()); List<File> list =
-     * (List<File>) FileUtils.listFiles(new File("testPack"), FileFilterUtils
-     * .notFileFilter(FileFilterUtils.suffixFileFilter(".dis")), FileFilterUtils.trueFileFilter());
-     * m.addModpackFiles(ChecksumUtil.getChecksum(list)); FileUtils.write(new File("new_test.json"),
-     * m.toJson(), false);
-     */
-
   }
 
-  public static void placeUploadFiles(String basePath, Map<String, String> files) {
-    File uploadDir = new File("upload");
-    uploadDir.mkdir();
-    try {
-      FileUtils.cleanDirectory(uploadDir);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    for (Map.Entry<String, String> entry : files.entrySet()) {
-      File file = new File(basePath, entry.getKey());
-      File newDirectory = new File(uploadDir, entry.getValue().substring(0, 2));
-      File newFile = new File(newDirectory, entry.getValue());
-      if (file.exists()) {
-        try {
-          FileUtils.copyFile(file, newFile);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }
-  }
 
-  public static void fromUploadFiles(Map<String, String> files) {
-    File modpack = new File("modpack");
-    File upload = new File("upload");
-    modpack.mkdir();
-    try {
-      FileUtils.cleanDirectory(modpack);
-    } catch (IOException ignored) {
+  public static class ModpackTableModel extends AbstractTableModel {
+
+    Modpack pack;
+
+    public ModpackTableModel(Modpack pack) {
+      this.pack = pack;
+      this.pack.setModpackFiles(new TreeMap<>(pack.getModpackFiles()));
     }
-    for (Map.Entry<String, String> entry : files.entrySet()) {
-      String hash = entry.getValue();
-      File fileDir = new File(upload, hash.substring(0, 2));
-      File file = new File(fileDir, hash);
-      String path = entry.getKey();
-      File filePath = new File(modpack, path);
-      try {
-        System.out.printf("Copying %s to %s\n", file.toString(), filePath.toString());
-        FileUtils.copyFile(file, filePath);
-      } catch (IOException e) {
-        e.printStackTrace();
+
+
+    @Override
+    public int getColumnCount() {
+      // TODO Auto-generated method stub
+      return 2;
+    }
+
+
+    @Override
+    public String getColumnName(int arg0) {
+      switch (arg0) {
+        case 0:
+          return "Filename";
+        case 1:
+          return "MD5-Hash";
+        default:
+          return "Unkown";
       }
     }
+
+    @Override
+    public int getRowCount() {
+      return pack.getModpackFiles().size();
+    }
+
+    public void removeFile(int row) {
+      removeFile((String) pack.getModpackFiles().keySet().toArray()[row]);
+    }
+
+    public void removeFiles(int[] rows) {
+      int removedRows = 0;
+      for (int row : rows) {
+        System.out.printf("Removing row #%d\n", row);
+        removeFile(row - removedRows);
+      }
+      fireTableRowsDeleted(rows[0], rows[rows.length - 1]);
+    }
+
+    public void removeFile(String name) {
+      System.out.printf("Removing %s\n", name);
+      pack.getModpackFiles().remove(name);
+    }
+
+    @Override
+    public Object getValueAt(int row, int column) {
+      if (column == 0) {
+        return pack.getModpackFiles().keySet().toArray()[row];
+      } else {
+        return pack.getModpackFiles().values().toArray()[row];
+      }
+    }
+
+    @Override
+    public boolean isCellEditable(int t, int t2) {
+      return false;
+    }
+
   }
 
   public static boolean getModpackDirectory(Component parent) {
     JFileChooser fileChooser = new JFileChooser(new File("."));
-    FileNameExtensionFilter filter = new FileNameExtensionFilter("Modpack_Json", "json", "mmp");
+    // FileNameExtensionFilter filter = new FileNameExtensionFilter("Modpack_Json", "json", "mmp");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     // fileChooser.setFileFilter(filter);
     fileChooser.setDialogTitle("Select the directory of the modpack you want to update to.");
