@@ -3,6 +3,7 @@ package net.mineguild.Launcher;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadTask;
+import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.json.JSONFactory;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
@@ -71,7 +72,7 @@ public class MineguildLauncher {
     baseDirectory = new File("modpack");
     baseDirectory.mkdirs();
 
-    File json = new File(baseDirectory, "assets/indexes/legacy.json");
+    /*File json = new File(baseDirectory, "assets/indexes/legacy.json");
     File install_profile = new File("version.json");
     FileUtils.write(install_profile,
         IOUtils.toString(new URL(Constants.MG_FORGE + "1.7.10-10.13.0.1180" + "/version.json")));
@@ -127,36 +128,54 @@ public class MineguildLauncher {
     di.setVisible(true);
     di.start();
     di.dispose();
-
+    */
     // args = new String[]{"old"};
+
+    DownloadTask.ssl_hack();
+    Modpack m;
     if (args.length == 1) {
       if (args[0].equals("old")) {
-        FileUtils.cleanDirectory(new File(baseDirectory, "mods"));
-        FileUtils.cleanDirectory(new File(baseDirectory, "config"));
-        Modpack m =
+        FileUtils.cleanDirectory(new File(ModpackUtils.getGameDir(), "mods"));
+        FileUtils.cleanDirectory(new File(ModpackUtils.getGameDir(), "config"));
+        m =
             Modpack.fromJson(IOUtils.toString(new URL(
                 "https://mineguild.net/download/mmp/test_pack.json")));
         ModpackUtils.updateModpack(m);
 
       } else {
-        Modpack m =
+        m =
             Modpack.fromJson(IOUtils.toString(new URL(
                 "https://mineguild.net/download/mmp/test_pack.json")));
         Modpack newPack =
             Modpack.fromJson(IOUtils.toString(new URL(
                 "https://mineguild.net/download/mmp/test_pack_new.json")));
         ModpackUtils.updateModpack(m, newPack);
+        m = newPack;
       }
     } else {
-      Modpack m =
+      m =
           Modpack.fromJson(IOUtils.toString(new URL(
               "https://mineguild.net/download/mmp/test_pack.json")));
       Modpack newPack =
           Modpack.fromJson(IOUtils.toString(new URL(
               "https://mineguild.net/download/mmp/test_pack_new.json")));
       ModpackUtils.updateModpack(m, newPack);
+      m = newPack;
     }
-    DownloadTask.ssl_hack();
+    boolean success = true;
+    try {
+      MCInstaller.setup(m);
+    } catch(Exception e){
+      success = false;
+    }
+    
+    if(success){
+      JOptionPane.showMessageDialog(null, "Modpack can be launched now. Well actually, it could be if it the launcher was able to.");
+    } else {
+      JOptionPane.showMessageDialog(null, "Something went wrong! Modpack can't be launched now!");
+    }
+    
+    
     
     System.exit(0);
   }

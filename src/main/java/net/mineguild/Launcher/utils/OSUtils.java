@@ -243,4 +243,9 @@ public class OSUtils {
     }
   }
 
+  public static int getNumCores() {
+    // TODO Auto-generated method stub
+    return 4;
+  }
+
 }

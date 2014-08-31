@@ -136,7 +136,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         // gather data for basic checks
         long remoteSize = Long.parseLong(con.getHeaderField("Content-Length"));
         if (remoteSize == 0) {
-          downloadSuccess = true;
+          downloadSuccess = true; 
           continue;
         }
         if (asset.hash == null && asset.getPrimaryDLType() == DLType.ETag) {

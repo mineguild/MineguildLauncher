@@ -25,6 +25,7 @@ public class Modpack {
   private @Expose @Getter long releaseTime;
   private @Expose @Getter @Setter Map<String, String> modpackFiles = new HashMap<>();
   private @Expose @Getter @Setter String forgeVersion;
+  private @Expose @Getter @Setter String minecraftVersion;
 
   private List<File> unprocessedFiles = new ArrayList<>(); // Local variable
   private @Getter @Setter File basePath; // Local variable -- doesn't belong to json.

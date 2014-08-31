@@ -19,16 +19,21 @@ public class ModpackUtils {
   public static Map<String, String> needed;
 
   public static void updateModpack(Modpack currentPack, Modpack newPack) throws Exception {
-    deleteOldFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(),
-        currentPack.getOld(newPack));
+    if(currentPack == null){
+      FileUtils.cleanDirectory(new File(getGameDir(), "mods"));
+      FileUtils.cleanDirectory(new File(getGameDir(), "config"));
+    } else{
+      deleteOldFiles(getGameDir(), newPack.getModpackFiles(),
+          currentPack.getOld(newPack));
+    }
     Map<String, String> neededFiles =
-        getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(),
+        getNeededFiles(getGameDir(), newPack.getModpackFiles(),
             MineguildLauncher.doExactCheck);
     if (neededFiles.size() > 0) {
       List<DownloadInfo> info =
-          DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
+          DownloadInfo.getDownloadInfo(getGameDir(), neededFiles);
       DownloadDialog dialog =
-          new DownloadDialog(info, "Updating...", DownloadInfo.getTotalSize(neededFiles.values()));
+          new DownloadDialog(info, "Updating Modpack", DownloadInfo.getTotalSize(neededFiles.values()));
       dialog.setVisible(true);
       dialog.start();
       dialog.dispose();
@@ -36,18 +41,7 @@ public class ModpackUtils {
   }
 
   public static void updateModpack(Modpack newPack) throws Exception {
-    FileUtils.cleanDirectory(MineguildLauncher.baseDirectory);
-    Map<String, String> neededFiles =
-        getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), false);
-    if (neededFiles.size() > 0) {
-      List<DownloadInfo> info =
-          DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
-      DownloadDialog dialog =
-          new DownloadDialog(info, "Downloading Modpack", DownloadInfo.getTotalSize(neededFiles.values()));
-      dialog.setVisible(true);
-      dialog.start();
-      dialog.dispose();
-    }
+    updateModpack(null, newPack);
   }
 
   public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files,
@@ -90,6 +84,10 @@ public class ModpackUtils {
         }
       }
     }
+  }
+  
+  public static File getGameDir(){
+    return new File(MineguildLauncher.baseDirectory, "minecraft");
   }
 
   public static class NeededFilesTask implements Runnable {
