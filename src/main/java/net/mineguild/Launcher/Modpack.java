@@ -14,7 +14,6 @@ import net.mineguild.Launcher.utils.RelativePath;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
@@ -26,6 +25,7 @@ public class Modpack {
   private @Expose @Getter String hash;
   private @Expose @Getter long releaseTime;
   private @Expose @Getter @Setter Map<String, String> modpackFiles = new HashMap<>();
+  private @Expose @Getter @Setter String forgeVersion;
 
   private List<File> unprocessedFiles = new ArrayList<>(); // Local variable
   private @Getter @Setter File basePath; // Local variable -- doesn't belong to json.
@@ -110,9 +110,8 @@ public class Modpack {
   }
 
   public void addModpackFiles() {
-    this.addFiles(FileUtils.listFiles(basePath, FileFilterUtils.and(
-        FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")),
-        FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
+    this.addFiles(FileUtils.listFiles(basePath, Constants.MODPACK_FILE_FILTER,
+        Constants.MODPACK_DIR_FILTER));
   }
 
 

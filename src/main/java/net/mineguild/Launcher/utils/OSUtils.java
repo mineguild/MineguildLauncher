@@ -78,6 +78,19 @@ public class OSUtils {
   public static long getOSFreeMemory() {
     return getOSMemory("getFreePhysicalMemorySize", "Could not get free RAM Value");
   }
+  
+  public static boolean is64bitOS() {
+    switch(getCurrentOS()){
+      case WINDOWS:
+        return is64BitWindows();
+      case MACOSX:
+        return is64BitOSX();
+      case UNIX:
+        return is64BitPosix();
+      default:
+        return false;
+    }
+  }
 
   public static OS getCurrentOS() {
     String osString = System.getProperty("os.name").toLowerCase();

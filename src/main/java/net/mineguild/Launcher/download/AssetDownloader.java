@@ -1,11 +1,5 @@
 package net.mineguild.Launcher.download;
 
-import com.google.common.collect.Lists;
-import lombok.Getter;
-import net.mineguild.Launcher.download.DownloadInfo.DLType;
-import net.mineguild.Launcher.utils.DownloadUtils;
-
-import javax.swing.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,11 +8,18 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.SwingWorker;
+
+import lombok.Getter;
+import net.mineguild.Launcher.download.DownloadInfo.DLType;
+import net.mineguild.Launcher.utils.DownloadUtils;
+
+import com.google.common.collect.Lists;
+
 public class AssetDownloader extends SwingWorker<Boolean, Void> {
   private static final int BUFFER_SIZE = 1024;
   private static final int SPEED_UPDATE_INTERVAL = 500;
   private List<DownloadInfo> downloads;
-  private int progressIndex = 0;
   private boolean allDownloaded = true;
   private int totalProgress = 0;
   private long totalSize = 0;
@@ -105,10 +106,13 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     final int attempts = 5;
     updateStatus(asset.name);
     setIndeterminate();
-    attempting: while (!downloadSuccess && (attempt < attempts)) {
+    while (!downloadSuccess && (attempt < attempts)) {
       try {
         if (remoteHash == null) {
           remoteHash = Lists.newArrayList();
+        }
+        if(isCancelled()){
+          return;
         }
         hashType = asset.hashType;
         if (attempt++ > 0) {
@@ -136,9 +140,12 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           continue;
         }
         if (asset.hash == null && asset.getPrimaryDLType() == DLType.ETag) {
-          remoteHash.clear();
-          remoteHash.add(con.getHeaderField("ETag").replace("\"", ""));
-          hashType = "md5";
+          String eTag = con.getHeaderField("ETag").replace("\"", "");
+          if (!eTag.contains("-") && eTag.length() == 32) {
+            remoteHash.clear();
+            remoteHash.add(eTag);
+            hashType = "md5";
+          }
         }
         if (asset.hash == null && asset.getPrimaryDLType() == DLType.ContentMD5) {
           remoteHash.clear();
@@ -168,7 +175,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
 
         if (asset.local.exists()) {
           downloadSuccess = true;
-          progressIndex += 1;
           totalBytesRead += remoteSize;
           continue;
         }
@@ -193,7 +199,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             input.close();
             output.close();
             asset.local.delete();
-            break attempting;
+            return;
           }
           output.write(buffer, 0, readLen);
           currentSize += readLen;
@@ -231,7 +237,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
 
         if (downloadSuccess = doHashCheck(asset, remoteHash)) {
-          progressIndex += 1;
         }
       } catch (Exception e) {
         downloadSuccess = false;

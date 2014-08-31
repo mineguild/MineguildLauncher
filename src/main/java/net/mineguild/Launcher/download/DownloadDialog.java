@@ -109,25 +109,25 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     return text.substring(0, end) + "...";
   }
 
-  public void start() {
+  public boolean start() {
     task = new AssetDownloader(info, totalFilesSize);
     task.addPropertyChangeListener(this);
     task.run();
     try {
       boolean success = task.get();
-      if (success) {
-        JOptionPane.showMessageDialog(this, "All files were successfully downloaded!", "Success!",
-            JOptionPane.INFORMATION_MESSAGE);
-      } else {
-        JOptionPane.showMessageDialog(this, "Files are missing!", "Error!",
-            JOptionPane.ERROR_MESSAGE);
-      }
+      /*
+       * if (success) { JOptionPane.showMessageDialog(this,
+       * "All files were successfully downloaded!", "Success!", JOptionPane.INFORMATION_MESSAGE); }
+       * else { JOptionPane.showMessageDialog(this, "Files are missing!", "Error!",
+       * JOptionPane.ERROR_MESSAGE); }
+       */
+      return success;
     } catch (Exception e) {
-      JOptionPane
-          .showMessageDialog(this, "Files are missing!", "Error!", JOptionPane.ERROR_MESSAGE);
-      // e.printStackTrace();
+      // JOptionPane
+      // .showMessageDialog(this, "Files are missing!", "Error!", JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace();
+      return false;
     }
-    setVisible(false);
   }
 
   @Override

@@ -37,9 +37,8 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
 
   public void start(final Modpack targetModpack) {
     worker =
-        new FileAddWorker(FileUtils.listFiles(targetModpack.getBasePath(), FileFilterUtils.and(
-            FileFilterUtils.notFileFilter(FileFilterUtils.suffixFileFilter(".dis")),
-            FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
+        new FileAddWorker(FileUtils.listFiles(targetModpack.getBasePath(), Constants.MODPACK_FILE_FILTER,
+            Constants.MODPACK_DIR_FILTER));
     worker.addPropertyChangeListener(this);
     this.targetModpack = targetModpack;
     worker.execute();

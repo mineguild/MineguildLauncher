@@ -24,26 +24,30 @@ public class ModpackUtils {
     Map<String, String> neededFiles =
         getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(),
             MineguildLauncher.doExactCheck);
-    List<DownloadInfo> info =
-        DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
-    DownloadDialog dialog =
-        new DownloadDialog(info, "Updating...", DownloadInfo.getTotalSize(neededFiles.values()));
-    dialog.setVisible(true);
-    dialog.start();
-    dialog.dispose();
+    if (neededFiles.size() > 0) {
+      List<DownloadInfo> info =
+          DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
+      DownloadDialog dialog =
+          new DownloadDialog(info, "Updating...", DownloadInfo.getTotalSize(neededFiles.values()));
+      dialog.setVisible(true);
+      dialog.start();
+      dialog.dispose();
+    }
   }
 
   public static void updateModpack(Modpack newPack) throws Exception {
     FileUtils.cleanDirectory(MineguildLauncher.baseDirectory);
     Map<String, String> neededFiles =
         getNeededFiles(MineguildLauncher.baseDirectory, newPack.getModpackFiles(), false);
-    List<DownloadInfo> info =
-        DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
-    DownloadDialog dialog =
-        new DownloadDialog(info, "Updating...", DownloadInfo.getTotalSize(neededFiles.values()));
-    dialog.setVisible(true);
-    dialog.start();
-    dialog.dispose();
+    if (neededFiles.size() > 0) {
+      List<DownloadInfo> info =
+          DownloadInfo.getDownloadInfo(MineguildLauncher.baseDirectory, neededFiles);
+      DownloadDialog dialog =
+          new DownloadDialog(info, "Downloading Modpack", DownloadInfo.getTotalSize(neededFiles.values()));
+      dialog.setVisible(true);
+      dialog.start();
+      dialog.dispose();
+    }
   }
 
   public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files,
