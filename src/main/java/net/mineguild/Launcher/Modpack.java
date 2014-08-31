@@ -1,29 +1,38 @@
 package net.mineguild.Launcher;
 
-import com.google.common.hash.Hashing;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.RelativePath;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
-import java.io.File;
-import java.util.*;
+import com.google.common.hash.Hashing;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 
 public class Modpack {
-  private @Getter @Setter String version;
-  private @Getter String hash;
-  private @Getter @Setter long releaseTime;
-  private List<File> unprocessedFiles = new ArrayList<>();
-  private Map<String, String> modpackFiles = new HashMap<>();
-  private @Getter @Setter File basePath;
+  private @Expose @Getter @Setter String version;
+  private @Expose @Getter String hash;
+  private @Expose @Getter long releaseTime;
+  private @Expose @Getter @Setter Map<String, String> modpackFiles = new HashMap<>();
+
+  private List<File> unprocessedFiles = new ArrayList<>(); // Local variable
+  private @Getter @Setter File basePath; // Local variable -- doesn't belong to json.
 
 
   public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
+
     this.version = version;
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
     this.releaseTime = releaseTime;
@@ -42,6 +51,19 @@ public class Modpack {
   public static Modpack fromJson(String json) {
     Gson g = new Gson();
     return g.fromJson(json, Modpack.class);
+  }
+
+  public String toJson() {
+    if (unprocessedFiles.size() > 0) {
+      processFiles();
+    }
+    Gson g = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
+    return g.toJson(this);
+  }
+
+  public void setReleaseTime(long releaseTime) {
+    this.releaseTime = releaseTime;
+    this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
   }
 
   public static HashMap<String, String> getNew(Modpack oldPack, Modpack newPack) {
@@ -80,13 +102,6 @@ public class Modpack {
     return Modpack.getOld(this, newPack);
   }
 
-  public Map<String, String> getModpackFiles() {
-    return modpackFiles;
-  }
-
-  public void setModpackFiles(Map<String, String> modpackFiles) {
-    this.modpackFiles = modpackFiles;
-  }
 
   public void addModpackFiles(Map<File, String> modpackFiles) {
     for (Map.Entry<File, String> entry : modpackFiles.entrySet()) {
@@ -100,17 +115,11 @@ public class Modpack {
         FileFilterUtils.sizeFileFilter(1l, true)), FileFilterUtils.trueFileFilter()));
   }
 
+
   public boolean isNewer(Modpack otherPack) {
     return otherPack.getReleaseTime() >= this.getReleaseTime();
   }
 
-  public String toJson() {
-    if (unprocessedFiles.size() > 0) {
-      processFiles();
-    }
-    Gson g = new GsonBuilder().setPrettyPrinting().create();
-    return g.toJson(this);
-  }
 
   public void addFile(File file, String checkSum) {
     modpackFiles.put(FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)),

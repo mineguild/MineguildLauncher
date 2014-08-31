@@ -45,7 +45,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.0.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
-    compile files('lib/authlib-1.5.16.jar')
+    compile files('libs/authlib-1.5.16.jar')
 
 }
 
