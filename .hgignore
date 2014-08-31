@@ -10,3 +10,9 @@ out/*
 upload/*
 jssecacerts
 hash.py
+modpack/
+.classpath
+assets/objects/00/000c82756fd54e40cb236199f2b479629d0aca2f
+.project
+.settings/org.eclipse.jdt.core.prefs
+bin/
