@@ -2,7 +2,6 @@ package net.mineguild.Launcher.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -11,6 +10,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import lombok.Getter;
 import net.mineguild.Launcher.utils.winreg.RuntimeStreamer;
 
 import org.apache.commons.io.FileUtils;
@@ -19,6 +19,12 @@ public class OSUtils {
 
   public static enum OS {
     WINDOWS, UNIX, MACOSX, OTHER,
+  }
+
+  @Getter
+  private static int numCores;
+  static {
+    numCores = Runtime.getRuntime().availableProcessors();
   }
 
   private static byte[] cachedMacAddress;
@@ -78,9 +84,9 @@ public class OSUtils {
   public static long getOSFreeMemory() {
     return getOSMemory("getFreePhysicalMemorySize", "Could not get free RAM Value");
   }
-  
+
   public static boolean is64bitOS() {
-    switch(getCurrentOS()){
+    switch (getCurrentOS()) {
       case WINDOWS:
         return is64BitWindows();
       case MACOSX:
@@ -243,9 +249,22 @@ public class OSUtils {
     }
   }
 
-  public static int getNumCores() {
-    // TODO Auto-generated method stub
-    return 4;
+  /**
+   * Used to get the java delimiter for current OS
+   * 
+   * @return string containing java delimiter for current OS
+   */
+  public static String getJavaDelimiter() {
+    switch (getCurrentOS()) {
+      case WINDOWS:
+        return ";";
+      case UNIX:
+        return ":";
+      case MACOSX:
+        return ":";
+      default:
+        return ";";
+    }
   }
 
 }

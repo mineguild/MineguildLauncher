@@ -3,7 +3,9 @@ package net.mineguild.Launcher;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadTask;
+import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.MCInstaller;
+import net.mineguild.Launcher.minecraft.MCLauncher;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.json.JSONFactory;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
@@ -27,6 +29,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.HttpAuthenticationService;
 import com.mojang.authlib.HttpUserAuthentication;
 import com.mojang.authlib.ProfileLookupCallback;
+import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 
@@ -54,83 +57,10 @@ public class MineguildLauncher {
       e.printStackTrace();
     }
     DownloadTask.ssl_hack();
+    System.setProperty("java.net.preferIPv4Stack" , "true");
     Gson g = new GsonBuilder().setPrettyPrinting().create();
-
-    /*
-     * Agent ag = new Agent("MineguildLauncher", 2); YggdrasilUserAuthentication authentication =
-     * (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(Proxy.NO_PROXY, "MG")
-     * .createUserAuthentication(Agent.MINECRAFT);
-     * authentication.loadFromStorage(g.fromJson(FileUtils.readFileToString(new //
-     * File("profile.json")), Map.class)); authentication.logIn(); FileUtils.write(new
-     * File("profile.json"), g.toJson(authentication.saveForStorage()));
-     * System.out.println(g.toJson(authentication.saveForStorage()));
-     * 
-     * System.out.println(g.toJson(authentication.getSelectedProfile()));
-     * authentication.getSelectedProfile(); System.exit(0);
-     */
-    
-    baseDirectory = new File("modpack");
+    baseDirectory = new File("modpack/");
     baseDirectory.mkdirs();
-
-    /*File json = new File(baseDirectory, "assets/indexes/legacy.json");
-    File install_profile = new File("version.json");
-    FileUtils.write(install_profile,
-        IOUtils.toString(new URL(Constants.MG_FORGE + "1.7.10-10.13.0.1180" + "/version.json")));
-    Version v = JSONFactory.loadVersion(install_profile);
-    File mc_version =
-        new File(baseDirectory, "versions/${version}/${version}".replace("${version}", v.assets));
-    FileUtils.write(
-        mc_version,
-        IOUtils.toString(new URL(Constants.MC_DL
-            + "versions/${version}/${version}.json".replace("${version}", v.assets))));
-    Version mcV = JSONFactory.loadVersion(mc_version);
-    List<DownloadInfo> libs = new ArrayList<DownloadInfo>();
-    for (Library lib : v.getLibraries()) {
-      File local = new File(baseDirectory, "libraries/" + lib.getPath());
-      if (lib.checksums != null) {
-        libs.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
-            lib.checksums, "sha1"));
-      } else {
-        libs.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
-      }
-    }
-    for (Library lib : mcV.libraries){
-      if(lib.natives == null){
-        File local = new File(baseDirectory, "libraries/" + lib.getPath());
-        libs.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
-      } else {
-        File local = new File(baseDirectory, "libraries/" + lib.getPathNatives());
-        if (!local.exists()) {
-            libs.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local.getName()));
-        }
-      }
-    }
-    DownloadDialog di = new DownloadDialog(libs, "Downloading Libraries");
-    di.setVisible(true);
-    di.start();
-    di.dispose();
-    if (!json.exists()) {
-      FileUtils.write(json, IOUtils.toString(new URL(
-          "https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(
-              "${version}", v.assets))));
-    }
-    AssetIndex index = JSONFactory.loadAssetIndex(json);
-    long totalSize = 0;
-    List<DownloadInfo> info = new ArrayList<>();
-    for (Map.Entry<String, Asset> a : index.objects.entrySet()) {
-      totalSize += a.getValue().size;
-      String path = a.getValue().hash.substring(0, 2) + "/" + a.getValue().hash;
-      // System.out.println(a.getKey() + " : " + a.getValue().size);
-      info.add(new DownloadInfo(new URL(Constants.MC_RES + path), new File(baseDirectory,
-          "assets/objects/" + path), a.getKey(), Lists.newArrayList(a.getValue().hash), "sha1"));
-    }
-    di = new DownloadDialog(info, "Downloading Assets", totalSize);
-    di.setVisible(true);
-    di.start();
-    di.dispose();
-    */
-    // args = new String[]{"old"};
-
     DownloadTask.ssl_hack();
     Modpack m;
     if (args.length == 1) {
@@ -170,7 +100,19 @@ public class MineguildLauncher {
     }
     
     if(success){
-      JOptionPane.showMessageDialog(null, "Modpack can be launched now. Well actually, it could be if it the launcher was able to.");
+      //JOptionPane.showMessageDialog(null, "Modpack can be launched now. Well actually, it could be if it the launcher was able to.");
+      String user = JOptionPane.showInputDialog("Please enter your username/email");
+      String pass = JOptionPane.showInputDialog("Please enter your password");
+      YggdrasilUserAuthentication authentication = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(Proxy.NO_PROXY,"Minecraft").createUserAuthentication(Agent.MINECRAFT);
+      authentication.setUsername(user);
+      authentication.setPassword(pass);
+      try{
+        authentication.logIn();
+      } catch (AuthenticationException e){
+        JOptionPane.showMessageDialog(null, "Invalid credentials!");
+      }
+      LoginResponse res = new LoginResponse(Integer.toString(authentication.getAgent().getVersion()), "token", "nylser", null, authentication.getSelectedProfile().getId().toString(), authentication);
+      MCInstaller.launchMinecraft(m, res);
     } else {
       JOptionPane.showMessageDialog(null, "Something went wrong! Modpack can't be launched now!");
     }

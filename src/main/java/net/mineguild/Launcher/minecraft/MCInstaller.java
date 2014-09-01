@@ -1,10 +1,18 @@
 package net.mineguild.Launcher.minecraft;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
@@ -15,15 +23,19 @@ import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
+import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
 import net.mineguild.Launcher.utils.json.JSONFactory;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Library;
 import net.mineguild.Launcher.utils.json.versions.Version;
+import net.mineguild.Launcher.utils.winreg.JavaFinder;
+import net.mineguild.Launcher.utils.winreg.JavaInfo;
 
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Lists;
+import com.google.gson.GsonBuilder;
 
 public class MCInstaller {
 
@@ -92,6 +104,8 @@ public class MCInstaller {
           list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
               lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
         } else if (lib.download != null && lib.download) {
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, lib.getPath()));
+        } else {
           list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, lib.getPath()));
         }
       }
@@ -183,4 +197,170 @@ public class MCInstaller {
 
     return list;
   }
+
+  public static void launchMinecraft(Modpack pack, LoginResponse resp) {
+    try {
+      File packDir = MineguildLauncher.baseDirectory;
+      File gameDir = new File(packDir, "minecraft");
+      String gameFolder = gameDir.getAbsolutePath(); 
+      File assetDir = new File(packDir, "assets");
+      File libDir = new File(packDir, "libraries");
+      File natDir = new File(packDir, "natives");
+      final String packVer = pack.getVersion();
+
+      // Logger.logInfo("Setting up native libraries for " + pack.getName() + " v " + packVer +
+      // " MC " + packmcversion);
+      if (!gameDir.exists())
+        gameDir.mkdirs();
+
+      if (natDir.exists()) {
+        natDir.delete();
+      }
+      natDir.mkdirs();
+      Version base =
+          JSONFactory.loadVersion(new File(packDir, "/versions/{MC_VER}/{MC_VER}.json".replace(
+              "{MC_VER}", packbasejson)));
+      byte[] buf = new byte[1024];
+      for (Library lib : base.getLibraries()) {
+        if (lib.natives != null) {
+          File local = new File(libDir, lib.getPathNatives());
+          ZipInputStream input = null;
+          try {
+            input = new ZipInputStream(new FileInputStream(local));
+            ZipEntry entry = input.getNextEntry();
+            while (entry != null) {
+              String name = entry.getName();
+              int n;
+              if (lib.extract == null || !lib.extract.exclude(name)) {
+                File output = new File(natDir, name);
+                output.getParentFile().mkdirs();
+                FileOutputStream out = new FileOutputStream(output);
+                while ((n = input.read(buf, 0, 1024)) > -1) {
+                  out.write(buf, 0, n);
+                }
+                out.close();
+              }
+              input.closeEntry();
+              entry = input.getNextEntry();
+            }
+          } catch (Exception e) {
+            // ErrorUtils.tossError("Error extracting native libraries");
+            // Logger.logError("", e);
+          } finally {
+            try {
+              input.close();
+            } catch (IOException e) {
+            }
+          }
+        }
+      }
+      List<File> classpath = Lists.newArrayList();
+      Version packjson = new Version();
+      if (new File(packDir, "pack.json").exists()) {
+        packjson = JSONFactory.loadVersion(new File(packDir, "pack.json"));
+        for (Library lib : packjson.getLibraries()) {
+          // Logger.logError(new File(libDir, lib.getPath()).getAbsolutePath());
+          classpath.add(new File(libDir, lib.getPath()));
+        }
+        // }
+      } else {
+        packjson = base;
+      }
+      classpath.add(new File(packDir, "/versions/{MC_VER}/{MC_VER}.jar".replace("{MC_VER}",
+          packmcversion)));
+      for (Library lib : base.getLibraries()) {
+        classpath.add(new File(libDir, lib.getPath()));
+      }
+
+      System.out.println(getDefaultJavaPath());
+      System.out.println(gameFolder);
+      System.out.println(assetDir.getPath());
+      System.out.println(natDir.getPath());
+      System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(classpath));
+      System.out.println(packjson.mainClass != null ? packjson.mainClass : base.mainClass);
+      System.out.println(packjson.minecraftArguments != null ? packjson.minecraftArguments
+          : base.minecraftArguments);
+      
+      System.out.println(pack.getMinecraftVersion());
+
+      System.out.println(packjson.assets != null ? packjson.assets : base.getAssets());
+      Process minecraftProcess =
+          MCLauncher.launchMinecraft(getDefaultJavaPath(), gameFolder, assetDir,
+              natDir, classpath, packjson.mainClass != null ? packjson.mainClass : base.mainClass,
+              packjson.minecraftArguments != null ? packjson.minecraftArguments
+                  : base.minecraftArguments,
+              packjson.assets != null ? packjson.assets : base.getAssets(), "2048", "256m", pack
+                  .getMinecraftVersion(), resp.getAuth(), false);
+      /*
+       * LaunchFrame.MCRunning = true; if (LaunchFrame.con != null)
+       * LaunchFrame.con.minecraftStarted();
+       */
+      // StreamLogger.prepare(minecraftProcess.getInputStream(), new
+      // LogEntry().level(LogLevel.UNKNOWN));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(minecraftProcess.getInputStream()));
+      String line = reader.readLine();
+      while (line != null && ! line.trim().equals("--EOF--")) {
+          System.out.println ("Stdout: " + line);
+          line = reader.readLine();
+      }
+      String[] ignore = {"Session ID is token"};
+      // StreamLogger.setIgnore(ignore);
+      // StreamLogger.doStart();
+      // String curVersion =
+      // (Settings.getSettings().getPackVer().equalsIgnoreCase("recommended version") ?
+      // pack.getVersion() : Settings.getSettings().getPackVer()).replace(".", "_");
+      // TrackerUtils.sendPageView(ModPack.getSelectedPack().getName(), "Launched / " +
+      // ModPack.getSelectedPack().getName() + " / " + curVersion.replace('_', '.'));
+      try {
+        Thread.sleep(1500);
+      } catch (InterruptedException e) {
+      }
+      try {
+        minecraftProcess.exitValue();
+      } catch (IllegalThreadStateException e) {
+        /*
+         * LaunchFrame.getInstance().setVisible(false);
+         * LaunchFrame.setProcMonitor(ProcessMonitor.create(minecraftProcess, new Runnable() {
+         * 
+         * @Override public void run() { if (!Settings.getSettings().getKeepLauncherOpen()) {
+         * System.exit(0); } else { if (LaunchFrame.con != null) LaunchFrame.con.minecraftStopped();
+         * LaunchFrame launchFrame = LaunchFrame.getInstance(); launchFrame.setVisible(true);
+         * Main.getEventBus().post(new EnableObjectsEvent()); try { Settings.getSettings().load(new
+         * FileInputStream(Settings.getSettings().getConfigFile()));
+         * LaunchFrame.getInstance().tabbedPane.remove(1); LaunchFrame.getInstance().optionsPane =
+         * new OptionsPane(Settings.getSettings());
+         * LaunchFrame.getInstance().tabbedPane.add(LaunchFrame.getInstance().optionsPane, 1);
+         * LaunchFrame.getInstance().tabbedPane.setIconAt(1,
+         * LauncherStyle.getCurrentStyle().filterHeaderIcon
+         * (this.getClass().getResource("/image/tabs/options.png"))); } catch (Exception e1) {
+         * Logger.logError("Failed to reload settings after launcher closed", e1); } }
+         * LaunchFrame.MCRunning = false; } }));
+         */
+      }
+    } catch (Exception e) {
+      // Logger.logError("Error while running launchMinecraft()", e);
+      e.printStackTrace();
+    }
+  }
+
+  public static String getDefaultJavaPath() {
+    JavaInfo javaVersion;
+
+    if (OSUtils.getCurrentOS() == OS.MACOSX) {
+      javaVersion = JavaFinder.parseJavaVersion();
+
+      if (javaVersion != null && javaVersion.path != null)
+        return javaVersion.path;
+    } else if (OSUtils.getCurrentOS() == OS.WINDOWS) {
+      javaVersion = JavaFinder.parseJavaVersion();
+
+      if (javaVersion != null && javaVersion.path != null)
+        return javaVersion.path.replace(".exe", "w.exe");
+    }
+    // Windows specific code adds <java.home>/bin/java no need mangle javaw.exe here.
+    return System.getProperty("java.home") + "/bin/java";
+  }
+
+
+
 }
