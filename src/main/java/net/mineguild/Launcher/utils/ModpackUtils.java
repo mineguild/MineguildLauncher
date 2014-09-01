@@ -4,6 +4,7 @@ import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.Modpack;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -35,7 +36,10 @@ public class ModpackUtils {
       DownloadDialog dialog =
           new DownloadDialog(info, "Updating Modpack", DownloadInfo.getTotalSize(neededFiles.values()));
       dialog.setVisible(true);
-      dialog.start();
+      boolean success = dialog.start();
+      if(!success){
+        throw new Exception("Modpack updater cancelled!");
+      }
       dialog.dispose();
     }
   }

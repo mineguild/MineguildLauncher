@@ -18,8 +18,8 @@ public class RelativePath {
    * @param f input file
    * @return a List collection with the individual elements of the path in reverse order
    */
-  private static List getPathList(File f) {
-    List l = new ArrayList();
+  private static List<String> getPathList(File f) {
+    List<String> l = new ArrayList<String>();
     File r;
     try {
       r = f.getCanonicalFile();
@@ -40,7 +40,7 @@ public class RelativePath {
    * @param r home path
    * @param f path of file
    */
-  private static String matchPathLists(List r, List f) {
+  private static String matchPathLists(List<String> r, List<String> f) {
     int i;
     int j;
     String s;
@@ -80,9 +80,8 @@ public class RelativePath {
    * @return path from home to f as a string
    */
   public static String getRelativePath(File home, File f) {
-    File r;
-    List homelist;
-    List filelist;
+    List<String> homelist;
+    List<String> filelist;
     String s;
 
     homelist = getPathList(home);

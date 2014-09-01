@@ -1,47 +1,24 @@
 package net.mineguild.Launcher;
 
-import net.mineguild.Launcher.download.DownloadDialog;
-import net.mineguild.Launcher.download.DownloadInfo;
+import java.io.File;
+import java.net.Proxy;
+import java.net.URL;
+
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+
 import net.mineguild.Launcher.download.DownloadTask;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.MCInstaller;
-import net.mineguild.Launcher.minecraft.MCLauncher;
 import net.mineguild.Launcher.utils.ModpackUtils;
-import net.mineguild.Launcher.utils.json.JSONFactory;
-import net.mineguild.Launcher.utils.json.assets.AssetIndex;
-import net.mineguild.Launcher.utils.json.assets.AssetIndex.Asset;
-import net.mineguild.Launcher.utils.json.versions.Library;
-import net.mineguild.Launcher.utils.json.versions.Version;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Files;
-import com.google.common.reflect.Reflection;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.authlib.Agent;
-import com.mojang.authlib.AuthenticationService;
-import com.mojang.authlib.BaseUserAuthentication;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.HttpAuthenticationService;
-import com.mojang.authlib.HttpUserAuthentication;
-import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
-
-import javax.swing.*;
-
-import java.io.File;
-import java.net.Proxy;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MineguildLauncher {
 
@@ -58,7 +35,6 @@ public class MineguildLauncher {
     }
     DownloadTask.ssl_hack();
     System.setProperty("java.net.preferIPv4Stack" , "true");
-    Gson g = new GsonBuilder().setPrettyPrinting().create();
     baseDirectory = new File("modpack/");
     baseDirectory.mkdirs();
     DownloadTask.ssl_hack();

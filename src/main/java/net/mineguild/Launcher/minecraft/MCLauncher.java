@@ -9,18 +9,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFileFilter;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 import net.mineguild.Launcher.utils.ChecksumUtil;
-import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
 import net.mineguild.Launcher.utils.json.JSONFactory;
 import net.mineguild.Launcher.utils.json.OldPropertyMapSerializer;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex.Asset;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
@@ -35,8 +33,6 @@ import com.mojang.util.UUIDTypeAdapter;
 public class MCLauncher {
 
   public static boolean isLegacy = false;
-  private static String separator = File.separator;
-  private static String gameDirectory;
   private static StringBuilder cpb;
 
   public static Process launchMinecraft(String javaPath, String gameFolder, File assetDir,
@@ -46,7 +42,6 @@ public class MCLauncher {
 
     cpb = new StringBuilder("");
     isLegacy = legacy;
-    gameDirectory = gameFolder;
     File gameDir = new File(gameFolder);
     assetDir = syncAssets(assetDir, assetIndex);
 
@@ -248,13 +243,13 @@ public class MCLauncher {
 
     final File targetDir = new File(assetDir, "virtual/" + indexName);
 
-    final ConcurrentSkipListSet<File> old = new ConcurrentSkipListSet();
+    final ConcurrentSkipListSet<File> old = new ConcurrentSkipListSet<File>();
     old.addAll(FileUtils.listFiles(targetDir, FileFilterUtils.trueFileFilter(),
         FileFilterUtils.trueFileFilter()));
 
     // Benchmark.reset("threading");
-    Parallel.TaskHandler th =
-        new Parallel.ForEach(index.objects.entrySet()).withFixedThreads(2 * OSUtils.getNumCores())
+    Parallel.TaskHandler<Void> th =
+        new Parallel.ForEach<Entry<String, Asset>, Void>(index.objects.entrySet()).withFixedThreads(2 * OSUtils.getNumCores())
         // .configurePoolSize(2*2*OSUtils.getNumCores(), 10)
             .apply(new Parallel.F<Entry<String, Asset>, Void>() {
               public Void apply(Entry<String, Asset> e) {
@@ -287,7 +282,7 @@ public class MCLauncher {
     // Benchmark.logBenchAs("threading", "parallel asset(virtual) check");
 
     for (File f : old) {
-      String name = f.getAbsolutePath().replace(targetDir.getAbsolutePath(), "");
+      f.getAbsolutePath().replace(targetDir.getAbsolutePath(), "");
       // Logger.logInfo("  Removed: " + name.substring(1));
       f.delete();
     }

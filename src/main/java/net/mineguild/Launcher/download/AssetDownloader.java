@@ -110,7 +110,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     byte[] buffer = new byte[BUFFER_SIZE];
     boolean downloadSuccess = false;
     List<String> remoteHash = asset.hash;
-    String hashType;
     int attempt = 0;
     final int attempts = 5;
     updateStatus(asset.name);
@@ -123,7 +122,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         if (isCancelled()) {
           return;
         }
-        hashType = asset.hashType;
         if (attempt++ > 0) {
           System.out.println("Connecting.. Try " + attempt + " of " + attempts + " for: "
               + asset.url);
@@ -153,14 +151,12 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           String eTag = con.getHeaderField("ETag").replace("\"", "");
           remoteHash.clear();
           remoteHash.add(eTag);
-          hashType = "md5";
 
         }
 
         if (asset.hash == null && asset.getPrimaryDLType() == DLType.ContentMD5) {
           remoteHash.clear();
           remoteHash.add(con.getHeaderField("Content-MD5").replace("\"", ""));
-          hashType = "md5";
         }
 
         System.out.println(asset.name);
