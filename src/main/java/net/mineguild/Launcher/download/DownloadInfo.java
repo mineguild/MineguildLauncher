@@ -27,14 +27,6 @@ public class DownloadInfo {
 
   public DownloadInfo() {}
 
-  public DownloadInfo(URL url, File local, String name, Boolean ftbServers) {
-    this(url, local, name, null, "md5");
-    if (ftbServers) {
-      primaryDLType = DLType.ContentMD5;
-      backupDLType = DLType.FTBBackup;
-    }
-  }
-
   public DownloadInfo(URL url, File local, String name) {
     this(url, local, name, null, "md5");
   }
@@ -130,6 +122,6 @@ public class DownloadInfo {
   }
 
   public enum DLType {
-    ETag, ContentMD5, FTBBackup, NONE
+    ETag, ContentMD5, NONE
   }
 }

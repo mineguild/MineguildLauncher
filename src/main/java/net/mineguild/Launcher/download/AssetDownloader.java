@@ -78,12 +78,21 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   }
 
   public int calculateTotalProgress(long currentSize, long remoteSize) {
+    int newProg = 0;
     if (totalSize > 0) {
-      return (int) ((totalBytesRead * 100) / totalSize);
+      newProg = (int) ((totalBytesRead * 100) / totalSize);
     } else if (currentSize > 0 && remoteSize > 0) {
-      return (int) (((currentSize * (percentPerFile)) / remoteSize) + percentPerFile * currentFile);
+      newProg =
+          (int) (((currentSize * (percentPerFile)) / remoteSize) + percentPerFile * currentFile);
     } else {
-      return (int) (percentPerFile * (currentFile + 1));
+      newProg = (int) (percentPerFile * (currentFile + 1));
+    }
+    if (newProg > 100) {
+      return 100;
+    } else if (newProg < 0) {
+      return 0;
+    } else {
+      return newProg;
     }
   }
 
@@ -111,7 +120,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         if (remoteHash == null) {
           remoteHash = Lists.newArrayList();
         }
-        if(isCancelled()){
+        if (isCancelled()) {
           return;
         }
         hashType = asset.hashType;
@@ -136,16 +145,18 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         // gather data for basic checks
         long remoteSize = Long.parseLong(con.getHeaderField("Content-Length"));
         if (remoteSize == 0) {
-          downloadSuccess = true; 
+          downloadSuccess = true;
           continue;
         }
+
         if (asset.hash == null && asset.getPrimaryDLType() == DLType.ETag) {
           String eTag = con.getHeaderField("ETag").replace("\"", "");
           remoteHash.clear();
           remoteHash.add(eTag);
           hashType = "md5";
-          
+
         }
+
         if (asset.hash == null && asset.getPrimaryDLType() == DLType.ContentMD5) {
           remoteHash.clear();
           remoteHash.add(con.getHeaderField("Content-MD5").replace("\"", ""));

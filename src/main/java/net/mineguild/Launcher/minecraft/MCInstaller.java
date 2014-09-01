@@ -113,8 +113,7 @@ public class MCInstaller {
       if (lib.natives == null) {
         local = new File(libDir, lib.getPath());
         if (!local.exists()) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, lib.getPath(),
-              true));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, lib.getPath()));
         }
       } else {
         local = new File(libDir, lib.getPathNatives());
