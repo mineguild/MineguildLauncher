@@ -1,13 +1,10 @@
 package net.mineguild.Launcher.download;
 
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -18,40 +15,49 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-@SuppressWarnings("serial")
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
+
   private final static String NON_THIN = "[^iIl1\\.,']";
   private static Image icon = null;
   private final int statusTextSize = 40;
   public JLabel status;
   public JLabel speedLabel;
   Boolean canceled = false;
-  private JPanel contentPane;
   private JButton buttonCancel;
   private JProgressBar overall;
   private JProgressBar current;
   private List<DownloadInfo> info;
   private long totalFilesSize = 0;
   private AssetDownloader task;
+  
+  {
+    initGUI();
+  }
 
   public DownloadDialog(List<DownloadInfo> info, String title) {
+    this.setTitle(title);
     try {
-      icon = ImageIO.read(DownloadDialog.class.getResourceAsStream("/icon.png"));
+      icon = ImageIO.read(getClass().getResourceAsStream("/icon.png"));
       setIconImage(icon);
     } catch (Exception ignored) {
       ignored.printStackTrace();
     }
     this.info = info;
-    setTitle(title);
-    setContentPane(contentPane);
     char[] statusChars = new char[statusTextSize];
     Arrays.fill(statusChars, 'x');
     status.setText(String.copyValueOf(statusChars));
     setResizable(false);
     pack();
     setMinimumSize(getSize());
+    status.setText(title);
     setResizable(true);
-    status.setText("Working...");
     setLocationRelativeTo(null);
     getRootPane().setDefaultButton(buttonCancel);
     buttonCancel.addActionListener(new ActionListener() {
@@ -71,9 +77,30 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     });
   }
 
-  public DownloadDialog(List<DownloadInfo> info, String title, long totalFilesSize) {
+  public DownloadDialog(List<DownloadInfo> info, String title, long totalSize) {
     this(info, title);
-    this.totalFilesSize = totalFilesSize;
+    this.totalFilesSize = totalSize;
+  }
+
+  public boolean start() {
+    task = new AssetDownloader(info, totalFilesSize);
+    task.addPropertyChangeListener(this);
+    task.run();
+    try {
+      boolean success = task.get();
+      /*
+       * if (success) { JOptionPane.showMessageDialog(this,
+       * "All files were successfully downloaded!", "Success!", JOptionPane.INFORMATION_MESSAGE); }
+       * else { JOptionPane.showMessageDialog(this, "Files are missing!", "Error!",
+       * JOptionPane.ERROR_MESSAGE); }
+       */
+      return success;
+    } catch (Exception e) {
+      // JOptionPane
+      // .showMessageDialog(this, "Files are missing!", "Error!", JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace();
+      return false;
+    }
   }
 
   private static int textWidth(String str) {
@@ -110,26 +137,58 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
 
     return text.substring(0, end) + "...";
   }
-
-  public boolean start() {
-    task = new AssetDownloader(info, totalFilesSize);
-    task.addPropertyChangeListener(this);
-    task.run();
-    try {
-      boolean success = task.get();
-      /*
-       * if (success) { JOptionPane.showMessageDialog(this,
-       * "All files were successfully downloaded!", "Success!", JOptionPane.INFORMATION_MESSAGE); }
-       * else { JOptionPane.showMessageDialog(this, "Files are missing!", "Error!",
-       * JOptionPane.ERROR_MESSAGE); }
-       */
-      return success;
-    } catch (Exception e) {
-      // JOptionPane
-      // .showMessageDialog(this, "Files are missing!", "Error!", JOptionPane.ERROR_MESSAGE);
-      e.printStackTrace();
-      return false;
-    }
+  
+  public void initGUI(){
+    setLayout(new GridBagLayout());
+    GridBagConstraints c = new GridBagConstraints();
+    // Add status label
+    c.anchor = GridBagConstraints.LINE_START;
+    c.gridx = 0;
+    c.insets = new Insets(0, 4, 0, 0);
+    c.gridy = 0;
+    //c.fill = GridBagConstraints.HORIZONTAL;
+    status = new JLabel();
+    add(status, c);
+    // Overall progressbar
+    overall = new JProgressBar();
+    overall.setToolTipText("Overall Progress");
+    c = new GridBagConstraints();
+    c.gridx = 0;
+    c.gridy = 1;
+    c.gridwidth = 2;
+    c.fill = GridBagConstraints.HORIZONTAL;
+    add(overall, c);
+    // Current progressbar
+    current = new JProgressBar();
+    current.setToolTipText("Current File Progress");
+    c = new GridBagConstraints();
+    c.gridx = 0;
+    c.gridwidth = 2;
+    //c.fill = GridBagConstraints.HORIZONTAL;
+    c.weightx = 1;
+    c.gridy = 2;
+    c.fill = GridBagConstraints.HORIZONTAL;
+    //c.anchor = GridBagConstraints.CENTER;
+    add(current, c);
+    JPanel speedPanel = new JPanel();
+    // Speed desc
+    JLabel lbl = new JLabel("Current Speed:");
+    speedLabel = new JLabel("0 kb/s");
+    speedPanel.add(lbl);
+    speedPanel.add(speedLabel);
+    c = new GridBagConstraints();
+    c.gridx = 0;
+    c.gridy = 3;
+    c.anchor = GridBagConstraints.LINE_START;
+    add(speedPanel, c);
+    
+    buttonCancel = new JButton("Cancel");
+    c = new GridBagConstraints();
+    c.gridx = 1;
+    c.gridy = 3;
+    c.anchor = GridBagConstraints.LINE_END;
+    add(buttonCancel, c);
+    
   }
 
   @Override
@@ -168,97 +227,4 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     }
   }
 
-  {
-    // GUI initializer generated by IntelliJ IDEA GUI Designer
-    // >>> IMPORTANT!! <<<
-    // DO NOT EDIT OR ADD ANY CODE HERE!
-    $$$setupUI$$$();
-  }
-
-  /**
-   * Method generated by IntelliJ IDEA GUI Designer >>> IMPORTANT!! <<< DO NOT edit this method OR
-   * call it in your code!
-   *
-   * @noinspection ALL
-   */
-  private void $$$setupUI$$$() {
-    contentPane = new JPanel();
-    contentPane.setLayout(new GridLayoutManager(3, 1, new Insets(10, 10, 10, 10), -1, -1));
-    final JPanel panel1 = new JPanel();
-    panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-    contentPane.add(panel1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
-    final Spacer spacer1 = new Spacer();
-    panel1.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
-        0, false));
-    final JPanel panel2 = new JPanel();
-    panel2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-    panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-    buttonCancel = new JButton();
-    buttonCancel.setText("Cancel");
-    panel2.add(buttonCancel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null,
-        null, 0, false));
-    final JPanel panel3 = new JPanel();
-    panel3.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
-    contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-    status = new JLabel();
-    status.setText("Working...");
-    panel3.add(status, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW,
-        GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-    final JPanel panel4 = new JPanel();
-    panel4.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-    panel3.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-    overall = new JProgressBar();
-    overall.setStringPainted(true);
-    overall.setToolTipText("Overall Download Progress");
-    panel4.add(overall, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW,
-        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-    final JPanel panel5 = new JPanel();
-    panel5.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-    panel3.add(panel5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-    current = new JProgressBar();
-    current.setIndeterminate(false);
-    current.setStringPainted(true);
-    current.setToolTipText("Current File Download Progress");
-    panel5.add(current, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW,
-        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-    final JPanel panel6 = new JPanel();
-    panel6.setLayout(new BorderLayout(0, 0));
-    contentPane.add(panel6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK
-            | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-    final JLabel label1 = new JLabel();
-    label1.setText("Current Speed:  ");
-    panel6.add(label1, BorderLayout.WEST);
-    speedLabel = new JLabel();
-    speedLabel.setText("0 kb/s");
-    panel6.add(speedLabel, BorderLayout.CENTER);
-  }
-
-  /**
-   * @noinspection ALL
-   */
-  public JComponent $$$getRootComponent$$$() {
-    return contentPane;
-  }
 }

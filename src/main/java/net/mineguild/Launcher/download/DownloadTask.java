@@ -18,14 +18,14 @@ public class DownloadTask extends SwingWorker<Void, Void> {
   private static final int BUFFER_SIZE = 1024;
   long totalSize = 0;
   private HashMap<String, File> url_file;
-  private DownloadDialog gui;
+  private OLDDownloadDialog gui;
 
-  public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file) {
+  public DownloadTask(OLDDownloadDialog gui, HashMap<String, File> url_file) {
     this.gui = gui;
     this.url_file = url_file;
   }
 
-  public DownloadTask(DownloadDialog gui, HashMap<String, File> url_file, long totalSize) {
+  public DownloadTask(OLDDownloadDialog gui, HashMap<String, File> url_file, long totalSize) {
     this(gui, url_file);
     this.totalSize = totalSize;
   }

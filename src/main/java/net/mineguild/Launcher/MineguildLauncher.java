@@ -3,10 +3,14 @@ package net.mineguild.Launcher;
 import java.io.File;
 import java.net.Proxy;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import net.mineguild.Launcher.download.DownloadDialog;
+import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadTask;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.MCInstaller;
@@ -15,6 +19,7 @@ import net.mineguild.Launcher.utils.ModpackUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.collect.Lists;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
