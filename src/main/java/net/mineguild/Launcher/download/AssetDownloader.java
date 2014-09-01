@@ -141,7 +141,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
         if (asset.hash == null && asset.getPrimaryDLType() == DLType.ETag) {
           String eTag = con.getHeaderField("ETag").replace("\"", "");
-          if (!eTag.contains("-") && eTag.length() == 32) {
+          if (!eTag.contains("-")) {
             remoteHash.clear();
             remoteHash.add(eTag);
             hashType = "md5";
