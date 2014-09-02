@@ -131,6 +131,7 @@ public class LoginDialog extends JDialog {
      */
     saveTokenBox.setVisible(false); // Not implemented yet.
     pack();
+    setMinimumSize(getSize());
     setModal(true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setLocationRelativeTo(null);

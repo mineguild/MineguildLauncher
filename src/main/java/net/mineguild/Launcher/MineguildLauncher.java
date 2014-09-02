@@ -14,6 +14,7 @@ import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.ModpackUtils;
+import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.Settings;
 
 import org.apache.commons.io.FileUtils;
@@ -32,8 +33,12 @@ public class MineguildLauncher {
     // DownloadDialog d = new DownloadDialog(new HashMap<String, File>(0), "Test");
     // d.setVisible(true); //STUFF...
     try {
-      // UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      // 
+      if(OSUtils.getCurrentOS() != net.mineguild.Launcher.utils.OSUtils.OS.WINDOWS)
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      else {
+        UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
+      }
       /*
        * UIManager.put("nimbusBase", Color.BLACK); UIManager.put("text", Color.WHITE);
        * UIManager.put("nimbusLightBackground", Color.DARK_GRAY); UIManager.put("control",

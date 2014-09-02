@@ -39,10 +39,10 @@ public class Console extends JFrame implements ILogListener {
   private final HTMLEditorKit kit;
   private HTMLDocument doc;
   private final JComboBox logTypeComboBox;
-  private LogType logType = LogType.DEBUG;
+  private LogType logType = LogType.MINIMAL;
   private final JComboBox logSourceComboBox;
   private LogSource logSource = LogSource.ALL;
-  private LogLevel logLevel = LogLevel.DEBUG;
+  private LogLevel logLevel = LogLevel.INFO;
   private JButton killMCButton;
 
   public Console() {
@@ -147,6 +147,7 @@ public class Console extends JFrame implements ILogListener {
     ircButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
+        
         // OSUtils.browse(Locations.SUPPORTSITE);
       }
     });

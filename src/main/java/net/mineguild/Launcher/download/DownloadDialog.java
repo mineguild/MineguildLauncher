@@ -1,10 +1,13 @@
 package net.mineguild.Launcher.download;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -16,18 +19,20 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.plaf.basic.BasicLabelUI;
 
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
 
-  private final static String NON_THIN = "[^iIl1\\,']";
   private static Image icon = null;
   private final int statusTextSize = 40;
   public JLabel status;
+  public JLabel fileName;
   public JLabel speedLabel;
   Boolean canceled = false;
   private JButton buttonCancel;
@@ -36,7 +41,9 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
   private List<DownloadInfo> info;
   private long totalFilesSize = 0;
   private AssetDownloader task;
-  
+  private static final MyLabelUI myUI = new MyLabelUI();
+  private JPanel mainPanel;
+
   {
     initGUI();
   }
@@ -53,14 +60,8 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
       ignored.printStackTrace();
     }
     this.info = info;
-    char[] statusChars = new char[statusTextSize];
-    Arrays.fill(statusChars, 'x');
-    status.setText(String.copyValueOf(statusChars));
-    setResizable(false);
     pack();
-    setMinimumSize(getSize());
-    status.setText(title);
-    setResizable(true);
+    setMinimumSize(new Dimension(300, getHeight()));
     setLocationRelativeTo(null);
     getRootPane().setDefaultButton(buttonCancel);
     buttonCancel.addActionListener(new ActionListener() {
@@ -107,92 +108,66 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     }
   }
 
-  private static int textWidth(String str) {
-    return (int) (str.length() - str.replaceAll(NON_THIN, "").length() / 2);
-  }
 
-  public static String ellipsize(String text, int max) {
-
-    if (textWidth(text) <= max) {
-      return text;
-    }
-
-    // Start by chopping off at the word before max
-    // This is an over-approximation due to thin-characters...
-    int end = text.lastIndexOf(' ', max - 3);
-
-    // Just one long word. Chop it off.
-    if (end == -1) {
-      return text.substring(0, max - 3) + "...";
-    }
-
-    // Step forward as long as textWidth allows.
-    int newEnd = end;
-    do {
-      end = newEnd;
-      newEnd = text.indexOf(' ', end + 1);
-
-      // No more spaces.
-      if (newEnd == -1) {
-        newEnd = text.length();
-      }
-
-    } while (textWidth(text.substring(0, newEnd) + "...") < max);
-
-    return text.substring(0, end) + "...";
-  }
-  
-  public void initGUI(){
-    getContentPane().setLayout(new GridBagLayout());
-    GridBagConstraints c = new GridBagConstraints();
-    // Add status label
-    c.anchor = GridBagConstraints.LINE_START;
-    c.gridx = 0;
-    c.insets = new Insets(0, 4, 0, 0);
-    c.gridy = 0;
-    //c.fill = GridBagConstraints.HORIZONTAL;
-    status = new JLabel();
-    getContentPane().add(status, c);
+  public void initGUI() {  
+    mainPanel = new JPanel();
+    getContentPane().add(mainPanel, BorderLayout.CENTER);
+    GridBagLayout gbl_mainPanel = new GridBagLayout();
+    gbl_mainPanel.columnWeights = new double[]{1.0, 0.0};
+    gbl_mainPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
+    mainPanel.setLayout(gbl_mainPanel);
+    // c.fill = GridBagConstraints.HORIZONTAL;
+    status = new JLabel("Current Status");
+    GridBagConstraints gbc_status = new GridBagConstraints();
+    gbc_status.anchor = GridBagConstraints.WEST;
+    gbc_status.gridx = 0;
+    gbc_status.gridy = 0;
+    mainPanel.add(status, gbc_status);
+    fileName = new JLabel("Current File");
+    GridBagConstraints gbc_fileName = new GridBagConstraints();
+    gbc_fileName.fill = GridBagConstraints.BOTH;
+    gbc_fileName.gridx = 0;
+    gbc_fileName.gridy = 1;
+    mainPanel.add(fileName, gbc_fileName);
+    fileName.setUI(myUI);
     // Overall progressbar
     overall = new JProgressBar();
+    GridBagConstraints gbc_overall = new GridBagConstraints();
+    gbc_overall.fill = GridBagConstraints.HORIZONTAL;
+    gbc_overall.gridwidth = 2;
+    gbc_overall.insets = new Insets(0, 0, 5, 0);
+    gbc_overall.gridx = 0;
+    gbc_overall.gridy = 2;
+    mainPanel.add(overall, gbc_overall);
     overall.setToolTipText("Overall Progress");
-    c = new GridBagConstraints();
-    c.gridx = 0;
-    c.gridy = 1;
-    c.gridwidth = 2;
-    c.fill = GridBagConstraints.HORIZONTAL;
-    getContentPane().add(overall, c);
     // Current progressbar
     current = new JProgressBar();
+    GridBagConstraints gbc_current = new GridBagConstraints();
+    gbc_current.fill = GridBagConstraints.HORIZONTAL;
+    gbc_current.gridwidth = 2;
+    gbc_current.insets = new Insets(0, 0, 5, 0);
+    gbc_current.gridx = 0;
+    gbc_current.gridy = 3;
+    mainPanel.add(current, gbc_current);
     current.setToolTipText("Current File Progress");
-    c = new GridBagConstraints();
-    c.gridx = 0;
-    c.gridwidth = 2;
-    //c.fill = GridBagConstraints.HORIZONTAL;
-    c.weightx = 1;
-    c.gridy = 2;
-    c.fill = GridBagConstraints.HORIZONTAL;
-    //c.anchor = GridBagConstraints.CENTER;
-    getContentPane().add(current, c);
     JPanel speedPanel = new JPanel();
+    GridBagConstraints gbc_speedPanel = new GridBagConstraints();
+    gbc_speedPanel.anchor = GridBagConstraints.WEST;
+    gbc_speedPanel.insets = new Insets(0, 0, 0, 5);
+    gbc_speedPanel.gridx = 0;
+    gbc_speedPanel.gridy = 4;
+    mainPanel.add(speedPanel, gbc_speedPanel);
     // Speed desc
     JLabel lbl = new JLabel("Current Speed:");
     speedLabel = new JLabel("0 kb/s");
     speedPanel.add(lbl);
     speedPanel.add(speedLabel);
-    c = new GridBagConstraints();
-    c.gridx = 0;
-    c.gridy = 3;
-    c.anchor = GridBagConstraints.LINE_START;
-    getContentPane().add(speedPanel, c);
     
+    JPanel buttonPanel = new JPanel();
     buttonCancel = new JButton("Cancel");
-    c = new GridBagConstraints();
-    c.gridx = 1;
-    c.gridy = 3;
-    c.anchor = GridBagConstraints.LINE_END;
-    getContentPane().add(buttonCancel, c);
-    
+    buttonPanel.add(buttonCancel, BorderLayout.CENTER);
+    getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
   }
 
   @Override
@@ -210,16 +185,9 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     } else if (evt.getPropertyName().equals("info")) {
       @SuppressWarnings("unchecked")
       HashMap<String, Object> info = (HashMap<String, Object>) evt.getNewValue();
-      String noName =
-          String.format("Downloading  (%d of %d)", (Integer) info.get("currentFile"),
-              (Integer) info.get("overallFiles"));
-      int sizeLeft = statusTextSize - noName.length();
-      String name = (String) info.get("fileName");
-      if (name.length() > sizeLeft) {
-        name = ellipsize(name, sizeLeft);
-      }
-      status.setText(String.format("Downloading %s (%d of %d)", name,
+      status.setText(String.format("Downloading file (%d of %d)",
           (Integer) info.get("currentFile"), (Integer) info.get("overallFiles")));
+      fileName.setText((String) info.get("fileName"));
     } else if (evt.getPropertyName().equals("note")) {
       status.setText((String) evt.getNewValue());
     } else if (evt.getPropertyName().equals("speed")) {
@@ -228,6 +196,15 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
       current.setIndeterminate(true);
       current.setStringPainted(false);
       current.setValue(0);
+    }
+  }
+
+  private static class MyLabelUI extends BasicLabelUI {
+    @Override
+    protected String layoutCL(JLabel label, FontMetrics fontMetrics, String text, Icon icon,
+        Rectangle viewR, Rectangle iconR, Rectangle textR) {
+      String s = super.layoutCL(label, fontMetrics, text, icon, viewR, iconR, textR);
+      return s;
     }
   }
 

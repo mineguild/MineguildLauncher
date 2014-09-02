@@ -26,6 +26,7 @@ import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
+import net.mineguild.Launcher.utils.RelativePath;
 import net.mineguild.Launcher.utils.json.JSONFactory;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Library;
@@ -104,9 +105,9 @@ public class MCInstaller {
           list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
               lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
         } else if (lib.download != null && lib.download) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, lib.getPath()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
         } else {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, lib.getPath()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
         }
       }
     }

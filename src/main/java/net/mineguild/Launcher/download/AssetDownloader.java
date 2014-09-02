@@ -160,12 +160,11 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           remoteHash.clear();
           remoteHash.add(con.getHeaderField("Content-MD5").replace("\"", ""));
         }
-
-        System.out.println(asset.name);
-        System.out.println("RemoteSize: " + remoteSize);
-        System.out.println("asset.hash: " + asset.hash);
-        System.out.println("remoteHash: " + remoteHash);
-        System.out.println("------------");
+        Logger.logInfo("Downloading "+asset.name);
+        Logger.logDebug(asset.name);
+        Logger.logDebug("RemoteSize: " + remoteSize);
+        Logger.logDebug("asset.hash: " + asset.hash);
+        Logger.logDebug("remoteHash: " + remoteHash);
 
         // existing file are only added when we want to check file integrity with force update
         if (asset.local.exists()) {
