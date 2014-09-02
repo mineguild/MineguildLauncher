@@ -7,9 +7,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -20,6 +23,10 @@ import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.Modpack;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
+import net.mineguild.Launcher.log.LogEntry;
+import net.mineguild.Launcher.log.LogLevel;
+import net.mineguild.Launcher.log.Logger;
+import net.mineguild.Launcher.log.StreamLogger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
@@ -201,7 +208,7 @@ public class MCInstaller {
     try {
       File packDir = MineguildLauncher.baseDirectory;
       File gameDir = new File(packDir, "minecraft");
-      String gameFolder = gameDir.getAbsolutePath(); 
+      String gameFolder = gameDir.getAbsolutePath();
       File assetDir = new File(packDir, "assets");
       File libDir = new File(packDir, "libraries");
       File natDir = new File(packDir, "natives");
@@ -244,7 +251,7 @@ public class MCInstaller {
             }
           } catch (Exception e) {
             // ErrorUtils.tossError("Error extracting native libraries");
-            // Logger.logError("", e);
+            Logger.logError("Error extracting natives", e);
           } finally {
             try {
               input.close();
@@ -258,7 +265,7 @@ public class MCInstaller {
       if (new File(packDir, "pack.json").exists()) {
         packjson = JSONFactory.loadVersion(new File(packDir, "pack.json"));
         for (Library lib : packjson.getLibraries()) {
-          // Logger.logError(new File(libDir, lib.getPath()).getAbsolutePath());
+          Logger.logError(new File(libDir, lib.getPath()).getAbsolutePath());
           classpath.add(new File(libDir, lib.getPath()));
         }
         // }
@@ -271,40 +278,33 @@ public class MCInstaller {
         classpath.add(new File(libDir, lib.getPath()));
       }
 
-      System.out.println(getDefaultJavaPath());
-      System.out.println(gameFolder);
-      System.out.println(assetDir.getPath());
-      System.out.println(natDir.getPath());
-      System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(classpath));
-      System.out.println(packjson.mainClass != null ? packjson.mainClass : base.mainClass);
-      System.out.println(packjson.minecraftArguments != null ? packjson.minecraftArguments
-          : base.minecraftArguments);
-      
-      System.out.println(pack.getMinecraftVersion());
 
-      System.out.println(packjson.assets != null ? packjson.assets : base.getAssets());
       Process minecraftProcess =
-          MCLauncher.launchMinecraft(getDefaultJavaPath(), gameFolder, assetDir,
-              natDir, classpath, packjson.mainClass != null ? packjson.mainClass : base.mainClass,
+          MCLauncher.launchMinecraft(getDefaultJavaPath(), gameFolder, assetDir, natDir, classpath,
+              packjson.mainClass != null ? packjson.mainClass : base.mainClass,
               packjson.minecraftArguments != null ? packjson.minecraftArguments
                   : base.minecraftArguments,
               packjson.assets != null ? packjson.assets : base.getAssets(), "2048", "256m", pack
                   .getMinecraftVersion(), resp.getAuth(), false);
       /*
        * LaunchFrame.MCRunning = true; if (LaunchFrame.con != null)
-       * LaunchFrame.con.minecraftStarted();
        */
-      // StreamLogger.prepare(minecraftProcess.getInputStream(), new
-      // LogEntry().level(LogLevel.UNKNOWN));
-      BufferedReader reader = new BufferedReader(new InputStreamReader(minecraftProcess.getInputStream()));
-      String line = reader.readLine();
-      while (line != null && ! line.trim().equals("--EOF--")) {
-          System.out.println ("Stdout: " + line);
-          line = reader.readLine();
-      }
+      MineguildLauncher.con.minecraftStarted();
+
+      StreamLogger.prepare(minecraftProcess.getInputStream(),
+          new LogEntry().level(LogLevel.UNKNOWN));
+      /*
+       * BufferedReader reader = new BufferedReader(new
+       * InputStreamReader(minecraftProcess.getInputStream())); String line = reader.readLine();
+       */
       String[] ignore = {"Session ID is token"};
-      // StreamLogger.setIgnore(ignore);
-      // StreamLogger.doStart();
+      /*
+       * Set<String> ignore = new HashSet<String>(Arrays.asList(new String[]
+       * {"Session ID is token"})); while (line != null && !line.trim().equals("--EOF--")) { if
+       * (!ignore.contains(line)) { System.out.println(line); } line = reader.readLine(); }
+       */
+      //StreamLogger.setIgnore(ignore);
+      StreamLogger.doStart();
       // String curVersion =
       // (Settings.getSettings().getPackVer().equalsIgnoreCase("recommended version") ?
       // pack.getVersion() : Settings.getSettings().getPackVer()).replace(".", "_");
@@ -337,7 +337,7 @@ public class MCInstaller {
          */
       }
     } catch (Exception e) {
-      // Logger.logError("Error while running launchMinecraft()", e);
+      Logger.logError("Error while running launchMinecraft()", e);
       e.printStackTrace();
     }
   }

@@ -12,6 +12,7 @@ import javax.swing.SwingWorker;
 
 import lombok.Getter;
 import net.mineguild.Launcher.download.DownloadInfo.DLType;
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.DownloadUtils;
 
 import com.google.common.collect.Lists;
@@ -123,7 +124,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           return;
         }
         if (attempt++ > 0) {
-          System.out.println("Connecting.. Try " + attempt + " of " + attempts + " for: "
+          Logger.logInfo("Connecting.. Try " + attempt + " of " + attempts + " for: "
               + asset.url);
         }
 
@@ -170,7 +171,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           long localSize = asset.local.length();
           if (!(con instanceof HttpURLConnection && localSize == remoteSize)) {
             asset.local.delete();
-            System.out.println("Local asset size differs from remote size: " + asset.name
+            Logger.logInfo("Local asset size differs from remote size: " + asset.name
                 + " remote: " + remoteSize + " local: " + localSize);
           }
         }
@@ -238,7 +239,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         // file downloaded check size
         if (!(con instanceof HttpURLConnection && currentSize > 0 && currentSize == remoteSize)) {
           asset.local.delete();
-          System.out.println("Local asset size differs from remote size: " + asset.name
+          Logger.logInfo("Local asset size differs from remote size: " + asset.name
               + " remote: " + remoteSize + " local: " + currentSize);
         }
 
@@ -247,7 +248,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
       } catch (Exception e) {
         downloadSuccess = false;
         e.printStackTrace();
-        System.out.println("Connection failed, trying again");
+        Logger.logError("Connection failed, trying again");
       }
     }
     if (!downloadSuccess) {
@@ -267,7 +268,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     if (good || assetHash != null && assetHash.contains(hash)) {
       return true;
     }
-    System.out.println("Asset hash checking failed: " + asset.name + " " + asset.hashType + " "
+    Logger.logInfo("Asset hash checking failed: " + asset.name + " " + asset.hashType + " "
         + hash);// unhashed DL's are not allowed!!!
     asset.local.delete();
     return false;

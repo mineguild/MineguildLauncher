@@ -41,6 +41,9 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     initGUI();
   }
 
+  /**
+   * @wbp.parser.constructor
+   */
   public DownloadDialog(List<DownloadInfo> info, String title) {
     this.setTitle(title);
     try {
@@ -140,7 +143,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
   }
   
   public void initGUI(){
-    setLayout(new GridBagLayout());
+    getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints c = new GridBagConstraints();
     // Add status label
     c.anchor = GridBagConstraints.LINE_START;
@@ -149,7 +152,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     c.gridy = 0;
     //c.fill = GridBagConstraints.HORIZONTAL;
     status = new JLabel();
-    add(status, c);
+    getContentPane().add(status, c);
     // Overall progressbar
     overall = new JProgressBar();
     overall.setToolTipText("Overall Progress");
@@ -158,7 +161,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     c.gridy = 1;
     c.gridwidth = 2;
     c.fill = GridBagConstraints.HORIZONTAL;
-    add(overall, c);
+    getContentPane().add(overall, c);
     // Current progressbar
     current = new JProgressBar();
     current.setToolTipText("Current File Progress");
@@ -170,7 +173,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     c.gridy = 2;
     c.fill = GridBagConstraints.HORIZONTAL;
     //c.anchor = GridBagConstraints.CENTER;
-    add(current, c);
+    getContentPane().add(current, c);
     JPanel speedPanel = new JPanel();
     // Speed desc
     JLabel lbl = new JLabel("Current Speed:");
@@ -181,14 +184,14 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     c.gridx = 0;
     c.gridy = 3;
     c.anchor = GridBagConstraints.LINE_START;
-    add(speedPanel, c);
+    getContentPane().add(speedPanel, c);
     
     buttonCancel = new JButton("Cancel");
     c = new GridBagConstraints();
     c.gridx = 1;
     c.gridy = 3;
     c.anchor = GridBagConstraints.LINE_END;
-    add(buttonCancel, c);
+    getContentPane().add(buttonCancel, c);
     
   }
 

@@ -2,6 +2,7 @@ package net.mineguild.Launcher.utils.json;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 
@@ -34,6 +35,15 @@ public class JSONFactory {
     return GSON.fromJson(reader, Version.class);
   }
   
+  public static Settings loadSettings(File json) throws IOException {
+    FileReader reader = new FileReader(json);
+    return GSON.fromJson(reader, Settings.class);
+  }
+  
+  public static void saveSettings(Settings set, File json) throws IOException {
+    FileWriter writer = new FileWriter(json);
+    GSON.toJson(set, Settings.class, writer);
+  }
   
 
 
