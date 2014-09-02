@@ -36,13 +36,13 @@ import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import com.jgoodies.forms.factories.DefaultComponentFactory;
 
 public class LoginDialog extends JDialog {
 
   private JButton loginButton;
   private JButton cancelButton;
   private JPanel dataPanel;
-  private JLabel lblUsernameemail;
   private JTextField userField;
   private JLabel lblPassword;
   private JPasswordField passwordField;
@@ -54,6 +54,7 @@ public class LoginDialog extends JDialog {
   public LoginResponse response;
   public boolean successfull = false;
   private JPanel spacerPanel;
+  private JLabel lblUsernameemail;
 
   public LoginDialog(Frame parent) {
     super(parent);
@@ -109,8 +110,8 @@ public class LoginDialog extends JDialog {
             FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("pref:grow"),},
             new RowSpec[] {FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                 FormFactory.DEFAULT_ROWSPEC,}));
-
-    lblUsernameemail = new JLabel("Username/Email");
+    
+    lblUsernameemail = DefaultComponentFactory.getInstance().createLabel("Username/Email");
     dataPanel.add(lblUsernameemail, "1, 1, right, default");
 
     userField = new JTextField();
