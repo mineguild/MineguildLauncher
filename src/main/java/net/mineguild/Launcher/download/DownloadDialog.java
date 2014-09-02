@@ -24,7 +24,7 @@ import javax.swing.JProgressBar;
 
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
 
-  private final static String NON_THIN = "[^iIl1\\.,']";
+  private final static String NON_THIN = "[^iIl1\\,']";
   private static Image icon = null;
   private final int statusTextSize = 40;
   public JLabel status;
@@ -65,6 +65,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
       public void actionPerformed(ActionEvent e) {
         canceled = true;
         task.cancel(true);
+        dispose();
       }
     });
     addWindowListener(new WindowAdapter() {
