@@ -59,7 +59,7 @@ public class MineguildLauncher {
         m =
             Modpack.fromJson(IOUtils.toString(new URL(
                 "https://mineguild.net/download/mmp/test_pack.json")));
-        //ModpackUtils.updateModpack(m);
+        ModpackUtils.updateModpack(m);
 
       } else {
         m =
@@ -68,7 +68,7 @@ public class MineguildLauncher {
         Modpack newPack =
             Modpack.fromJson(IOUtils.toString(new URL(
                 "https://mineguild.net/download/mmp/test_pack_new.json")));
-        //ModpackUtils.updateModpack(m, newPack);
+        ModpackUtils.updateModpack(m, newPack);
         m = newPack;
       }
     } else {
@@ -78,7 +78,7 @@ public class MineguildLauncher {
       Modpack newPack =
           Modpack.fromJson(IOUtils.toString(new URL(
               "https://mineguild.net/download/mmp/test_pack_new.json")));
-      //ModpackUtils.updateModpack(m, newPack);
+      ModpackUtils.updateModpack(m, newPack);
       m = newPack;
     }
     boolean success = true;
