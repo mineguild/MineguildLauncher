@@ -50,7 +50,7 @@ public class ModpackUtils {
 
   public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files,
       boolean exactCheck) {
-    needed = new HashMap<>();
+    needed = new HashMap<String, String>();
     ExecutorService executorService = Executors.newFixedThreadPool(4);
     for (Map.Entry<String, String> entry : files.entrySet()) {
       try {

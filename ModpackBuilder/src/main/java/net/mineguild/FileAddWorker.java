@@ -41,7 +41,7 @@ public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
 
   @Override
   protected Map<File, String> doInBackground() throws Exception {
-    results = new ConcurrentHashMap<>();
+    results = new ConcurrentHashMap<File, String>();
     ExecutorService executor = Executors.newFixedThreadPool(4);
     for (File file : files) {
       try {
@@ -65,7 +65,7 @@ public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
 
     File file;
     HashFunction hf;
-
+    
     WorkerTask(File file, HashFunction hf) {
       this.file = file;
       this.hf = hf;

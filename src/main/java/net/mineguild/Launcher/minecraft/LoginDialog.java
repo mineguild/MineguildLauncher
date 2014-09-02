@@ -30,6 +30,8 @@ import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.exceptions.UserMigratedException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
+import java.awt.FlowLayout;
+import javax.swing.border.EmptyBorder;
 
 public class LoginDialog extends JDialog {
 
@@ -46,7 +48,6 @@ public class LoginDialog extends JDialog {
 
   public LoginResponse response;
   public boolean successfull = false;
-  private JPanel spacerPanel;
   private JLabel lblUsernameemail;
 
   public LoginDialog(Frame parent) {
@@ -91,31 +92,33 @@ public class LoginDialog extends JDialog {
 
     saveTokenBox = new JCheckBox("Save MCToken");
     checkBoxPanel.add(saveTokenBox);
-
-    spacerPanel = new JPanel();
-    getContentPane().add(spacerPanel, BorderLayout.NORTH);
-
-    dataPanel = new JPanel();
-    spacerPanel.add(dataPanel);
-    dataPanel.setToolTipText("");
-    dataPanel
-        .setLayout(new FormLayout(new ColumnSpec[] {FormFactory.PREF_COLSPEC,
-            FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("pref:grow"),},
-            new RowSpec[] {FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,}));
     
-    lblUsernameemail = DefaultComponentFactory.getInstance().createLabel("Username/Email");
-    dataPanel.add(lblUsernameemail, "1, 1, right, default");
-
-    userField = new JTextField();
-    dataPanel.add(userField, "3, 1, fill, default");
-    userField.setColumns(25);
-
-    lblPassword = new JLabel("Password");
-    dataPanel.add(lblPassword, "1, 3, right, default");
-
-    passwordField = new JPasswordField();
-    dataPanel.add(passwordField, "3, 3, fill, default");
+        dataPanel = new JPanel();
+        dataPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        getContentPane().add(dataPanel, BorderLayout.NORTH);
+        dataPanel.setToolTipText("");
+        dataPanel
+            .setLayout(new FormLayout(new ColumnSpec[] {
+            FormFactory.DEFAULT_COLSPEC,
+            FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+            ColumnSpec.decode("default:grow(3)"),},
+          new RowSpec[] {
+            RowSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_ROWSPEC,
+            RowSpec.decode("default:grow"),}));
+        
+        lblUsernameemail = DefaultComponentFactory.getInstance().createLabel("Username/Email");
+        dataPanel.add(lblUsernameemail, "1, 1, right, default");
+        
+            userField = new JTextField();
+            dataPanel.add(userField, "3, 1, fill, fill");
+            userField.setColumns(25);
+            
+                lblPassword = new JLabel("Password");
+                dataPanel.add(lblPassword, "1, 3, right, default");
+                
+                    passwordField = new JPasswordField();
+                    dataPanel.add(passwordField, "3, 3, fill, fill");
     /*
      * if (MineguildLauncher.settings.getMCPassword().length() > 0 &&
      * MineguildLauncher.settings.getMCUser() != null) { if

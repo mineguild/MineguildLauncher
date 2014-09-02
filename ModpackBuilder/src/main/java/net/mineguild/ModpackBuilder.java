@@ -172,7 +172,7 @@ public class ModpackBuilder extends JFrame {
 
     public ModpackTableModel(Modpack pack) {
       this.pack = pack;
-      this.pack.setModpackFiles(new TreeMap<>(pack.getModpackFiles()));
+      this.pack.setModpackFiles(new TreeMap<String, String>(pack.getModpackFiles()));
     }
 
 

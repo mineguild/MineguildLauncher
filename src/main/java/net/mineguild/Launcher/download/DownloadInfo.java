@@ -1,6 +1,8 @@
 package net.mineguild.Launcher.download;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -83,7 +85,7 @@ public class DownloadInfo {
   }
 
   public static List<DownloadInfo> getDownloadInfo(File base, Map<String, String> map) {
-    List<DownloadInfo> infoList = new ArrayList<>();
+    List<DownloadInfo> infoList = Lists.newArrayList();
     for (Map.Entry<String, String> entry : map.entrySet()) {
       String reqURL = null;
       reqURL = DownloadInfo.GET_SCRIPT + "?data=" + entry.getValue();

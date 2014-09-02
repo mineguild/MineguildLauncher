@@ -20,7 +20,7 @@ public class ChecksumUtil {
 
   public static Map<File, String> getChecksum(List<File> files, HashFunction hf) {
     ExecutorService executor = Executors.newFixedThreadPool(4);
-    results = new ConcurrentHashMap<>();
+    results = new ConcurrentHashMap<File, String>();
     for (File file : files) {
       try {
         Runnable worker = new WorkerTask(file, hf);

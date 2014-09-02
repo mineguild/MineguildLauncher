@@ -65,7 +65,7 @@ task fixJars(type: Copy) {
 
 tasks.copyL4jLib.dependsOn.remove(tasks.jar)
 tasks.copyL4jLib.dependsOn tasks.shadowJar
-sourceCompatibility = 1.7
+sourceCompatibility = 1.6
 
 jar {
     manifest {

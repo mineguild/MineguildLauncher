@@ -15,6 +15,8 @@ import net.mineguild.Launcher.utils.RelativePath;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,11 +26,11 @@ public class Modpack {
   private @Expose @Getter @Setter String version;
   private @Expose @Getter String hash;
   private @Expose @Getter long releaseTime;
-  private @Expose @Getter @Setter Map<String, String> modpackFiles = new HashMap<>();
+  private @Expose @Getter @Setter Map<String, String> modpackFiles = new HashMap<String, String>();
   private @Expose @Getter @Setter String forgeVersion;
   private @Expose @Getter @Setter String minecraftVersion;
 
-  private List<File> unprocessedFiles = new ArrayList<>(); // Local variable
+  private List<File> unprocessedFiles = Lists.newArrayList(); // Local variable
   private @Getter @Setter File basePath; // Local variable -- doesn't belong to json.
 
 
@@ -68,7 +70,7 @@ public class Modpack {
   }
 
   public static HashMap<String, String> getNew(Modpack oldPack, Modpack newPack) {
-    HashMap<String, String> newFiles = new HashMap<>();
+    HashMap<String, String> newFiles = Maps.newHashMap();
     for (Map.Entry<String, String> newEntry : newPack.getModpackFiles().entrySet()) {
       if (oldPack.getModpackFiles().containsKey(newEntry.getKey())) {
         if (!oldPack.getModpackFiles().get(newEntry.getKey()).equals(newEntry.getValue())) {
@@ -82,7 +84,7 @@ public class Modpack {
   }
 
   public static Map<String, String> getOld(Modpack oldPack, Modpack newPack) {
-    Map<String, String> oldFiles = new HashMap<>();
+    Map<String, String> oldFiles = Maps.newHashMap();
     for (Map.Entry<String, String> oldEntry : oldPack.getModpackFiles().entrySet()) {
       if (newPack.getModpackFiles().containsKey(oldEntry.getKey())) {
         if (!newPack.getModpackFiles().get(oldEntry.getKey()).equals(oldEntry.getValue())) {
@@ -145,7 +147,7 @@ public class Modpack {
   }
 
   public Collection<String> getFilesBySum(String sum) {
-    Collection<String> files = new ArrayList<>();
+    Collection<String> files = Lists.newArrayList();
     for (Map.Entry<String, String> entry : modpackFiles.entrySet()) {
       if (entry.getValue().equals(sum)) {
         files.add(entry.getKey());

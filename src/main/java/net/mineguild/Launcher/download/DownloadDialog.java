@@ -211,19 +211,19 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
       @SuppressWarnings("unchecked")
       HashMap<String, Object> info = (HashMap<String, Object>) evt.getNewValue();
       String noName =
-          String.format("Downloading  (%d of %d)", (int) info.get("currentFile"),
-              (int) info.get("overallFiles"));
+          String.format("Downloading  (%d of %d)", (Integer) info.get("currentFile"),
+              (Integer) info.get("overallFiles"));
       int sizeLeft = statusTextSize - noName.length();
       String name = (String) info.get("fileName");
       if (name.length() > sizeLeft) {
         name = ellipsize(name, sizeLeft);
       }
       status.setText(String.format("Downloading %s (%d of %d)", name,
-          (int) info.get("currentFile"), (int) info.get("overallFiles")));
+          (Integer) info.get("currentFile"), (Integer) info.get("overallFiles")));
     } else if (evt.getPropertyName().equals("note")) {
       status.setText((String) evt.getNewValue());
     } else if (evt.getPropertyName().equals("speed")) {
-      speedLabel.setText(String.format("%.2f KB/s", (float) evt.getNewValue()));
+      speedLabel.setText(String.format("%.2f KB/s", (Float) evt.getNewValue()));
     } else if (evt.getPropertyName().equals("current_inter")) {
       current.setIndeterminate(true);
       current.setStringPainted(false);

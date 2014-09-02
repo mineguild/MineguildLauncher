@@ -16,6 +16,7 @@ import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.DownloadUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class AssetDownloader extends SwingWorker<Boolean, Void> {
   private static final int BUFFER_SIZE = 1024;
@@ -65,7 +66,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   }
 
   public synchronized void updateStatus(String filename) {
-    HashMap<String, Object> data = new HashMap<>();
+    HashMap<String, Object> data = Maps.newHashMap();
     data.put("fileName", filename);
     data.put("currentFile", currentFile + 1);
     data.put("overallFiles", downloads.size());

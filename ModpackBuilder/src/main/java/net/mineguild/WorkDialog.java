@@ -49,11 +49,11 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
   @Override
   public void propertyChange(PropertyChangeEvent event) {
     if (event.getPropertyName().equals("progress")) {
-      bar.setValue((int) event.getNewValue());
+      bar.setValue((Integer) event.getNewValue());
     } else if (event.getPropertyName().equals("done")) {
       try {
         targetModpack.addModpackFiles(worker.get());
-      } catch (InterruptedException | ExecutionException e) {
+      } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
