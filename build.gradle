@@ -27,10 +27,6 @@ launch4j {
     icon = sourceSets.main.resources.srcDirs[0].getAbsolutePath() + File.separator + "icon.ico"
 }
 
-shadowJar {
-    baseName = "MineguildLauncher"
-    classifier = ''
-}
 
 
 dependencies {
@@ -46,8 +42,16 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
     compile files('libs/authlib-1.5.16.jar')
-
 }
+
+shadowJar {
+    dependencies {
+        exclude(dependency('org.projectlombok:lombok:1.14.4'))
+    }
+    baseName = "MineguildLauncher"
+    classifier = ''
+}
+
 
 
 task fixJars(type: Copy) {
