@@ -1,17 +1,16 @@
 package net.mineguild.Launcher.minecraft;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.Proxy;
-import java.util.Arrays;
 import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -19,24 +18,18 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import net.mineguild.Launcher.MineguildLauncher;
-
+import com.jgoodies.forms.factories.DefaultComponentFactory;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.mojang.authlib.Agent;
-import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.exceptions.UserMigratedException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
-
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import com.jgoodies.forms.factories.DefaultComponentFactory;
 
 public class LoginDialog extends JDialog {
 

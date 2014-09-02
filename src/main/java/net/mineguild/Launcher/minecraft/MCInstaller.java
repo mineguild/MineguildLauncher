@@ -1,18 +1,13 @@
 package net.mineguild.Launcher.minecraft;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -41,7 +36,6 @@ import net.mineguild.Launcher.utils.winreg.JavaInfo;
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Lists;
-import com.google.gson.GsonBuilder;
 
 public class MCInstaller {
 
