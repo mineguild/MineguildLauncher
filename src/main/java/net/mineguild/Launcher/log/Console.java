@@ -31,6 +31,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 import net.mineguild.Launcher.MineguildLauncher;
+import net.mineguild.Launcher.minecraft.MCLauncher;
 
 @SuppressWarnings("serial")
 public class Console extends JFrame implements ILogListener {
@@ -157,7 +158,7 @@ public class Console extends JFrame implements ILogListener {
     killMCButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
-        // GameUtils.killMC();
+        MCLauncher.killMC();
       }
     });
     panel.add(killMCButton);
@@ -175,6 +176,7 @@ public class Console extends JFrame implements ILogListener {
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
     getContentPane().add(scrollPane);
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
     pack();
 
     refreshLogs();

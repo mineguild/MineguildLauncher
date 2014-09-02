@@ -9,6 +9,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
+import net.mineguild.Launcher.MineguildLauncher;
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
@@ -288,6 +290,13 @@ public class MCLauncher {
     }
 
     return targetDir;
+  }
+  
+  public static void killMC(){
+    if(MineguildLauncher.MCRunning && MineguildLauncher.procmon != null){
+      MineguildLauncher.procmon.stop();
+      Logger.logWarn("Minecraft was killed by user.");
+    }
   }
 
 

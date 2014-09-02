@@ -3,7 +3,6 @@ package net.mineguild.Launcher.utils;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.Modpack;
 import net.mineguild.Launcher.download.DownloadDialog;
-import net.mineguild.Launcher.download.OLDDownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 
 import org.apache.commons.io.FileUtils;

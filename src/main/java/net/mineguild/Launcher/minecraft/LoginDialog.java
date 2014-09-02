@@ -57,6 +57,14 @@ public class LoginDialog extends JDialog {
 
   public LoginDialog(Frame parent) {
     super(parent);
+    addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosed(WindowEvent e) {
+        if(successfull == false || response == null){
+          System.exit(0);
+        }
+      }
+    });
     setAlwaysOnTop(true);
     setTitle("Login with MC-Account");
     JPanel bottomPanel = new JPanel();

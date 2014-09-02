@@ -286,9 +286,8 @@ public class MCInstaller {
                   : base.minecraftArguments,
               packjson.assets != null ? packjson.assets : base.getAssets(), "2048", "256m", pack
                   .getMinecraftVersion(), resp.getAuth(), false);
-      /*
-       * LaunchFrame.MCRunning = true; if (LaunchFrame.con != null)
-       */
+      
+      MineguildLauncher.MCRunning = true;
       MineguildLauncher.con.minecraftStarted();
 
       StreamLogger.prepare(minecraftProcess.getInputStream(),
@@ -303,7 +302,7 @@ public class MCInstaller {
        * {"Session ID is token"})); while (line != null && !line.trim().equals("--EOF--")) { if
        * (!ignore.contains(line)) { System.out.println(line); } line = reader.readLine(); }
        */
-      //StreamLogger.setIgnore(ignore);
+      // StreamLogger.setIgnore(ignore);
       StreamLogger.doStart();
       // String curVersion =
       // (Settings.getSettings().getPackVer().equalsIgnoreCase("recommended version") ?
@@ -317,24 +316,31 @@ public class MCInstaller {
       try {
         minecraftProcess.exitValue();
       } catch (IllegalThreadStateException e) {
-        /*
-         * LaunchFrame.getInstance().setVisible(false);
-         * LaunchFrame.setProcMonitor(ProcessMonitor.create(minecraftProcess, new Runnable() {
-         * 
-         * @Override public void run() { if (!Settings.getSettings().getKeepLauncherOpen()) {
-         * System.exit(0); } else { if (LaunchFrame.con != null) LaunchFrame.con.minecraftStopped();
-         * LaunchFrame launchFrame = LaunchFrame.getInstance(); launchFrame.setVisible(true);
-         * Main.getEventBus().post(new EnableObjectsEvent()); try { Settings.getSettings().load(new
-         * FileInputStream(Settings.getSettings().getConfigFile()));
-         * LaunchFrame.getInstance().tabbedPane.remove(1); LaunchFrame.getInstance().optionsPane =
-         * new OptionsPane(Settings.getSettings());
-         * LaunchFrame.getInstance().tabbedPane.add(LaunchFrame.getInstance().optionsPane, 1);
-         * LaunchFrame.getInstance().tabbedPane.setIconAt(1,
-         * LauncherStyle.getCurrentStyle().filterHeaderIcon
-         * (this.getClass().getResource("/image/tabs/options.png"))); } catch (Exception e1) {
-         * Logger.logError("Failed to reload settings after launcher closed", e1); } }
-         * LaunchFrame.MCRunning = false; } }));
-         */
+
+        // LaunchFrame.getInstance().setVisible(false);
+        MineguildLauncher.procmon = ProcessMonitor.create(minecraftProcess, new Runnable() {
+
+          @Override
+          public void run() {
+            if (MineguildLauncher.con != null)
+              MineguildLauncher.con.minecraftStopped();
+            // LaunchFrame launchFrame = LaunchFrame.getInstance(); launchFrame.setVisible(true);
+            /*
+             * Main.getEventBus().post(new EnableObjectsEvent()); try {
+             * Settings.getSettings().load(new
+             * FileInputStream(Settings.getSettings().getConfigFile()));
+             * LaunchFrame.getInstance().tabbedPane.remove(1); LaunchFrame.getInstance().optionsPane
+             * = new OptionsPane(Settings.getSettings());
+             * LaunchFrame.getInstance().tabbedPane.add(LaunchFrame.getInstance().optionsPane, 1);
+             * LaunchFrame.getInstance().tabbedPane.setIconAt(1,
+             * LauncherStyle.getCurrentStyle().filterHeaderIcon
+             * (this.getClass().getResource("/image/tabs/options.png"))); } catch (Exception e1) {
+             * Logger.logError("Failed to reload settings after launcher closed", e1); } }
+             */
+            MineguildLauncher.MCRunning = false;
+          }
+        });
+
       }
     } catch (Exception e) {
       Logger.logError("Error while running launchMinecraft()", e);

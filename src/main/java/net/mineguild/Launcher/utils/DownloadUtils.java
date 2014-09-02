@@ -8,6 +8,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 public class DownloadUtils {
 
   public static String fileHash(File file, String type) throws IOException {
@@ -41,6 +46,27 @@ public class DownloadUtils {
     String result = fmt.toString();
     fmt.close();
     return result;
+  }
+
+  public static void ssl_hack() {
+    // Create a new trust manager that trust all certificates
+    TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
+      public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+        return null;
+      }
+  
+      public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+  
+      public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+    }};
+  
+    // Activate the new trust manager
+    try {
+      SSLContext sc = SSLContext.getInstance("SSL");
+      sc.init(null, trustAllCerts, new java.security.SecureRandom());
+      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    } catch (Exception ignored) {
+    }
   }
 
 
