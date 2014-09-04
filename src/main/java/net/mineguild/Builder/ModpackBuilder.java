@@ -1,4 +1,4 @@
-package net.mineguild;
+package net.mineguild.Builder;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -21,6 +21,8 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
+
+import net.mineguild.Launcher.Modpack;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -116,6 +118,8 @@ public class ModpackBuilder extends JFrame {
 
   public void createUpdatedPack(JFrame parent) {
     Modpack modPack = new Modpack(modpackDirectory);
+    modPack.setMinecraftVersion("1.7.10");
+    modPack.setForgeVersion("1.7.10-10.13.0.1180");
     modPack.setVersion(ModpackBuilder.instance.versionField.getText());
     modPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
@@ -128,7 +132,7 @@ public class ModpackBuilder extends JFrame {
     JButton removeButton = new JButton("Remove selected entry/entries");
     JButton doneButton = new JButton("Done");
     doneButton.addActionListener(new ActionListener() {
-      
+
       @Override
       public void actionPerformed(ActionEvent e) {
         showFilesDialog.dispose();
@@ -142,7 +146,7 @@ public class ModpackBuilder extends JFrame {
         table.clearSelection();
       }
     });
-    
+
     showFilesDialog.add(tableView, BorderLayout.NORTH);
     showFilesDialog.add(removeButton, BorderLayout.CENTER);
     showFilesDialog.add(doneButton, BorderLayout.SOUTH);

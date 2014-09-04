@@ -1,17 +1,18 @@
-package net.mineguild;
+package net.mineguild.Builder;
 
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
+import net.mineguild.Launcher.Constants;
+import net.mineguild.Launcher.Modpack;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 
 @SuppressWarnings("serial")
 public class WorkDialog extends JDialog implements PropertyChangeListener {
@@ -37,8 +38,8 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
 
   public void start(final Modpack targetModpack) {
     worker =
-        new FileAddWorker(FileUtils.listFiles(targetModpack.getBasePath(), Constants.MODPACK_FILE_FILTER,
-            Constants.MODPACK_DIR_FILTER));
+        new FileAddWorker(FileUtils.listFiles(targetModpack.getBasePath(),
+            Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER));
     worker.addPropertyChangeListener(this);
     this.targetModpack = targetModpack;
     worker.execute();

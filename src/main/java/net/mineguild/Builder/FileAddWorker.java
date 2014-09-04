@@ -1,4 +1,4 @@
-package net.mineguild;
+package net.mineguild.Builder;
 
 import java.io.File;
 import java.util.Collection;
@@ -10,13 +10,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingWorker;
 
-import com.google.common.hash.HashFunction;
+import com.google.common.hash.HashFunction;s
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
 
 public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
-  
+
   @Override
   protected void done() {
     super.done();
@@ -27,17 +27,17 @@ public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
   private static FileAddWorker instance;
   private Collection<File> files;
   private float progressPerFile;
-  
+
   public FileAddWorker(Collection<File> files) {
     this.files = files;
     this.progressPerFile = 100f / files.size();
     FileAddWorker.instance = this;
   }
-  
-  public void updateProgress(){
+
+  public void updateProgress() {
     setProgress((int) (progressPerFile * results.size()));
   }
-  
+
 
   @Override
   protected Map<File, String> doInBackground() throws Exception {
@@ -60,12 +60,12 @@ public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
     }
     return results;
   }
-  
+
   public static class WorkerTask implements Runnable {
 
     File file;
     HashFunction hf;
-    
+
     WorkerTask(File file, HashFunction hf) {
       this.file = file;
       this.hf = hf;

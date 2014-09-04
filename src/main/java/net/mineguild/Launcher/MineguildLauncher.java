@@ -6,6 +6,7 @@ import java.net.URL;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import net.mineguild.Builder.ModpackBuilder;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.LoginDialog;
@@ -51,6 +52,12 @@ public class MineguildLauncher {
     }
     DownloadUtils.ssl_hack();
     System.setProperty("java.net.preferIPv4Stack", "true");
+    if(args.length == 1){
+      if(args[0].equals("builder")){
+        ModpackBuilder.main(new String[0]);
+        System.exit(0);
+      }
+    }
     con = new Console();
     con.setVisible(true);
     LoginDialog dialog = new LoginDialog(con);

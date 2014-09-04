@@ -6,12 +6,14 @@ buildscript {
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.0.3'
         classpath group: 'edu.sc.seis.gradle', name: 'launch4j', version: '1.0.6'
+        classpath 'edu.sc.seis.gradle:macappbundle:2.0.0'
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'launch4j'
 apply plugin: 'eclipse'
+apply plugin: 'macAppBundle'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 
@@ -27,7 +29,9 @@ launch4j {
     icon = sourceSets.main.resources.srcDirs[0].getAbsolutePath() + File.separator + "icon.ico"
 }
 
-
+macAppBundle {
+    mainClassName = "net.mineguild.Launcher.MineguildLauncher"
+}
 
 dependencies {
     compile group: 'com.jgoodies', name: 'forms', version: '1.2.1'

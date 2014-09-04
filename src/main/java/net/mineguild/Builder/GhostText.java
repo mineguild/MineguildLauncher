@@ -1,4 +1,4 @@
-package net.mineguild;
+package net.mineguild.Builder;
 
 import java.awt.Color;
 import java.awt.event.FocusEvent;

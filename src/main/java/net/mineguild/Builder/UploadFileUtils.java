@@ -1,4 +1,4 @@
-package net.mineguild;
+package net.mineguild.Builder;
 
 import java.io.File;
 import java.io.IOException;
