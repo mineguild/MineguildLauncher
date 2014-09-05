@@ -60,7 +60,7 @@ public class MineguildLauncher {
     con.setVisible(true);
     try {
       settings = JSONFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
-    } catch (IOException e){
+    } catch (IOException e) {
       OSUtils.getLocalDir().mkdirs();
       settings = new Settings();
       settings.setMCUser("test");
@@ -70,9 +70,9 @@ public class MineguildLauncher {
       @Override
       public void run() {
         try {
-          JSONFactory.saveSettings(MineguildLauncher.settings, new File(OSUtils.getLocalDir(), "settings.json"));
+          JSONFactory.saveSettings(MineguildLauncher.settings, new File(OSUtils.getLocalDir(),
+              "settings.json"));
         } catch (IOException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }
@@ -93,13 +93,13 @@ public class MineguildLauncher {
     Logger.logInfo(String.format("Newest pack version: %s from %s", newest.getVersion(), new Date(
         newest.getReleaseTime()).toString()));
     File curpack = new File(baseDirectory, "version.json");
-    boolean freshInstall = !curpack.exists();
+    boolean forceUpdate = !curpack.exists();
     if (args.length == 1) {
       if (args[0].equals("forceupdate")) {
-        freshInstall = true;
+        forceUpdate = true;
       }
     }
-    if (freshInstall) {
+    if (forceUpdate) {
       try {
         ModpackUtils.updateModpack(newest);
       } catch (Exception e) {
@@ -112,14 +112,24 @@ public class MineguildLauncher {
         Modpack localPack = Modpack.fromJson(FileUtils.readFileToString(curpack));
         if (!newest.getHash().equals(localPack.getHash())) {
           if (newest.isNewer(localPack)) {
-            Logger.logInfo(String.format("Updating from %s[ReleaseTime:%s] to %s[ReleaseTime:%s]",
-                localPack.getVersion(), new Date(localPack.getReleaseTime()).toString(),
-                newest.getVersion(), new Date(newest.getReleaseTime()).toString()));
-            try {
-              ModpackUtils.updateModpack(localPack, newest);
-            } catch (Exception e) {
-              Logger.logError("Modpack update interrupted!", e);
-              updated = false;
+            int result =
+                JOptionPane.showConfirmDialog(con, String.format(
+                    "A new version %s[Released: %s] is available! Do you want to update?",
+                    newest.getVersion(), new Date(newest.getReleaseTime()).toString()));
+            if (result == JOptionPane.YES_OPTION) {
+              Logger.logInfo(String.format(
+                  "Updating from %s[ReleaseTime:%s] to %s[ReleaseTime:%s]", localPack.getVersion(),
+                  new Date(localPack.getReleaseTime()).toString(), newest.getVersion(), new Date(
+                      newest.getReleaseTime()).toString()));
+              try {
+                ModpackUtils.updateModpack(localPack, newest);
+              } catch (Exception e) {
+                Logger.logError("Modpack update interrupted!", e);
+                updated = false;
+              }
+            } else {
+              // We let him launch the pack although he won't be able to play on the server.
+              Logger.logInfo("Pack wasn't updated, because user denied.");
             }
             m = newest;
           } else {
