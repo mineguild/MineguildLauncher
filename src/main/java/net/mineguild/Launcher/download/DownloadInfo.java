@@ -1,23 +1,15 @@
 package net.mineguild.Launcher.download;
 
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-
-import org.apache.commons.io.IOUtils;
-
 import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import net.mineguild.Launcher.Constants;
+
+import com.google.common.collect.Lists;
+
 public class DownloadInfo {
-  public static final String INFO_SCRIPT = "https://mineguild.net/download/mmp/php/info.php";
-  public static final String GET_SCRIPT = "https://mineguild.net/download/mmp/php/getfile.php";
   public URL url;
   public File local;
   public String name;
@@ -52,43 +44,13 @@ public class DownloadInfo {
     this.hashType = hashType;
   }
 
-  public static long getTotalSize(Collection<String> hashes) {
-    Gson g = new Gson();
-    String json_hashes = g.toJson(hashes);
-    // System.out.println(json_hashes);
-    URL script = null;
-    try {
-      script =
-          new URL(DownloadInfo.INFO_SCRIPT + "?data=" + URLEncoder.encode(json_hashes, "utf-8"));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return -1l;
-    }
-    try {
-      HttpURLConnection con = (HttpURLConnection) script.openConnection();
-
-      con.setRequestMethod("GET");
-      con.connect();
-      try {
-        List<String> lines = IOUtils.readLines(con.getInputStream());
-        return Long.parseLong(lines.get(lines.size() - 1));
-      } catch (NumberFormatException e) {
-        System.out.println("Invalid file(s)!");
-      }
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    return 0;
-
-  }
+  
 
   public static List<DownloadInfo> getDownloadInfo(File base, Map<String, String> map) {
     List<DownloadInfo> infoList = Lists.newArrayList();
     for (Map.Entry<String, String> entry : map.entrySet()) {
       String reqURL = null;
-      reqURL = DownloadInfo.GET_SCRIPT + "?data=" + entry.getValue();
+      reqURL = Constants.MG_GET_SCRIPT + "?data=" + entry.getValue();
       try {
         File local = new File(base, entry.getKey());
         DownloadInfo info = new DownloadInfo(new URL(reqURL), local, local.getName());
@@ -116,7 +78,7 @@ public class DownloadInfo {
   public void setBackupDLType(DLType backupDLType) {
     this.backupDLType = backupDLType;
   }
-
+  
   @Override
   public String toString() {
     return String

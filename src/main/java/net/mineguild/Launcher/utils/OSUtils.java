@@ -266,5 +266,16 @@ public class OSUtils {
         return ";";
     }
   }
+  
+  public static File getLocalDir() {
+    switch(getCurrentOS()){
+      case WINDOWS:
+        return new File(System.getenv("AppData") + "/mmp");
+      default:
+        return new File(System.getProperty("user.home") + "/.mmp");
+    }
+        
+    
+  }
 
 }

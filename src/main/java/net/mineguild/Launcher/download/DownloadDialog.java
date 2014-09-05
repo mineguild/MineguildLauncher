@@ -14,7 +14,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,10 +26,10 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.plaf.basic.BasicLabelUI;
 
+@SuppressWarnings("serial")
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
 
   private static Image icon = null;
-  private final int statusTextSize = 40;
   public JLabel status;
   public JLabel fileName;
   public JLabel speedLabel;
@@ -68,7 +67,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
       @Override
       public void actionPerformed(ActionEvent e) {
         canceled = true;
-        task.cancel(true);
+        task.cancel(false);
         dispose();
       }
     });

@@ -1,7 +1,6 @@
 package net.mineguild.Launcher;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +56,10 @@ public class Modpack {
   }
 
   public String toJson() {
-    if (unprocessedFiles.size() > 0) {
-      processFiles();
+    if (unprocessedFiles != null) {
+      if (unprocessedFiles.size() > 0) {
+        processFiles();
+      }
     }
     Gson g = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
     return g.toJson(this);
@@ -113,8 +114,10 @@ public class Modpack {
   }
 
   public void addModpackFiles() {
-    this.addFiles(FileUtils.listFiles(basePath, Constants.MODPACK_FILE_FILTER,
-        Constants.MODPACK_DIR_FILTER));
+    if (basePath != null) {
+      this.addFiles(FileUtils.listFiles(basePath, Constants.MODPACK_FILE_FILTER,
+          Constants.MODPACK_DIR_FILTER));
+    }
   }
 
 
@@ -124,8 +127,10 @@ public class Modpack {
 
 
   public void addFile(File file, String checkSum) {
-    modpackFiles.put(FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)),
-        checkSum);
+    if (basePath != null) {
+      modpackFiles.put(
+          FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)), checkSum);
+    }
   }
 
   public void processFiles() {

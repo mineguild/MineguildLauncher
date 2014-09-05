@@ -2,9 +2,12 @@ package net.mineguild.Builder;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.TreeMap;
 
 import javax.swing.InputVerifier;
@@ -21,6 +24,11 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import org.apache.commons.io.FileUtils;
 
 import net.mineguild.Launcher.Modpack;
 
@@ -116,10 +124,10 @@ public class ModpackBuilder extends JFrame {
 
   }
 
-  public void createUpdatedPack(JFrame parent) {
+  public void createUpdatedPack(final JFrame parent) {
     Modpack modPack = new Modpack(modpackDirectory);
     modPack.setMinecraftVersion("1.7.10");
-    modPack.setForgeVersion("1.7.10-10.13.0.1180");
+    modPack.setForgeVersion("1.7.10-10.13.1.1212-new");
     modPack.setVersion(ModpackBuilder.instance.versionField.getText());
     modPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
@@ -131,6 +139,15 @@ public class ModpackBuilder extends JFrame {
     JScrollPane tableView = new JScrollPane(table);
     JButton removeButton = new JButton("Remove selected entry/entries");
     JButton doneButton = new JButton("Done");
+    JButton refreshButton = new JButton("Refresh");
+    refreshButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        WorkDialog dialog = new WorkDialog(parent);
+        dialog.start(mTableModel.getPack());
+        mTableModel.fireTableDataChanged();
+      }
+    });
     doneButton.addActionListener(new ActionListener() {
 
       @Override
@@ -146,15 +163,27 @@ public class ModpackBuilder extends JFrame {
         table.clearSelection();
       }
     });
-
+    Font font = new Font( "Monospaced", Font.PLAIN, 12 ); 
+    table.setFont(font);
     showFilesDialog.add(tableView, BorderLayout.NORTH);
-    showFilesDialog.add(removeButton, BorderLayout.CENTER);
-    showFilesDialog.add(doneButton, BorderLayout.SOUTH);
+    JPanel bottomButtonPanel = new JPanel(new BorderLayout());
+    bottomButtonPanel.add(removeButton, BorderLayout.NORTH);
+    bottomButtonPanel.add(doneButton, BorderLayout.SOUTH);
+    showFilesDialog.add(refreshButton, BorderLayout.CENTER);
+    showFilesDialog.add(bottomButtonPanel, BorderLayout.SOUTH);
     showFilesDialog.pack();
+    showFilesDialog.setMinimumSize(new Dimension(700, getHeight()));
     showFilesDialog.setLocationRelativeTo(null);
     showFilesDialog.setModal(true);
     showFilesDialog.setVisible(true);
     System.out.println(modPack.toJson());
+    try {
+      FileUtils.write(new File("modpack.json"), modPack.toJson());
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    UploadFileUtils.placeUploadFiles(ModpackBuilder.modpackDirectory.getAbsolutePath(), modPack.getModpackFiles());
     System.exit(0);
   }
 
@@ -172,7 +201,7 @@ public class ModpackBuilder extends JFrame {
 
   public static class ModpackTableModel extends AbstractTableModel {
 
-    Modpack pack;
+    @Getter Modpack pack;
 
     public ModpackTableModel(Modpack pack) {
       this.pack = pack;

@@ -4,14 +4,18 @@ import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.Modpack;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
+import net.mineguild.Launcher.log.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -21,8 +25,7 @@ public class ModpackUtils {
 
   public static void updateModpack(Modpack currentPack, Modpack newPack) throws Exception {
     if(currentPack == null){
-      FileUtils.cleanDirectory(new File(getGameDir(), "mods"));
-      FileUtils.cleanDirectory(new File(getGameDir(), "config"));
+      deleteUntrackedMods(getGameDir(), newPack.getModpackFiles());
     } else{
       deleteOldFiles(getGameDir(), newPack.getModpackFiles(),
           currentPack.getOld(newPack));
@@ -34,7 +37,7 @@ public class ModpackUtils {
       List<DownloadInfo> info =
           DownloadInfo.getDownloadInfo(getGameDir(), neededFiles);
       DownloadDialog dialog =
-          new DownloadDialog(info, "Updating Modpack", DownloadInfo.getTotalSize(neededFiles.values()));
+          new DownloadDialog(info, "Updating Modpack", DownloadUtils.getTotalSize(neededFiles.values()));
       dialog.setVisible(true);
       boolean success = dialog.start();
       if(!success){
@@ -80,12 +83,24 @@ public class ModpackUtils {
           String hash = ChecksumUtil.getMD5(new File(baseDirectory, entry.getKey()));
           if (!hash.equals(allFiles.get(entry.getKey()))) {
             FileUtils.deleteQuietly(currentFile);
-            System.out.println("Deleting: " + currentFile.getName());
+            Logger.logInfo(String.format("Deleted '%s' - hash doesn't match", currentFile.getName()));
           }
         } else {
           FileUtils.deleteQuietly(currentFile);
-          System.out.println("Deleting: " + currentFile.getName());
+          Logger.logInfo(String.format("Deleted '%s' - no longer in pack", currentFile.getName()));
         }
+      }
+    }
+  }
+  
+  public static void deleteUntrackedMods(File baseDirectory, Map<String, String> files){
+    File mods = new File(baseDirectory, "mods");
+    Set<String> needed = files.keySet(); 
+    for(File f : FileUtils.listFiles(mods, FileFilterUtils.trueFileFilter(), FileFilterUtils.trueFileFilter())){
+      String path = FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(baseDirectory, f));
+      if(!needed.contains(path)){
+        FileUtils.deleteQuietly(f);
+        Logger.logInfo(String.format("Deleted '%s' - not in pack", f.getName()));
       }
     }
   }

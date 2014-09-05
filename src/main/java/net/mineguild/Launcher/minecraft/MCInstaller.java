@@ -26,7 +26,6 @@ import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
-import net.mineguild.Launcher.utils.RelativePath;
 import net.mineguild.Launcher.utils.json.JSONFactory;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Library;
@@ -99,15 +98,27 @@ public class MCInstaller {
       packbasejson = forgeVersion.inheritsFrom;
 
     for (Library lib : forgeVersion.getLibraries()) {
-      local = new File(libDir, lib.getPath());
-      if (!local.exists()) {
+      if(lib.natives == null){
+        local = new File(libDir, lib.getPath());
+        if (!local.exists()) {
+          if (lib.checksums != null) {
+            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
+                lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
+          } else if (lib.download != null && lib.download) {
+            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
+          } else {
+            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
+          }
+        }
+      } else {
+        local = new File(libDir, lib.getPathNatives());
         if (lib.checksums != null) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local.getName(),
               lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
         } else if (lib.download != null && lib.download) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local.getName()));
         } else {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local.getName()));
         }
       }
     }
@@ -207,8 +218,6 @@ public class MCInstaller {
       File assetDir = new File(packDir, "assets");
       File libDir = new File(packDir, "libraries");
       File natDir = new File(packDir, "natives");
-      final String packVer = pack.getVersion();
-
       // Logger.logInfo("Setting up native libraries for " + pack.getName() + " v " + packVer +
       // " MC " + packmcversion);
       if (!gameDir.exists())
@@ -287,17 +296,9 @@ public class MCInstaller {
 
       StreamLogger.prepare(minecraftProcess.getInputStream(),
           new LogEntry().level(LogLevel.UNKNOWN));
-      /*
-       * BufferedReader reader = new BufferedReader(new
-       * InputStreamReader(minecraftProcess.getInputStream())); String line = reader.readLine();
-       */
+
       String[] ignore = {"Session ID is token"};
-      /*
-       * Set<String> ignore = new HashSet<String>(Arrays.asList(new String[]
-       * {"Session ID is token"})); while (line != null && !line.trim().equals("--EOF--")) { if
-       * (!ignore.contains(line)) { System.out.println(line); } line = reader.readLine(); }
-       */
-      // StreamLogger.setIgnore(ignore);
+      StreamLogger.setIgnore(ignore);
       StreamLogger.doStart();
       // String curVersion =
       // (Settings.getSettings().getPackVer().equalsIgnoreCase("recommended version") ?

@@ -38,9 +38,9 @@ public class Console extends JFrame implements ILogListener {
   private final JEditorPane displayArea;
   private final HTMLEditorKit kit;
   private HTMLDocument doc;
-  private final JComboBox logTypeComboBox;
+  private final JComboBox<LogType> logTypeComboBox;
   private LogType logType = LogType.MINIMAL;
-  private final JComboBox logSourceComboBox;
+  private final JComboBox<LogSource> logSourceComboBox;
   private LogSource logSource = LogSource.ALL;
   private LogLevel logLevel = LogLevel.INFO;
   private JButton killMCButton;
@@ -108,14 +108,12 @@ public class Console extends JFrame implements ILogListener {
       }
     });
     panel.add(clipboard);
-
+    
     logTypeComboBox = new JComboBox(LogType.values());
     logTypeComboBox.setSelectedItem(logType);
     logTypeComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
         logType = (LogType) logTypeComboBox.getSelectedItem();
-
-        // setup loglevel. If DEBUG selected show also DEBUG messages
         switch (logType) {
           case MINIMAL:
             logLevel = LogLevel.INFO;

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingWorker;
 
-import com.google.common.hash.HashFunction;s
+import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 

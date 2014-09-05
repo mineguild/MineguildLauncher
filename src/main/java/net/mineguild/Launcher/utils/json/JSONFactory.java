@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 
+import org.apache.commons.io.FileUtils;
+
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
 
@@ -41,8 +43,7 @@ public class JSONFactory {
   }
   
   public static void saveSettings(Settings set, File json) throws IOException {
-    FileWriter writer = new FileWriter(json);
-    GSON.toJson(set, Settings.class, writer);
+    FileUtils.write(json, GSON.toJson(set, Settings.class));
   }
   
 

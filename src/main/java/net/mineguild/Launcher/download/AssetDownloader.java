@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.SwingWorker;
 
 import lombok.Getter;
+import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.download.DownloadInfo.DLType;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.DownloadUtils;
@@ -134,7 +135,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         URLConnection con = asset.url.openConnection();
         if (con instanceof HttpURLConnection) {
           con.setRequestProperty("Cache-Control", "no-cache, no-transform");
-          if (asset.url.toString().contains(DownloadInfo.GET_SCRIPT)) {
+          if (asset.url.toString().contains(Constants.MG_GET_SCRIPT)) {
             ((HttpURLConnection) con).setRequestMethod("GET");
           } else {
             ((HttpURLConnection) con).setRequestMethod("HEAD");
