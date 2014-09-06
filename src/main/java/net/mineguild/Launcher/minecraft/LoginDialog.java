@@ -234,7 +234,6 @@ public class LoginDialog extends JDialog {
       authentication.setPassword(pass);
     }
     if (m != null) {
-      System.out.println("Trying mojangdata");
       authentication.loadFromStorage(m);
       mojangData = true;
     } else {
@@ -275,7 +274,7 @@ public class LoginDialog extends JDialog {
       } catch (Exception e) {
         e.printStackTrace();
         JOptionPane.showMessageDialog(this,
-            "Can't authenticate with Mineguild! Are you whitelisted?\n" + e.toString());
+            "Can't authenticate with Mineguild!\n" + e.getMessage());
         return;
       }
       response =

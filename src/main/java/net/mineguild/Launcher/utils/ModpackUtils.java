@@ -95,6 +95,9 @@ public class ModpackUtils {
   
   public static void deleteUntrackedMods(File baseDirectory, Map<String, String> files){
     File mods = new File(baseDirectory, "mods");
+    if(!mods.exists()){
+      return;
+    }
     Set<String> needed = files.keySet(); 
     for(File f : FileUtils.listFiles(mods, FileFilterUtils.trueFileFilter(), FileFilterUtils.trueFileFilter())){
       String path = FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(baseDirectory, f));
@@ -105,7 +108,13 @@ public class ModpackUtils {
     }
   }
   
-  public static File getGameDir(){
+  public static File getGameDir() throws IOException{
+    File gameDir = new File(MineguildLauncher.baseDirectory, "minecraft");
+    if(!gameDir.exists()){
+      if(!gameDir.mkdirs()){
+        throw new IOException("Unable to create game directory!");
+      }
+    }
     return new File(MineguildLauncher.baseDirectory, "minecraft");
   }
 

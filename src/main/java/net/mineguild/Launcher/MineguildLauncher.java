@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
@@ -62,8 +63,7 @@ public class MineguildLauncher {
       settings = JSONFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
     } catch (IOException e) {
       OSUtils.getLocalDir().mkdirs();
-      settings = new Settings();
-      settings.setMCUser("test");
+      settings = new Settings(getInstallPath());
       JSONFactory.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
     }
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -77,11 +77,14 @@ public class MineguildLauncher {
         }
       }
     }));
+    if (settings.getModpackPath() == null) {
+      settings.setModpackPath(getInstallPath());
+    }
     LoginDialog dialog = new LoginDialog(con);
     dialog.run();
     JSONFactory.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
     LoginResponse res = dialog.response;
-    baseDirectory = new File("modpack/");
+    baseDirectory = settings.getModpackPath();
     baseDirectory.mkdirs();
 
     Logger.addListener(con);
@@ -156,18 +159,50 @@ public class MineguildLauncher {
       FileUtils.write(new File(baseDirectory, "version.json"), m.toJson());
       boolean success = true;
       try {
+        Logger.logInfo("Preparing MC for launch.");
         MCInstaller.setup(m);
       } catch (Exception e) {
+        Logger.logError("Couldn't prepare MC for launch.", e);
         success = false;
       }
 
       if (success) {
-        MCInstaller.launchMinecraft(m, res);
+        int result = JOptionPane.showConfirmDialog(con, "Minecraft (MMP) is ready to launch, do you want to launch it?", "Launch MC?", JOptionPane.YES_NO_OPTION);
+        if(result == JOptionPane.OK_OPTION){
+          Logger.logInfo("Launching Minecraft.");
+          MCInstaller.launchMinecraft(m, res);
+        } else {
+          Logger.logInfo("Not launching Minecraft.");
+        }
       } else {
-        JOptionPane.showMessageDialog(null, "Something went wrong! Modpack can't be launched now!");
+        JOptionPane.showMessageDialog(con, "Something went wrong! Modpack can't be launched now!");
       }
     } else {
       Logger.logInfo("No success installing/updating modpack.");
+    }
+  }
+
+  public static File getInstallPath() {
+    int result =
+        JOptionPane
+            .showConfirmDialog(
+                con,
+                String
+                    .format(
+                        "Do you want to select a different install location for the modpack? Otherwise it will be installed in %s",
+                        new File("modpack").getAbsolutePath()));
+    if (result == JOptionPane.OK_OPTION) {
+      JFileChooser chooser = new JFileChooser();
+      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      result = chooser.showDialog(con, "Use selected directory");
+      if (result == JFileChooser.APPROVE_OPTION) {
+        return new File(chooser.getSelectedFile(), "/");
+      } else {
+        return getInstallPath();
+      }
+
+    } else {
+      return new File("modpack/");
     }
   }
 }

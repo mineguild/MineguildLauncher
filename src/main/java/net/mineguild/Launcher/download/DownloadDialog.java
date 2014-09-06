@@ -184,7 +184,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     } else if (evt.getPropertyName().equals("info")) {
       @SuppressWarnings("unchecked")
       HashMap<String, Object> info = (HashMap<String, Object>) evt.getNewValue();
-      status.setText(String.format("Downloading file (%d of %d)",
+      status.setText(String.format("Downloading file %d of %d",
           (Integer) info.get("currentFile"), (Integer) info.get("overallFiles")));
       fileName.setText((String) info.get("fileName"));
     } else if (evt.getPropertyName().equals("note")) {
