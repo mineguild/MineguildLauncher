@@ -2,6 +2,7 @@ package net.mineguild.Launcher;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -159,6 +160,10 @@ public class Modpack {
       }
     }
     return files;
+  }
+
+  public String getReleaseDate() {
+    return new Date(releaseTime).toString();
   }
 
 

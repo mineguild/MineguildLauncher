@@ -93,8 +93,8 @@ public class MineguildLauncher {
     Modpack newest =
         Modpack.fromJson(IOUtils
             .toString(new URL("https://mineguild.net/download/mmp/modpack.json")));
-    Logger.logInfo(String.format("Newest pack version: %s from %s", newest.getVersion(), new Date(
-        newest.getReleaseTime()).toString()));
+    Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
+        new Date(newest.getReleaseTime()).toString()));
     File curpack = new File(baseDirectory, "version.json");
     boolean forceUpdate = !curpack.exists();
     if (args.length == 1) {
@@ -113,17 +113,22 @@ public class MineguildLauncher {
     } else {
       try {
         Modpack localPack = Modpack.fromJson(FileUtils.readFileToString(curpack));
+        Logger.logInfo(String.format("Local pack version: %s released on %s", newest.getVersion(),
+            newest.getReleaseDate()));
         if (!newest.getHash().equals(localPack.getHash())) {
           if (newest.isNewer(localPack)) {
             int result =
                 JOptionPane.showConfirmDialog(con, String.format(
-                    "A new version %s[Released: %s] is available! Do you want to update?",
-                    newest.getVersion(), new Date(newest.getReleaseTime()).toString()));
+                    "A new version %s released on %s is available! Do you want to update?",
+                    newest.getVersion(), newest.getReleaseDate()));
             if (result == JOptionPane.YES_OPTION) {
-              Logger.logInfo(String.format(
-                  "Updating from %s[ReleaseTime:%s] to %s[ReleaseTime:%s]", localPack.getVersion(),
-                  new Date(localPack.getReleaseTime()).toString(), newest.getVersion(), new Date(
-                      newest.getReleaseTime()).toString()));
+              Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]",
+                  localPack.getVersion(), localPack.getReleaseDate(),
+                  localPack.getHash()));
+              Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]",
+                  newest.getVersion(), newest.getReleaseDate(),
+                  newest.getHash()));
+              Logger.logInfo("Updating from Local to Remote");
               try {
                 ModpackUtils.updateModpack(localPack, newest);
               } catch (Exception e) {
@@ -167,9 +172,13 @@ public class MineguildLauncher {
       }
 
       if (success) {
-        int result = JOptionPane.showConfirmDialog(con, "Minecraft (MMP) is ready to launch, do you want to launch it?", "Launch MC?", JOptionPane.YES_NO_OPTION);
-        if(result == JOptionPane.OK_OPTION){
-          Logger.logInfo("Launching Minecraft.");
+        int result =
+            JOptionPane.showConfirmDialog(con,
+                "Minecraft (MMP) is ready to launch, do you want to launch it?", "Launch MC?",
+                JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+          Logger.logInfo(String.format("Launching Local: %s [Released: %s] [Hash: %s]",
+              m.getVersion(), new Date(m.getReleaseTime()).toString(), m.getHash()));
           MCInstaller.launchMinecraft(m, res);
         } else {
           Logger.logInfo("Not launching Minecraft.");
@@ -205,4 +214,6 @@ public class MineguildLauncher {
       return new File("modpack/");
     }
   }
+
+
 }
