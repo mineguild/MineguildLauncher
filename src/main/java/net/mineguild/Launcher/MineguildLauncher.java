@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 import net.mineguild.Builder.ModpackBuilder;
 import net.mineguild.Launcher.log.Console;
@@ -39,19 +40,23 @@ public class MineguildLauncher {
     // DownloadDialog d = new DownloadDialog(new HashMap<String, File>(0), "Test");
     // d.setVisible(true); //STUFF...
     try {
-      //
-      if (OSUtils.getCurrentOS() != net.mineguild.Launcher.utils.OSUtils.OS.WINDOWS)
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      else {
-        UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
-      }
+      /*
+       * if (OSUtils.getCurrentOS() != net.mineguild.Launcher.utils.OSUtils.OS.WINDOWS)
+       * UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); else {
+       * UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel"); }
+       */
       /*
        * UIManager.put("nimbusBase", Color.BLACK); UIManager.put("text", Color.WHITE);
        * UIManager.put("nimbusLightBackground", Color.DARK_GRAY); UIManager.put("control",
-       * Color.DARK_GRAY); for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) { if
-       * ("Nimbus".equals(info.getName())) { UIManager.setLookAndFeel(info.getClassName()); break; }
-       * }
+       * Color.DARK_GRAY);
        */
+      for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+        if ("Nimbus".equals(info.getName())) {
+          UIManager.setLookAndFeel(info.getClassName());
+          break;
+        }
+      }
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -123,11 +128,9 @@ public class MineguildLauncher {
                     newest.getVersion(), newest.getReleaseDate()));
             if (result == JOptionPane.YES_OPTION) {
               Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]",
-                  localPack.getVersion(), localPack.getReleaseDate(),
-                  localPack.getHash()));
+                  localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
               Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]",
-                  newest.getVersion(), newest.getReleaseDate(),
-                  newest.getHash()));
+                  newest.getVersion(), newest.getReleaseDate(), newest.getHash()));
               Logger.logInfo("Updating from Local to Remote");
               try {
                 ModpackUtils.updateModpack(localPack, newest);

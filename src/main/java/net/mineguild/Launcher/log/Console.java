@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.html.HTMLDocument;
@@ -163,6 +164,10 @@ public class Console extends JFrame implements ILogListener {
     panel.add(killMCButton);
 
     displayArea = new JEditorPane("text/html", "");
+    UIDefaults defaults = new UIDefaults();
+    defaults.put("EditorPane[Enabled].backgroundPainter", Color.BLACK);
+    displayArea.putClientProperty("Nimbus.Overrides", defaults);
+    displayArea.putClientProperty("Nimbus.Overrides.InheritDefaults", true);
     displayArea.setBackground(Color.BLACK);
     displayArea.setEditable(false);
     kit = new HTMLEditorKit();

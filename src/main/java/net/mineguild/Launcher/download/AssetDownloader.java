@@ -28,8 +28,9 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   private long totalSize = 0;
   private int currentFile = 0;
   private float percentPerFile = 0;
-  private float speed;
+  private double speed;
   private long totalBytesRead = 0;
+  private double start;
 
   @Getter
   private String status;
@@ -48,6 +49,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
 
   @Override
   protected Boolean doInBackground() throws Exception {
+    start = System.nanoTime();
     for (DownloadInfo download : downloads) {
       if (isCancelled()) {
         return false;
@@ -74,8 +76,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     firePropertyChange("info", null, data);
   }
 
-  public synchronized void setSpeed(float newSpeed) {
-    float oldSpeed = speed;
+  public synchronized void setSpeed(double newSpeed) {
+    double oldSpeed = speed;
     speed = newSpeed;
     firePropertyChange("speed", oldSpeed, speed);
   }
@@ -126,8 +128,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           return;
         }
         if (attempt++ > 0) {
-          Logger.logInfo("Connecting.. Try " + attempt + " of " + attempts + " for: "
-              + asset.url);
+          Logger.logInfo("Connecting.. Try " + attempt + " of " + attempts + " for: " + asset.url);
         }
 
         // Will this break something?
@@ -161,7 +162,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           remoteHash.clear();
           remoteHash.add(con.getHeaderField("Content-MD5").replace("\"", ""));
         }
-        Logger.logInfo("Downloading "+asset.name);
+        Logger.logInfo("Downloading " + asset.name);
         Logger.logDebug(asset.name);
         Logger.logDebug("RemoteSize: " + remoteSize);
         Logger.logDebug("asset.hash: " + asset.hash);
@@ -172,8 +173,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           long localSize = asset.local.length();
           if (!(con instanceof HttpURLConnection && localSize == remoteSize)) {
             asset.local.delete();
-            Logger.logInfo("Local asset size differs from remote size: " + asset.name
-                + " remote: " + remoteSize + " local: " + localSize);
+            Logger.logInfo("Local asset size differs from remote size: " + asset.name + " remote: "
+                + remoteSize + " local: " + localSize);
           }
         }
 
@@ -198,8 +199,12 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         asset.local.getParentFile().mkdirs();
         int readLen;
         long currentSize = 0;
-        long lastTime = System.currentTimeMillis();
-        float lastSize = 0;
+        if (totalSize == 0) {
+          start = System.nanoTime();
+        }
+        final double BYTES_PER_KILOBYTE = 1000;
+        final double NANOS_PER_SECOND = 1000000000.0;
+        final double BYTES_PER_MIB = 1024 * 1024;
         InputStream input = con.getInputStream();
         FileOutputStream output = new FileOutputStream(asset.local);
         while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {
@@ -211,6 +216,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           }
           output.write(buffer, 0, readLen);
           currentSize += readLen;
+          totalBytesRead += readLen;
 
           int prog = (int) ((currentSize * 100) / remoteSize);
           if (prog > 100) {
@@ -219,16 +225,16 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           if (prog < 0) {
             prog = 0;
           }
-
-          if (System.currentTimeMillis() - lastTime > SPEED_UPDATE_INTERVAL) {
-            setSpeed(((currentSize - lastSize) / BUFFER_SIZE)
-                / (System.currentTimeMillis() - lastTime) * 1024);
-            lastTime = System.currentTimeMillis();
-            lastSize = currentSize;
+          if (totalSize == 0) {
+            setSpeed(NANOS_PER_SECOND / BYTES_PER_KILOBYTE * currentSize
+                / (System.nanoTime() - start + 1));
+          } else {
+            setSpeed(NANOS_PER_SECOND / BYTES_PER_KILOBYTE * totalBytesRead
+                / (System.nanoTime() - start + 1));
           }
+
           setProgress(prog);
           setTotalProgress(calculateTotalProgress(currentSize, remoteSize));
-          totalBytesRead += readLen;
 
         }
 
@@ -240,8 +246,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         // file downloaded check size
         if (!(con instanceof HttpURLConnection && currentSize > 0 && currentSize == remoteSize)) {
           asset.local.delete();
-          Logger.logInfo("Local asset size differs from remote size: " + asset.name
-              + " remote: " + remoteSize + " local: " + currentSize);
+          Logger.logInfo("Local asset size differs from remote size: " + asset.name + " remote: "
+              + remoteSize + " local: " + currentSize);
         }
 
         if (downloadSuccess = doHashCheck(asset, remoteHash)) {
@@ -269,8 +275,11 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     if (good || assetHash != null && assetHash.contains(hash)) {
       return true;
     }
-    Logger.logInfo("Asset hash checking failed: " + asset.name + " " + asset.hashType + " "
-        + hash);// unhashed DL's are not allowed!!!
+    Logger.logInfo("Asset hash checking failed: " + asset.name + " " + asset.hashType + " " + hash);// unhashed
+                                                                                                    // DL's
+                                                                                                    // are
+                                                                                                    // not
+                                                                                                    // allowed!!!
     asset.local.delete();
     return false;
   }

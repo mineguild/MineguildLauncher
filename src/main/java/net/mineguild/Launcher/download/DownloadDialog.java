@@ -190,7 +190,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     } else if (evt.getPropertyName().equals("note")) {
       status.setText((String) evt.getNewValue());
     } else if (evt.getPropertyName().equals("speed")) {
-      speedLabel.setText(String.format("%.2f KB/s", (Float) evt.getNewValue()));
+      speedLabel.setText(String.format("%.2f KB/s", (Double) evt.getNewValue()));
     } else if (evt.getPropertyName().equals("current_inter")) {
       current.setIndeterminate(true);
       current.setStringPainted(false);
