@@ -153,7 +153,6 @@ public class MineguildLauncher {
       boolean success = true;
       try {
         Logger.logInfo("Preparing MC for launch.");
-        m.setMinecraftVersion("1.8");
         MCInstaller.setup(m);
       } catch (Exception e) {
         Logger.logError("Couldn't prepare MC for launch.", e);

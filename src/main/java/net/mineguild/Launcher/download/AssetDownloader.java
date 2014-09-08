@@ -442,9 +442,9 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             instance.setSpeed(NANOS_PER_SECOND / BYTES_PER_KILOBYTE * instance.totalBytesRead
                 / (System.nanoTime() - instance.start + 1));
 
-
-            // setProgress(prog);
-            //instance.setTotalProgress(instance.calculateTotalProgress(currentSize, remoteSize));
+            if (instance.totalSize > 0) {
+              instance.setTotalProgress(instance.calculateTotalProgress(currentSize, remoteSize));
+            }
 
           }
 
