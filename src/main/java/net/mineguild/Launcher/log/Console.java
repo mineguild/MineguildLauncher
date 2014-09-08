@@ -109,8 +109,8 @@ public class Console extends JFrame implements ILogListener {
       }
     });
     panel.add(clipboard);
-    
-    logTypeComboBox = new JComboBox(LogType.values());
+
+    logTypeComboBox = new JComboBox<LogType>(LogType.values());
     logTypeComboBox.setSelectedItem(logType);
     logTypeComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
@@ -132,7 +132,7 @@ public class Console extends JFrame implements ILogListener {
     });
     panel.add(logTypeComboBox);
 
-    logSourceComboBox = new JComboBox(LogSource.values());
+    logSourceComboBox = new JComboBox<LogSource>(LogSource.values());
     logSourceComboBox.setSelectedItem(logSource);
     logSourceComboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
@@ -146,7 +146,7 @@ public class Console extends JFrame implements ILogListener {
     ircButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
-        
+
         // OSUtils.browse(Locations.SUPPORTSITE);
       }
     });
@@ -265,7 +265,7 @@ public class Console extends JFrame implements ILogListener {
   @Override
   public void onLogEvent(LogEntry entry) {
     // drop unneeded messages as soon as possible
-    
+
     if ((logSource == LogSource.ALL || entry.source == logSource)
         && (logLevel == LogLevel.DEBUG || logLevel.includes(entry.level))) {
       final LogEntry entry_ = entry;

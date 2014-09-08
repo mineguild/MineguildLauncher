@@ -10,7 +10,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import net.mineguild.Builder.ModpackBuilder;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.LoginDialog;
@@ -22,7 +21,6 @@ import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JSONFactory;
 import net.mineguild.Launcher.utils.json.Settings;
-import net.mineguild.Launcher.utils.json.versions.OS;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
