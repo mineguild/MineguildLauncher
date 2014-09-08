@@ -21,7 +21,6 @@ import com.google.common.collect.Maps;
 
 public class AssetDownloader extends SwingWorker<Boolean, Void> {
   private static final int BUFFER_SIZE = 1024;
-  private static final int SPEED_UPDATE_INTERVAL = 500;
   private List<DownloadInfo> downloads;
   private boolean allDownloaded = true;
   private int totalProgress = 0;
@@ -204,7 +203,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
         final double BYTES_PER_KILOBYTE = 1000;
         final double NANOS_PER_SECOND = 1000000000.0;
-        final double BYTES_PER_MIB = 1024 * 1024;
         InputStream input = con.getInputStream();
         FileOutputStream output = new FileOutputStream(asset.local);
         while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {

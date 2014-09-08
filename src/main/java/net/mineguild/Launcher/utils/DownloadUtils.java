@@ -94,7 +94,7 @@ public class DownloadUtils {
     }
     try {
       HttpURLConnection con = (HttpURLConnection) script.openConnection();
-      String body = "data="+BaseEncoding.base64().encode(json_hashes.getBytes());
+      String body = "data=" + BaseEncoding.base64().encode(json_hashes.getBytes());
       con.setDoOutput(true);
       con.setDoInput(true);
       con.setRequestMethod("POST");
@@ -103,7 +103,7 @@ public class DownloadUtils {
       con.setRequestProperty("Content-Length", "" + Integer.toString(body.length()));
       con.setUseCaches(false);
       con.connect();
-      DataOutputStream wr = new DataOutputStream(con.getOutputStream ());
+      DataOutputStream wr = new DataOutputStream(con.getOutputStream());
       wr.writeBytes(body);
       wr.flush();
       wr.close();

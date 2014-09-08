@@ -6,16 +6,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -26,15 +20,15 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import net.mineguild.Launcher.Constants;
+import net.mineguild.Launcher.MineguildLauncher;
+
+import org.apache.commons.io.IOUtils;
+
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -48,21 +42,7 @@ import com.mojang.authlib.exceptions.UserMigratedException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 
-import java.awt.FlowLayout;
-
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
-import org.apache.commons.io.IOUtils;
-
-import net.mineguild.Launcher.Constants;
-import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.log.Logger;
-import net.mineguild.Launcher.utils.json.DateAdapter;
-import net.mineguild.Launcher.utils.json.EnumAdaptorFactory;
-import net.mineguild.Launcher.utils.json.FileAdapter;
-
+@SuppressWarnings("serial")
 public class LoginDialog extends JDialog {
 
   private JButton loginButton;
@@ -273,8 +253,8 @@ public class LoginDialog extends JDialog {
         }
       } catch (Exception e) {
         e.printStackTrace();
-        JOptionPane.showMessageDialog(this,
-            "Can't authenticate with Mineguild!\n" + e.getMessage());
+        JOptionPane
+            .showMessageDialog(this, "Can't authenticate with Mineguild!\n" + e.getMessage());
         return;
       }
       response =

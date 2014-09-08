@@ -2,14 +2,13 @@ package net.mineguild.Launcher.utils.json;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 
-import org.apache.commons.io.FileUtils;
-
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
+
+import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -26,26 +25,25 @@ public class JSONFactory {
     builder.setPrettyPrinting();
     GSON = builder.create();
   }
-  
-  public static AssetIndex loadAssetIndex(File json) throws IOException{
+
+  public static AssetIndex loadAssetIndex(File json) throws IOException {
     FileReader reader = new FileReader(json);
     return GSON.fromJson(reader, AssetIndex.class);
   }
-  
+
   public static Version loadVersion(File json) throws IOException {
     FileReader reader = new FileReader(json);
     return GSON.fromJson(reader, Version.class);
   }
-  
+
   public static Settings loadSettings(File json) throws IOException {
     FileReader reader = new FileReader(json);
     return GSON.fromJson(reader, Settings.class);
   }
-  
+
   public static void saveSettings(Settings set, File json) throws IOException {
     FileUtils.write(json, GSON.toJson(set, Settings.class));
   }
-  
 
 
 

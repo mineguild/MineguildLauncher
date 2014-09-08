@@ -35,19 +35,7 @@ public class MineguildLauncher {
   public static Settings settings;
 
   public static void main(String[] args) throws Exception {
-    // DownloadDialog d = new DownloadDialog(new HashMap<String, File>(0), "Test");
-    // d.setVisible(true); //STUFF...
     try {
-      /*
-       * if (OSUtils.getCurrentOS() != net.mineguild.Launcher.utils.OSUtils.OS.WINDOWS)
-       * UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); else {
-       * UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel"); }
-       */
-      /*
-       * UIManager.put("nimbusBase", Color.BLACK); UIManager.put("text", Color.WHITE);
-       * UIManager.put("nimbusLightBackground", Color.DARK_GRAY); UIManager.put("control",
-       * Color.DARK_GRAY);
-       */
       for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {
           UIManager.setLookAndFeel(info.getClassName());

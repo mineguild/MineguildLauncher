@@ -44,7 +44,7 @@ public class DownloadInfo {
     this.hashType = hashType;
   }
 
-  
+
 
   public static List<DownloadInfo> getDownloadInfo(File base, Map<String, String> map) {
     List<DownloadInfo> infoList = Lists.newArrayList();
@@ -78,7 +78,7 @@ public class DownloadInfo {
   public void setBackupDLType(DLType backupDLType) {
     this.backupDLType = backupDLType;
   }
-  
+
   @Override
   public String toString() {
     return String

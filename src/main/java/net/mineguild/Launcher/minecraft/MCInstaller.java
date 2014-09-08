@@ -98,12 +98,13 @@ public class MCInstaller {
       packbasejson = forgeVersion.inheritsFrom;
 
     for (Library lib : forgeVersion.getLibraries()) {
-      if(lib.natives == null){
+      if (lib.natives == null) {
         local = new File(libDir, lib.getPath());
         if (!local.exists()) {
           if (lib.checksums != null) {
-            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
-                lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
+            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local,
+                local.getName(), lib.checksums, "sha1", DownloadInfo.DLType.NONE,
+                DownloadInfo.DLType.NONE));
           } else if (lib.download != null && lib.download) {
             list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
           } else {
@@ -113,12 +114,14 @@ public class MCInstaller {
       } else {
         local = new File(libDir, lib.getPathNatives());
         if (lib.checksums != null) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local.getName(),
-              lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local
+              .getName(), lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
         } else if (lib.download != null && lib.download) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local.getName()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local
+              .getName()));
         } else {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local.getName()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local
+              .getName()));
         }
       }
     }
@@ -290,7 +293,7 @@ public class MCInstaller {
                   : base.minecraftArguments,
               packjson.assets != null ? packjson.assets : base.getAssets(), "2048", "256m", pack
                   .getMinecraftVersion(), resp.getAuth(), false);
-      
+
       MineguildLauncher.MCRunning = true;
       MineguildLauncher.con.minecraftStarted();
 

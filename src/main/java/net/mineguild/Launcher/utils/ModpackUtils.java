@@ -24,23 +24,21 @@ public class ModpackUtils {
   public static Map<String, String> needed;
 
   public static void updateModpack(Modpack currentPack, Modpack newPack) throws Exception {
-    if(currentPack == null){
+    if (currentPack == null) {
       deleteUntrackedMods(getGameDir(), newPack.getModpackFiles());
-    } else{
-      deleteOldFiles(getGameDir(), newPack.getModpackFiles(),
-          currentPack.getOld(newPack));
+    } else {
+      deleteOldFiles(getGameDir(), newPack.getModpackFiles(), currentPack.getOld(newPack));
     }
     Map<String, String> neededFiles =
-        getNeededFiles(getGameDir(), newPack.getModpackFiles(),
-            MineguildLauncher.doExactCheck);
+        getNeededFiles(getGameDir(), newPack.getModpackFiles(), MineguildLauncher.doExactCheck);
     if (neededFiles.size() > 0) {
-      List<DownloadInfo> info =
-          DownloadInfo.getDownloadInfo(getGameDir(), neededFiles);
+      List<DownloadInfo> info = DownloadInfo.getDownloadInfo(getGameDir(), neededFiles);
       DownloadDialog dialog =
-          new DownloadDialog(info, "Updating Modpack", DownloadUtils.getTotalSize(neededFiles.values()));
+          new DownloadDialog(info, "Updating Modpack", DownloadUtils.getTotalSize(neededFiles
+              .values()));
       dialog.setVisible(true);
       boolean success = dialog.start();
-      if(!success){
+      if (!success) {
         throw new Exception("Modpack updater cancelled!");
       }
       dialog.dispose();
@@ -83,7 +81,8 @@ public class ModpackUtils {
           String hash = ChecksumUtil.getMD5(new File(baseDirectory, entry.getKey()));
           if (!hash.equals(allFiles.get(entry.getKey()))) {
             FileUtils.deleteQuietly(currentFile);
-            Logger.logInfo(String.format("Deleted '%s' - hash doesn't match", currentFile.getName()));
+            Logger
+                .logInfo(String.format("Deleted '%s' - hash doesn't match", currentFile.getName()));
           }
         } else {
           FileUtils.deleteQuietly(currentFile);
@@ -92,26 +91,27 @@ public class ModpackUtils {
       }
     }
   }
-  
-  public static void deleteUntrackedMods(File baseDirectory, Map<String, String> files){
+
+  public static void deleteUntrackedMods(File baseDirectory, Map<String, String> files) {
     File mods = new File(baseDirectory, "mods");
-    if(!mods.exists()){
+    if (!mods.exists()) {
       return;
     }
-    Set<String> needed = files.keySet(); 
-    for(File f : FileUtils.listFiles(mods, FileFilterUtils.trueFileFilter(), FileFilterUtils.trueFileFilter())){
+    Set<String> needed = files.keySet();
+    for (File f : FileUtils.listFiles(mods, FileFilterUtils.trueFileFilter(),
+        FileFilterUtils.trueFileFilter())) {
       String path = FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(baseDirectory, f));
-      if(!needed.contains(path)){
+      if (!needed.contains(path)) {
         FileUtils.deleteQuietly(f);
         Logger.logInfo(String.format("Deleted '%s' - not in pack", f.getName()));
       }
     }
   }
-  
-  public static File getGameDir() throws IOException{
+
+  public static File getGameDir() throws IOException {
     File gameDir = new File(MineguildLauncher.baseDirectory, "minecraft");
-    if(!gameDir.exists()){
-      if(!gameDir.mkdirs()){
+    if (!gameDir.exists()) {
+      if (!gameDir.mkdirs()) {
         throw new IOException("Unable to create game directory!");
       }
     }

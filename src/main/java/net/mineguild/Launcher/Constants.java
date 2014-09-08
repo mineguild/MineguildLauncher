@@ -26,7 +26,8 @@ public class Constants {
   public static final String MG_FORGE = "https://mineguild.net/download/mmp/forge/";
   public static final String MG_INFO_SCRIPT = "https://mineguild.net/download/mmp/php/info.php";
   public static final String MG_GET_SCRIPT = "https://mineguild.net/download/mmp/php/getfile.php";
-  public static final String MG_LOGIN_SCRIPT = "https://mineguild.net/download/mmp/php/checkuser.php";
+  public static final String MG_LOGIN_SCRIPT =
+      "https://mineguild.net/download/mmp/php/checkuser.php";
 
 
 }

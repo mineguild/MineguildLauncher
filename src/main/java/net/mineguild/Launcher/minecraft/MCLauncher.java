@@ -251,8 +251,9 @@ public class MCLauncher {
 
     // Benchmark.reset("threading");
     Parallel.TaskHandler<Void> th =
-        new Parallel.ForEach<Entry<String, Asset>, Void>(index.objects.entrySet()).withFixedThreads(2 * OSUtils.getNumCores())
-        // .configurePoolSize(2*2*OSUtils.getNumCores(), 10)
+        new Parallel.ForEach<Entry<String, Asset>, Void>(index.objects.entrySet())
+            .withFixedThreads(2 * OSUtils.getNumCores())
+            // .configurePoolSize(2*2*OSUtils.getNumCores(), 10)
             .apply(new Parallel.F<Entry<String, Asset>, Void>() {
               public Void apply(Entry<String, Asset> e) {
                 Asset asset = e.getValue();
@@ -291,9 +292,9 @@ public class MCLauncher {
 
     return targetDir;
   }
-  
-  public static void killMC(){
-    if(MineguildLauncher.MCRunning && MineguildLauncher.procmon != null){
+
+  public static void killMC() {
+    if (MineguildLauncher.MCRunning && MineguildLauncher.procmon != null) {
       MineguildLauncher.procmon.stop();
       Logger.logWarn("Minecraft was killed by user.");
     }

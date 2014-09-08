@@ -22,15 +22,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
 
 import lombok.Getter;
-import lombok.Setter;
+import net.mineguild.Launcher.Modpack;
 
 import org.apache.commons.io.FileUtils;
-
-import net.mineguild.Launcher.Modpack;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -163,7 +162,7 @@ public class ModpackBuilder extends JFrame {
         table.clearSelection();
       }
     });
-    Font font = new Font( "Monospaced", Font.PLAIN, 12 ); 
+    Font font = new Font("Monospaced", Font.PLAIN, 12);
     table.setFont(font);
     showFilesDialog.add(tableView, BorderLayout.NORTH);
     JPanel bottomButtonPanel = new JPanel(new BorderLayout());
@@ -183,7 +182,8 @@ public class ModpackBuilder extends JFrame {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    UploadFileUtils.placeUploadFiles(ModpackBuilder.modpackDirectory.getAbsolutePath(), modPack.getModpackFiles());
+    UploadFileUtils.placeUploadFiles(ModpackBuilder.modpackDirectory.getAbsolutePath(),
+        modPack.getModpackFiles());
     System.exit(0);
   }
 
@@ -191,7 +191,13 @@ public class ModpackBuilder extends JFrame {
 
   public static void main(String[] args) throws Exception {
     try {
-      UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
+      for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+        if ("Nimbus".equals(info.getName())) {
+          UIManager.setLookAndFeel(info.getClassName());
+          break;
+        }
+      }
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -201,7 +207,8 @@ public class ModpackBuilder extends JFrame {
 
   public static class ModpackTableModel extends AbstractTableModel {
 
-    @Getter Modpack pack;
+    @Getter
+    Modpack pack;
 
     public ModpackTableModel(Modpack pack) {
       this.pack = pack;
@@ -269,9 +276,7 @@ public class ModpackBuilder extends JFrame {
 
   public static boolean getModpackDirectory(Component parent) {
     JFileChooser fileChooser = new JFileChooser(new File("."));
-    // FileNameExtensionFilter filter = new FileNameExtensionFilter("Modpack_Json", "json", "mmp");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    // fileChooser.setFileFilter(filter);
     fileChooser.setDialogTitle("Select the directory of the modpack you want to update to.");
     int returnValue = fileChooser.showOpenDialog(parent);
     if (returnValue == JFileChooser.APPROVE_OPTION) {

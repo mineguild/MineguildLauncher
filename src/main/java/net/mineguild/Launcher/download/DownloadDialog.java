@@ -108,12 +108,12 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
   }
 
 
-  public void initGUI() {  
+  public void initGUI() {
     mainPanel = new JPanel();
     getContentPane().add(mainPanel, BorderLayout.CENTER);
     GridBagLayout gbl_mainPanel = new GridBagLayout();
-    gbl_mainPanel.columnWeights = new double[]{1.0, 0.0};
-    gbl_mainPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
+    gbl_mainPanel.columnWeights = new double[] {1.0, 0.0};
+    gbl_mainPanel.rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0};
     mainPanel.setLayout(gbl_mainPanel);
     // c.fill = GridBagConstraints.HORIZONTAL;
     status = new JLabel("Current Status");
@@ -161,7 +161,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     speedLabel = new JLabel("0 kb/s");
     speedPanel.add(lbl);
     speedPanel.add(speedLabel);
-    
+
     JPanel buttonPanel = new JPanel();
     buttonCancel = new JButton("Cancel");
     buttonPanel.add(buttonCancel, BorderLayout.CENTER);
@@ -184,8 +184,8 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     } else if (evt.getPropertyName().equals("info")) {
       @SuppressWarnings("unchecked")
       HashMap<String, Object> info = (HashMap<String, Object>) evt.getNewValue();
-      status.setText(String.format("Downloading file %d of %d",
-          (Integer) info.get("currentFile"), (Integer) info.get("overallFiles")));
+      status.setText(String.format("Downloading file %d of %d", (Integer) info.get("currentFile"),
+          (Integer) info.get("overallFiles")));
       fileName.setText((String) info.get("fileName"));
     } else if (evt.getPropertyName().equals("note")) {
       status.setText((String) evt.getNewValue());
