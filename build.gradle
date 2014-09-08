@@ -50,6 +50,7 @@ dependencies {
 shadowJar {
     dependencies {
         exclude(dependency('org.projectlombok:lombok:1.14.4'))
+        exclude(dependency('authlib:authlib-1.5.16'))
     }
     baseName = "MineguildLauncher"
     classifier = ''
