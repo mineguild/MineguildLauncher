@@ -174,8 +174,8 @@ public class LoginDialog extends JDialog {
     }
 
     if (MineguildLauncher.settings.getMCUser().length() > 0) {
+      userField.setText(MineguildLauncher.settings.getMCUser());
       if (token) {
-        userField.setText(MineguildLauncher.settings.getMCUser());
         if (MineguildLauncher.settings.getMCPassword().length() > 0) {
           passwordField.setText(MineguildLauncher.settings.getMCPassword());
           passwordField.setEnabled(true);

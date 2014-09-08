@@ -28,6 +28,8 @@ public class Constants {
   public static final String MG_GET_SCRIPT = "https://mineguild.net/download/mmp/php/getfile.php";
   public static final String MG_LOGIN_SCRIPT =
       "https://mineguild.net/download/mmp/php/checkuser.php";
+  
+  public static final String AUTHLIB_VERSION = "1.5.16";
 
 
 }

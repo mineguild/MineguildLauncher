@@ -16,6 +16,7 @@ import net.mineguild.Launcher.minecraft.LoginDialog;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
+import net.mineguild.Launcher.utils.AuthWorkDialog;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.OSUtils;
@@ -57,23 +58,21 @@ public class MineguildLauncher {
       settings = new Settings(getInstallPath());
       JSONFactory.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
     }
-    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          JSONFactory.saveSettings(MineguildLauncher.settings, new File(OSUtils.getLocalDir(),
-              "settings.json"));
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }));
     if (settings.getModpackPath() == null) {
       settings.setModpackPath(getInstallPath());
     }
+    AuthWorkDialog dl = new AuthWorkDialog(con);
+    dl.start();
     LoginDialog dialog = new LoginDialog(con);
     dialog.run();
+    if (!dialog.successfull) {
+      Logger.logError("Login not successfull... Exiting");
+      Thread.sleep(1000);
+      System.exit(0);
+    }
     JSONFactory.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+
+    addSaveHook();
     LoginResponse res = dialog.response;
     baseDirectory = settings.getModpackPath();
     baseDirectory.mkdirs();
@@ -202,6 +201,20 @@ public class MineguildLauncher {
     } else {
       return new File("modpack/");
     }
+  }
+
+  public static void addSaveHook() {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          JSONFactory.saveSettings(MineguildLauncher.settings, new File(OSUtils.getLocalDir(),
+              "settings.json"));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }));
   }
 
 

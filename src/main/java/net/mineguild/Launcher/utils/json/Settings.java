@@ -6,12 +6,13 @@ import java.util.UUID;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.CryptoUtils;
 
 public class Settings {
 
   private @Getter @Setter Map<String, Object> mojangdata;
-  private @Getter String clientToken;
+  private String clientToken;
   private @Getter @Setter String MCUser;
   private String MCPassword;
   private @Getter @Setter String modpack_hash;
@@ -24,9 +25,18 @@ public class Settings {
     MCPassword = "";
     modpack_hash = "";
     additional_java_args = "";
-    clientToken = UUID.randomUUID().toString();
+    clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
   }
 
+  public String getClientToken(){
+    try {
+      return CryptoUtils.decrypt(clientToken);
+    } catch (Exception e){
+      Logger.logError("Found invalid/migrated clientToken... Generating new Token", e);
+      clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
+      return getClientToken();
+    }
+  }
 
   public String getMCPassword() {
     try {
