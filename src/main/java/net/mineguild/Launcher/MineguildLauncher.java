@@ -1,6 +1,8 @@
 package net.mineguild.Launcher;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
@@ -11,6 +13,9 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import net.mineguild.Launcher.log.Console;
+import net.mineguild.Launcher.log.ILogListener;
+import net.mineguild.Launcher.log.LogEntry;
+import net.mineguild.Launcher.log.LogType;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.LoginDialog;
 import net.mineguild.Launcher.minecraft.LoginResponse;
@@ -33,6 +38,7 @@ public class MineguildLauncher {
   public static boolean MCRunning;
   public static ProcessMonitor procmon;
   public static Console con;
+  public static long totalDownloadTime = 0;
   public static Settings settings;
 
   public static void main(String[] args) throws Exception {
@@ -51,6 +57,20 @@ public class MineguildLauncher {
     System.setProperty("java.net.preferIPv4Stack", "true");
     con = new Console();
     con.setVisible(true);
+    final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(OSUtils.getLocalDir(), "launcher.log")));
+    Logger.addListener(con);
+    Logger.addListener(new ILogListener() {
+      
+      @Override
+      public void onLogEvent(LogEntry logEntry) {
+        try {
+          bos.write((logEntry.toString(LogType.DEBUG)+"\n").getBytes());
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    });
     try {
       settings = JSONFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
     } catch (IOException e) {
@@ -77,7 +97,6 @@ public class MineguildLauncher {
     baseDirectory = settings.getModpackPath();
     baseDirectory.mkdirs();
 
-    Logger.addListener(con);
     Modpack m;
     boolean updated = true;
     Modpack newest =
@@ -154,6 +173,7 @@ public class MineguildLauncher {
       try {
         Logger.logInfo("Preparing MC for launch.");
         MCInstaller.setup(m);
+        Logger.logInfo("Downloaded for "+totalDownloadTime/1000+" seconds.");
       } catch (Exception e) {
         Logger.logError("Couldn't prepare MC for launch.", e);
         success = false;
@@ -193,13 +213,16 @@ public class MineguildLauncher {
       chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       result = chooser.showDialog(con, "Use selected directory");
       if (result == JFileChooser.APPROVE_OPTION) {
-        return new File(chooser.getSelectedFile(), "/");
+        return chooser.getSelectedFile();
       } else {
         return getInstallPath();
       }
 
     } else {
-      return new File("modpack/");
+      if (new File("modpack").mkdirs())
+        return new File("modpack");
+      else
+        return getInstallPath();
     }
   }
 

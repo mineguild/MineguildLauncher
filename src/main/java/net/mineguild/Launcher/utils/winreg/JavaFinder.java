@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 
@@ -174,11 +176,11 @@ public class JavaFinder {
       List<JavaInfo> java32 = Lists.newArrayList();
       List<JavaInfo> java64 = Lists.newArrayList();
 
-      // Logger.logInfo("The FTB Launcher has found the following Java versions installed:");
       for (JavaInfo java : javas) {
-        // Logger.logInfo(java.toString());
         if (java.isJava8()) {
           java8Found = true;
+          Logger.logInfo("Found java 8, skipping");
+          continue;
         }
         if (java.supportedVersion) {
           if (preferred == null && java != null)

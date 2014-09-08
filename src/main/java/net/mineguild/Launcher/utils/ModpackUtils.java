@@ -37,11 +37,13 @@ public class ModpackUtils {
       MultithreadDownloadDialog dialog =
           new MultithreadDownloadDialog(info, "Updating Modpack", DownloadUtils.getTotalSize(neededFiles
               .values()));
+      long startTime = System.currentTimeMillis();
       dialog.setVisible(true);
       boolean success = dialog.start();
       if (!success) {
         throw new Exception("Modpack updater cancelled!");
       }
+      MineguildLauncher.totalDownloadTime += System.currentTimeMillis()-startTime;
       dialog.dispose();
     }
   }

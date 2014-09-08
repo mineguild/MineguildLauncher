@@ -60,6 +60,7 @@ public class MCInstaller {
     }
     MultithreadDownloadDialog dlDialog;
     if (assets.size() > 0) {
+      long startTime = System.currentTimeMillis();
       dlDialog = new MultithreadDownloadDialog(assets, "Downloading Assets", totalAssetSize);
       dlDialog.setVisible(true);
       if (!dlDialog.start()) {
@@ -67,8 +68,10 @@ public class MCInstaller {
         throw new Exception("Download was interrupted!");
       }
       dlDialog.dispose();
+      MineguildLauncher.totalDownloadTime += System.currentTimeMillis()-startTime;
     }
     if (libraries.size() > 0) {
+      long startTime = System.currentTimeMillis();
       dlDialog = new MultithreadDownloadDialog(libraries, "Downloading Libraries");
       dlDialog.setVisible(true);
       if (!dlDialog.start()) {
@@ -76,6 +79,7 @@ public class MCInstaller {
         throw new Exception("Download was interrupted!");
       }
       dlDialog.dispose();
+      MineguildLauncher.totalDownloadTime += System.currentTimeMillis()-startTime;
     }
     if (libraries.size() + assets.size() > 0) {
       JOptionPane.showMessageDialog(null, libraries.size() + assets.size()

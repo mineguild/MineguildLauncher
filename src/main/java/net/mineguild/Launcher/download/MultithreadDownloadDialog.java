@@ -2,12 +2,10 @@ package net.mineguild.Launcher.download;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -18,13 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.plaf.basic.BasicLabelUI;
 
 @SuppressWarnings("serial")
 public class MultithreadDownloadDialog extends JDialog implements PropertyChangeListener {
@@ -122,6 +118,7 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
     mainPanel.add(status, gbc_status);
     // Overall progressbar
     overall = new JProgressBar();
+    overall.setStringPainted(true);
     GridBagConstraints gbc_overall = new GridBagConstraints();
     gbc_overall.fill = GridBagConstraints.HORIZONTAL;
     gbc_overall.gridwidth = 2;
