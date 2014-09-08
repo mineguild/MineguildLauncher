@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingWorker;
 
+import net.mineguild.Launcher.utils.OSUtils;
+
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
@@ -42,7 +44,7 @@ public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
   @Override
   protected Map<File, String> doInBackground() throws Exception {
     results = new ConcurrentHashMap<File, String>();
-    ExecutorService executor = Executors.newFixedThreadPool(4);
+    ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores());
     for (File file : files) {
       try {
         Runnable worker = new WorkerTask(file, Hashing.md5());

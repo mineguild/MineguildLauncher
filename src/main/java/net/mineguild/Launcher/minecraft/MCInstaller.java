@@ -18,6 +18,7 @@ import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.Modpack;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
+import net.mineguild.Launcher.download.MultithreadDownloadDialog;
 import net.mineguild.Launcher.log.LogEntry;
 import net.mineguild.Launcher.log.LogLevel;
 import net.mineguild.Launcher.log.Logger;
@@ -57,9 +58,9 @@ public class MCInstaller {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    DownloadDialog dlDialog;
+    MultithreadDownloadDialog dlDialog;
     if (assets.size() > 0) {
-      dlDialog = new DownloadDialog(assets, "Downloading Assets", totalAssetSize);
+      dlDialog = new MultithreadDownloadDialog(assets, "Downloading Assets", totalAssetSize);
       dlDialog.setVisible(true);
       if (!dlDialog.start()) {
         dlDialog.dispose();
@@ -68,7 +69,7 @@ public class MCInstaller {
       dlDialog.dispose();
     }
     if (libraries.size() > 0) {
-      dlDialog = new DownloadDialog(libraries, "Downloading Libraries");
+      dlDialog = new MultithreadDownloadDialog(libraries, "Downloading Libraries");
       dlDialog.setVisible(true);
       if (!dlDialog.start()) {
         dlDialog.dispose();

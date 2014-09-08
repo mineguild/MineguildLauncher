@@ -4,6 +4,7 @@ import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.Modpack;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
+import net.mineguild.Launcher.download.MultithreadDownloadDialog;
 import net.mineguild.Launcher.log.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -33,8 +34,8 @@ public class ModpackUtils {
         getNeededFiles(getGameDir(), newPack.getModpackFiles(), MineguildLauncher.doExactCheck);
     if (neededFiles.size() > 0) {
       List<DownloadInfo> info = DownloadInfo.getDownloadInfo(getGameDir(), neededFiles);
-      DownloadDialog dialog =
-          new DownloadDialog(info, "Updating Modpack", DownloadUtils.getTotalSize(neededFiles
+      MultithreadDownloadDialog dialog =
+          new MultithreadDownloadDialog(info, "Updating Modpack", DownloadUtils.getTotalSize(neededFiles
               .values()));
       dialog.setVisible(true);
       boolean success = dialog.start();

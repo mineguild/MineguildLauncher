@@ -28,10 +28,10 @@ public class Settings {
     clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
   }
 
-  public String getClientToken(){
+  public String getClientToken() {
     try {
       return CryptoUtils.decrypt(clientToken);
-    } catch (Exception e){
+    } catch (Exception e) {
       Logger.logError("Found invalid/migrated clientToken... Generating new Token", e);
       clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
       return getClientToken();
