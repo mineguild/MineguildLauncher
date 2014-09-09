@@ -54,16 +54,18 @@ public class MineguildLauncherConsole {
         Modpack localPack = Modpack.fromJson(FileUtils.readFileToString(curpack));
         System.out.println(String.format("Local pack version: %s released on %s",
             newest.getVersion(), newest.getReleaseDate()));
-        System.out.println(String.format("Local: %s [Released: %s] [Hash: %s]",
-            localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
-        System.out.println(String.format("Remote: %s [Released: %s] [Hash: %s]",
-            newest.getVersion(), newest.getReleaseDate(), newest.getHash()));
-        System.out.println("Updating from Local to Remote");
-        try {
-          updateModpack(localPack, newest);
-        } catch (Exception e) {
-          System.err.println("Can't update modpack!");
-          e.printStackTrace();
+        if (newest.isNewer(localPack)) {
+          System.out.println(String.format("Local: %s [Released: %s] [Hash: %s]",
+              localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
+          System.out.println(String.format("Remote: %s [Released: %s] [Hash: %s]",
+              newest.getVersion(), newest.getReleaseDate(), newest.getHash()));
+          System.out.println("Updating from Local to Remote");
+          try {
+            updateModpack(localPack, newest);
+          } catch (Exception e) {
+            System.err.println("Can't update modpack!");
+            e.printStackTrace();
+          }
         }
       } catch (Exception e) {
         try {
@@ -237,8 +239,10 @@ public class MineguildLauncherConsole {
               prog = 0;
             }
 
-             speed = NANOS_PER_SECOND / BYTES_PER_KILOBYTE * totalBytesRead / (System.nanoTime() - start + 1);
-             /* 
+            speed =
+                NANOS_PER_SECOND / BYTES_PER_KILOBYTE * totalBytesRead
+                    / (System.nanoTime() - start + 1);
+            /*
              * if (instance.totalSize > 0) {
              * instance.setTotalProgress(instance.calculateTotalProgress(currentSize, remoteSize));
              * }

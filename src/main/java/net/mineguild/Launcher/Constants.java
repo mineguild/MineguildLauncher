@@ -13,7 +13,8 @@ public class Constants {
                   FileFilterUtils.suffixFileFilter(".opt"),
                   FileFilterUtils.suffixFileFilter(".disabled"))),
               FileFilterUtils.sizeFileFilter(1l, true));
-  public static final IOFileFilter MODPACK_DIR_FILTER = FileFilterUtils.trueFileFilter();
+  public static final IOFileFilter MODPACK_DIR_FILTER = FileFilterUtils.or(
+      FileFilterUtils.prefixFileFilter("mods"), FileFilterUtils.prefixFileFilter("config"));
 
   // Minecraft links
   public static final String MC_RES = "http://resources.download.minecraft.net/"; // Minecraft
@@ -28,7 +29,7 @@ public class Constants {
   public static final String MG_GET_SCRIPT = "https://mineguild.net/download/mmp/php/getfile.php";
   public static final String MG_LOGIN_SCRIPT =
       "https://mineguild.net/download/mmp/php/checkuser.php";
-  
+
   public static final String AUTHLIB_VERSION = "1.5.16";
 
 

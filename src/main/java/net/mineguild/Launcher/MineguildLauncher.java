@@ -33,7 +33,7 @@ import org.apache.commons.io.IOUtils;
 public class MineguildLauncher {
 
   public static File baseDirectory;
-  public static boolean doExactCheck;
+  public static boolean doExactCheck = true;
   public static boolean MCRunning;
   public static boolean forceUpdate;
   public static ProcessMonitor procmon;

@@ -249,6 +249,7 @@ public class ModpackBuilder extends JFrame {
       for (int row : rows) {
         System.out.printf("Removing row #%d\n", row);
         removeFile(row - removedRows);
+        removedRows++;
       }
       fireTableRowsDeleted(rows[0], rows[rows.length - 1]);
     }
