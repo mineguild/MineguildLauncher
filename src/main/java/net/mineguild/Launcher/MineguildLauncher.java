@@ -189,11 +189,16 @@ public class MineguildLauncher {
     }
   }
 
-  public static File getInstallPath(Component parent) {
-    parent = (parent == null) ? con : parent;
-    File folder =
+  public static File getInstallPath(Component par) {
+    Component parent = (par == null) ? con : par;
+    File folder;
+    try{
+      folder =
         MineguildLauncher.settings.getModpackPath() == null ? new File("modpack")
             : MineguildLauncher.settings.getModpackPath();
+    } catch (NullPointerException e){
+      folder = new File("modpack");
+    }
     int result =
         JOptionPane
             .showConfirmDialog(
