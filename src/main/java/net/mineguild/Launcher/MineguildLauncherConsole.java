@@ -15,10 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import net.mineguild.Launcher.download.AssetDownloader;
 import net.mineguild.Launcher.download.DownloadInfo;
-import net.mineguild.Launcher.download.AssetDownloader.DownloadWorker;
 import net.mineguild.Launcher.download.DownloadInfo.DLType;
 import net.mineguild.Launcher.log.Logger;
-import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 
@@ -36,6 +34,9 @@ public class MineguildLauncherConsole {
   public static int currentFile = 0;
   public static boolean allDownloaded;
   public static int amountOfFiles = 0;
+  public static double start = 0;
+  public static double speed = 0;
+  public static long totalBytesRead = 0;
 
   public static void update() throws Exception {
     baseDir = new File(".");
@@ -94,6 +95,7 @@ public class MineguildLauncherConsole {
         ModpackUtils.getNeededFiles(baseDir, newPack.getModpackFiles(), true);
     List<DownloadInfo> downloads = DownloadInfo.getDownloadInfo(baseDir, neededFiles);
     amountOfFiles = downloads.size();
+    start = System.currentTimeMillis();
     ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores() * 2);
     for (DownloadInfo download : downloads) {
       try {
@@ -225,7 +227,7 @@ public class MineguildLauncherConsole {
              */
             output.write(buffer, 0, readLen);
             currentSize += readLen;
-            // AssetDownloader.instance.totalBytesRead += readLen;
+            totalBytesRead += readLen;
 
             int prog = (int) ((currentSize * 100) / remoteSize);
             if (prog > 100) {
@@ -235,10 +237,8 @@ public class MineguildLauncherConsole {
               prog = 0;
             }
 
-            /*
-             * instance.setSpeed(NANOS_PER_SECOND / BYTES_PER_KILOBYTE * instance.totalBytesRead /
-             * (System.nanoTime() - instance.start + 1));
-             * 
+             speed = NANOS_PER_SECOND / BYTES_PER_KILOBYTE * totalBytesRead / (System.nanoTime() - start + 1);
+             /* 
              * if (instance.totalSize > 0) {
              * instance.setTotalProgress(instance.calculateTotalProgress(currentSize, remoteSize));
              * }
@@ -280,7 +280,7 @@ public class MineguildLauncherConsole {
   }
 
   public static void updateStatus() {
-    System.out.printf("Downloaded %d of %d\n", currentFile, amountOfFiles);
+    System.out.printf("Downloaded %d of %d speed %.2f KB/s\n", currentFile, amountOfFiles, speed);
   }
 
 
