@@ -32,7 +32,7 @@ public class MineguildLauncherConsole {
   public static File baseDir;
   public static final int BUFFER_SIZE = 8192;
   public static int currentFile = 0;
-  public static boolean allDownloaded;
+  public static boolean allDownloaded = true;
   public static int amountOfFiles = 0;
   public static double start = 0;
   public static double speed = 0;
@@ -95,7 +95,7 @@ public class MineguildLauncherConsole {
         ModpackUtils.getNeededFiles(baseDir, newPack.getModpackFiles(), true);
     List<DownloadInfo> downloads = DownloadInfo.getDownloadInfo(baseDir, neededFiles);
     amountOfFiles = downloads.size();
-    start = System.currentTimeMillis();
+    start = System.nanoTime();
     ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores() * 2);
     for (DownloadInfo download : downloads) {
       try {
@@ -282,7 +282,5 @@ public class MineguildLauncherConsole {
   public static void updateStatus() {
     System.out.printf("Downloaded %d of %d speed %.2f KB/s\n", currentFile, amountOfFiles, speed);
   }
-
-
 
 }
