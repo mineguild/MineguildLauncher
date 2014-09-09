@@ -14,7 +14,7 @@ public class LogWriter implements ILogListener {
     this.source = source;
     this.logWriter =
         new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile), "UTF-8"));
-    this.logWriter.write(logFile + ": written by FTB Launcher"
+    this.logWriter.write(logFile + ": MineguildLauncher log."
         + System.getProperty("line.separator"));
     this.logWriter.flush();
   }

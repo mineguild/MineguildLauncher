@@ -305,7 +305,7 @@ public class MCInstaller {
       StreamLogger.prepare(minecraftProcess.getInputStream(),
           new LogEntry().level(LogLevel.UNKNOWN));
 
-      String[] ignore = {"Session ID is token"};
+      String[] ignore = {"Session ID is token", "Thingy Name:", "Material Name:"};
       StreamLogger.setIgnore(ignore);
       StreamLogger.doStart();
       // String curVersion =

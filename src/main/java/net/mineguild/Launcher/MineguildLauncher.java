@@ -1,8 +1,6 @@
 package net.mineguild.Launcher;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
@@ -13,9 +11,8 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import net.mineguild.Launcher.log.Console;
-import net.mineguild.Launcher.log.ILogListener;
-import net.mineguild.Launcher.log.LogEntry;
-import net.mineguild.Launcher.log.LogType;
+import net.mineguild.Launcher.log.LogSource;
+import net.mineguild.Launcher.log.LogWriter;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.LoginDialog;
 import net.mineguild.Launcher.minecraft.LoginResponse;
@@ -57,20 +54,9 @@ public class MineguildLauncher {
     System.setProperty("java.net.preferIPv4Stack", "true");
     con = new Console();
     con.setVisible(true);
-    final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(OSUtils.getLocalDir(), "launcher.log")));
     Logger.addListener(con);
-    Logger.addListener(new ILogListener() {
-      
-      @Override
-      public void onLogEvent(LogEntry logEntry) {
-        try {
-          bos.write((logEntry.toString(LogType.DEBUG)+"\n").getBytes());
-        } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-      }
-    });
+    Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"), LogSource.LAUNCHER));
+
     try {
       settings = JSONFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
     } catch (IOException e) {

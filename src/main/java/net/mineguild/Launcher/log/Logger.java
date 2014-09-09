@@ -6,6 +6,7 @@ import java.util.Vector;
 
 public class Logger {
   private static final List<ILogListener> listeners;
+  private static final long BUFFER_SIZE = 1000;
   private static final Vector<LogEntry> logEntries;
   private static LogThread logThread;
 
@@ -23,6 +24,14 @@ public class Logger {
   public static void log(LogEntry entry) {
     logEntries.add(entry);
     logThread.handleLog(entry);
+  }
+  
+  public static Vector<LogEntry> getBufferedEntries(){
+    Vector<LogEntry> newVector = (Vector<LogEntry>) logEntries.clone();
+    while(newVector.size() > BUFFER_SIZE){
+      newVector.remove(0);
+    }
+    return newVector;
   }
 
   public static void log(String message, LogLevel level, Throwable t) {

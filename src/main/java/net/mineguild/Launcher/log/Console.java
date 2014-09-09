@@ -201,7 +201,7 @@ public class Console extends JFrame implements ILogListener {
   synchronized private void refreshLogs() {
     doc = new HTMLDocument();
     displayArea.setDocument(doc);
-    List<LogEntry> entries = Logger.getLogEntries();
+    List<LogEntry> entries = Logger.getBufferedEntries();
     StringBuilder logHTML = new StringBuilder();
     for (LogEntry entry : entries) {
       // select only messages we want
