@@ -114,6 +114,28 @@ public class ModpackUtils {
       }
     }
   }
+  
+  public static void moveUntrackedMods(File baseDirectory, Map<String, String> files) {
+    File mods = new File(baseDirectory, "mods");
+    if (!mods.exists()) {
+      return;
+    }
+    File modsBackup = new File(baseDirectory, "modsBackup");
+    Set<String> needed = files.keySet();
+    for (File f : FileUtils.listFiles(mods, FileFilterUtils.trueFileFilter(),
+        FileFilterUtils.trueFileFilter())) {
+      String path = FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(baseDirectory, f));
+      if (!needed.contains(path)) {
+        try {
+          FileUtils.moveFile(f, modsBackup);
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        System.out.printf("Moved %s - not in pack\n", f.getName());
+      }
+    }
+  }
 
   public static File getGameDir() throws IOException {
     File gameDir = new File(MineguildLauncher.baseDirectory, "minecraft");

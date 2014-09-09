@@ -42,6 +42,22 @@ public class MineguildLauncher {
   public static Settings settings;
 
   public static void main(String[] args) throws Exception {
+    DownloadUtils.ssl_hack();
+    System.setProperty("java.net.preferIPv4Stack", "true");
+    if (args.length == 1) {
+      if (args[0].equals("-updateServer")) {
+        MineguildLauncherConsole.update();
+        System.exit(0);
+      }
+    } else if (args.length == 2) {
+      if (args[0].equals("-updateServer")) {
+        if (args[1].equals("forceUpdate")) {
+          forceUpdate = true;
+          MineguildLauncherConsole.update();
+          System.exit(0);
+        }
+      }
+    }
     try {
       for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {
@@ -53,13 +69,11 @@ public class MineguildLauncher {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    DownloadUtils.ssl_hack();
-    System.setProperty("java.net.preferIPv4Stack", "true");
+
+    Logger.addListener(new LogWriter(new File("launcher.log"), LogSource.LAUNCHER));
     con = new Console();
     con.setVisible(true);
     Logger.addListener(con);
-    Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"),
-        LogSource.LAUNCHER));
 
     try {
       settings = JSONFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
@@ -96,11 +110,6 @@ public class MineguildLauncher {
         new Date(newest.getReleaseTime()).toString()));
     File curpack = new File(baseDirectory, "version.json");
     forceUpdate = !curpack.exists() ? true : dialog.forceUpdate;
-    if (args.length == 1) {
-      if (args[0].equals("forceupdate")) {
-        forceUpdate = true;
-      }
-    }
     if (forceUpdate) {
       try {
         ModpackUtils.updateModpack(newest);
@@ -192,11 +201,11 @@ public class MineguildLauncher {
   public static File getInstallPath(Component par) {
     Component parent = (par == null) ? con : par;
     File folder;
-    try{
+    try {
       folder =
-        MineguildLauncher.settings.getModpackPath() == null ? new File("modpack")
-            : MineguildLauncher.settings.getModpackPath();
-    } catch (NullPointerException e){
+          MineguildLauncher.settings.getModpackPath() == null ? new File("modpack")
+              : MineguildLauncher.settings.getModpackPath();
+    } catch (NullPointerException e) {
       folder = new File("modpack");
     }
     int result =
