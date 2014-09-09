@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -18,6 +20,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import net.mineguild.Launcher.Constants;
+import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.log.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -120,6 +123,42 @@ public class DownloadUtils {
       e.printStackTrace();
     }
     return 0;
+  }
+
+  public static long getTotalSize(List<DownloadInfo> downloads) {
+    try {
+      Logger.logDebug("Starting size getting.");
+      double start = System.currentTimeMillis();
+      Collection<Long> size =
+          new Parallel.ForEach<DownloadInfo, Long>(downloads).apply(
+              new Parallel.F<DownloadInfo, Long>() {
+                @Override
+                public Long apply(DownloadInfo e) {
+                  try {
+                    if (e.size > 0) {
+                      return e.size;
+                    } else {
+                      URLConnection con = e.url.openConnection();
+                      return con.getContentLengthLong();
+                    }
+                  } catch (IOException e1) {
+                    Logger.logError("Couldn't get size of file", e1);
+                    return 0l;
+                  }
+                }
+
+              }).values();
+      Logger.logDebug(String.format("Finished size getting after %.2f seconds.",
+          (System.currentTimeMillis() - start) / 1000));
+      long sizeNumber = 0;
+      for (Long l : size) {
+        sizeNumber += l;
+      }
+      return sizeNumber;
+    } catch (Exception e) {
+      Logger.logError("Couldn't execute parallel task.", e);
+      return 0l;
+    }
   }
 
 

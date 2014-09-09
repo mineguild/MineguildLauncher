@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class AssetDownloader extends SwingWorker<Boolean, Void> {
-  private static final int BUFFER_SIZE = 1024;
+  private static final int BUFFER_SIZE = 8192;
   private static AssetDownloader instance;
   private List<DownloadInfo> downloads;
   private boolean allDownloaded = true;
@@ -119,7 +119,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     firePropertyChange("speed", oldSpeed, speed);
   }
 
-  public int calculateTotalProgress(long currentSize, long remoteSize) {
+  public synchronized int calculateTotalProgress(long currentSize, long remoteSize) {
     int newProg = 0;
     if (totalSize > 0) {
       newProg = (int) ((totalBytesRead * 100) / totalSize);
@@ -239,7 +239,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         if (totalSize == 0) {
           start = System.nanoTime();
         }
-        final double BYTES_PER_KILOBYTE = 1000;
+        final double BYTES_PER_KILOBYTE = 1024;
         final double NANOS_PER_SECOND = 1000000000.0;
         InputStream input = con.getInputStream();
         FileOutputStream output = new FileOutputStream(asset.local);

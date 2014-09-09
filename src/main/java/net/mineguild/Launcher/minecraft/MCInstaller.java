@@ -24,6 +24,7 @@ import net.mineguild.Launcher.log.LogLevel;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.log.StreamLogger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
+import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
@@ -72,7 +73,7 @@ public class MCInstaller {
     }
     if (libraries.size() > 0) {
       long startTime = System.currentTimeMillis();
-      dlDialog = new MultithreadDownloadDialog(libraries, "Downloading Libraries");
+      dlDialog = new MultithreadDownloadDialog(libraries, "Downloading Libraries", DownloadUtils.getTotalSize(libraries));
       dlDialog.setVisible(true);
       if (!dlDialog.start()) {
         dlDialog.dispose();
@@ -184,6 +185,8 @@ public class MCInstaller {
     AssetIndex index = JSONFactory.loadAssetIndex(json);
 
     Collection<DownloadInfo> tmp;
+    Logger.logInfo("Starting asset hash checking... Please wait...");
+    long start = System.currentTimeMillis();
     Parallel.TaskHandler th =
         new Parallel.ForEach(index.objects.entrySet()).withFixedThreads(2 * OSUtils.getNumCores())
         // .configurePoolSize(2*2*OSUtils.getNumCores(), 10)
@@ -204,13 +207,14 @@ public class MCInstaller {
                         .newArrayList(asset.hash), "sha1"));
                   }
                 } catch (Exception ex) {
-                  // Logger.logError("Asset hash check failed", ex);
+                  Logger.logError("Asset hash check failed", ex);
                 }
                 // values() will drop null entries
                 return null;
               }
             });
     tmp = th.values();
+    Logger.logInfo(String.format("Finished asset hash checking in %d seconds.", (System.currentTimeMillis()-start)/1000));
     list.addAll(tmp);
     // kill executorservice
     th.shutdown();
