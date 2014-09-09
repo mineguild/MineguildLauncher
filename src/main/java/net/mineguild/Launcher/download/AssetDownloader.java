@@ -416,7 +416,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           asset.local.getParentFile().mkdirs();
           int readLen;
           long currentSize = 0;
-          final double BYTES_PER_KILOBYTE = 1000;
+          final double BYTES_PER_KILOBYTE = 1024;
           final double NANOS_PER_SECOND = 1000000000.0;
           InputStream input = con.getInputStream();
           FileOutputStream output = new FileOutputStream(asset.local);

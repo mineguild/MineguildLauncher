@@ -41,6 +41,8 @@ import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.exceptions.UserMigratedException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
+import javax.swing.SwingConstants;
+import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")
 public class LoginDialog extends JDialog {
@@ -59,7 +61,12 @@ public class LoginDialog extends JDialog {
   public LoginResponse response;
   public int accountLevel;
   public boolean successfull = false;
+  public boolean forceUpdate = false;
   private JLabel lblUsernameemail;
+  private JCheckBox chckbxForceUpdate;
+  private JPanel panel;
+  private JButton btnChangeInstallLocation;
+  private JPanel panel_1;
 
   public LoginDialog(Frame parent) {
     super(parent);
@@ -93,6 +100,7 @@ public class LoginDialog extends JDialog {
         });
       }
     });
+    buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
     buttonPanel.add(loginButton);
     cancelButton = new JButton("Cancel");
     cancelButton.addActionListener(new ActionListener() {
@@ -105,12 +113,34 @@ public class LoginDialog extends JDialog {
 
     checkBoxPanel = new JPanel();
     bottomPanel.add(checkBoxPanel, BorderLayout.NORTH);
-
-    savePasswordBox = new JCheckBox("Save password");
-    checkBoxPanel.add(savePasswordBox);
-
-    saveTokenBox = new JCheckBox("Save MCToken");
-    checkBoxPanel.add(saveTokenBox);
+    checkBoxPanel.setLayout(new BorderLayout(0, 0));
+    
+    panel = new JPanel();
+    checkBoxPanel.add(panel, BorderLayout.SOUTH);
+    panel.setLayout(new BorderLayout(0, 0));
+    
+    chckbxForceUpdate = new JCheckBox("Force Update");
+    chckbxForceUpdate.setHorizontalAlignment(SwingConstants.CENTER);
+    panel.add(chckbxForceUpdate, BorderLayout.NORTH);
+    
+    btnChangeInstallLocation = new JButton("Change install location");
+    btnChangeInstallLocation.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        MineguildLauncher.settings.setModpackPath(MineguildLauncher.getInstallPath(getRootPane()));
+      }
+    });
+    panel.add(btnChangeInstallLocation);
+    
+    panel_1 = new JPanel();
+    checkBoxPanel.add(panel_1, BorderLayout.NORTH);
+    
+        savePasswordBox = new JCheckBox("Save password");
+        panel_1.add(savePasswordBox);
+        savePasswordBox.setHorizontalAlignment(SwingConstants.CENTER);
+        
+            saveTokenBox = new JCheckBox("Save MCToken");
+            panel_1.add(saveTokenBox);
+            saveTokenBox.setHorizontalAlignment(SwingConstants.LEFT);
 
     dataPanel = new JPanel();
     dataPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -195,6 +225,7 @@ public class LoginDialog extends JDialog {
     setModal(true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setLocationRelativeTo(null);
+    getRootPane().setDefaultButton(loginButton);
   }
 
   public void run() {
@@ -272,7 +303,8 @@ public class LoginDialog extends JDialog {
       } else {
         MineguildLauncher.settings.setMojangdata(null);
       }
-
+      
+      forceUpdate = chckbxForceUpdate.isSelected();
       successfull = true;
       dispose();
     }

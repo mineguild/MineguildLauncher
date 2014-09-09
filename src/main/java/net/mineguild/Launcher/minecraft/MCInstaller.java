@@ -106,7 +106,7 @@ public class MCInstaller {
     for (Library lib : forgeVersion.getLibraries()) {
       if (lib.natives == null) {
         local = new File(libDir, lib.getPath());
-        if (!local.exists()) {
+        if (!local.exists() || MineguildLauncher.forceUpdate) {
           if (lib.checksums != null) {
             list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local,
                 local.getName(), lib.checksums, "sha1", DownloadInfo.DLType.NONE,
@@ -147,12 +147,12 @@ public class MCInstaller {
     for (Library lib : mcJson.getLibraries()) {
       if (lib.natives == null) {
         local = new File(libDir, lib.getPath());
-        if (!local.exists()) {
+        if (!local.exists() || MineguildLauncher.forceUpdate) {
           list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, lib.getPath()));
         }
       } else {
         local = new File(libDir, lib.getPathNatives());
-        if (!local.exists()) {
+        if (!local.exists() || MineguildLauncher.forceUpdate) {
           list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, lib
               .getPathNatives()));
         }

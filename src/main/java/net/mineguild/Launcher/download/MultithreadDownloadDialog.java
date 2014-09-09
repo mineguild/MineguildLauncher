@@ -22,6 +22,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import net.mineguild.Launcher.log.Logger;
+
 @SuppressWarnings("serial")
 public class MultithreadDownloadDialog extends JDialog implements PropertyChangeListener {
 
@@ -86,16 +88,9 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
     task.run();
     try {
       boolean success = task.get();
-      /*
-       * if (success) { JOptionPane.showMessageDialog(this,
-       * "All files were successfully downloaded!", "Success!", JOptionPane.INFORMATION_MESSAGE); }
-       * else { JOptionPane.showMessageDialog(this, "Files are missing!", "Error!",
-       * JOptionPane.ERROR_MESSAGE); }
-       */
       return success;
     } catch (Exception e) {
-      // JOptionPane
-      // .showMessageDialog(this, "Files are missing!", "Error!", JOptionPane.ERROR_MESSAGE);
+      Logger.logError("Download didnt work!", e);
       e.printStackTrace();
       return false;
     }

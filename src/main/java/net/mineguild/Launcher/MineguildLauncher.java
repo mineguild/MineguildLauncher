@@ -1,11 +1,13 @@
 package net.mineguild.Launcher;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -33,6 +35,7 @@ public class MineguildLauncher {
   public static File baseDirectory;
   public static boolean doExactCheck;
   public static boolean MCRunning;
+  public static boolean forceUpdate;
   public static ProcessMonitor procmon;
   public static Console con;
   public static long totalDownloadTime = 0;
@@ -55,17 +58,18 @@ public class MineguildLauncher {
     con = new Console();
     con.setVisible(true);
     Logger.addListener(con);
-    Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"), LogSource.LAUNCHER));
+    Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"),
+        LogSource.LAUNCHER));
 
     try {
       settings = JSONFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
     } catch (IOException e) {
       OSUtils.getLocalDir().mkdirs();
-      settings = new Settings(getInstallPath());
+      settings = new Settings(getInstallPath(null));
       JSONFactory.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
     }
     if (settings.getModpackPath() == null) {
-      settings.setModpackPath(getInstallPath());
+      settings.setModpackPath(getInstallPath(null));
     }
     AuthWorkDialog dl = new AuthWorkDialog(con);
     dl.start();
@@ -91,7 +95,7 @@ public class MineguildLauncher {
     Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         new Date(newest.getReleaseTime()).toString()));
     File curpack = new File(baseDirectory, "version.json");
-    boolean forceUpdate = !curpack.exists();
+    forceUpdate = !curpack.exists() ? true : dialog.forceUpdate;
     if (args.length == 1) {
       if (args[0].equals("forceupdate")) {
         forceUpdate = true;
@@ -159,7 +163,7 @@ public class MineguildLauncher {
       try {
         Logger.logInfo("Preparing MC for launch.");
         MCInstaller.setup(m);
-        Logger.logInfo("Downloaded for "+totalDownloadTime/1000+" seconds.");
+        Logger.logInfo("Downloaded for " + totalDownloadTime / 1000 + " seconds.");
       } catch (Exception e) {
         Logger.logError("Couldn't prepare MC for launch.", e);
         success = false;
@@ -185,15 +189,20 @@ public class MineguildLauncher {
     }
   }
 
-  public static File getInstallPath() {
+  public static File getInstallPath(Component parent) {
+    parent = (parent == null) ? con : parent;
+    File folder =
+        MineguildLauncher.settings.getModpackPath() == null ? new File("modpack")
+            : MineguildLauncher.settings.getModpackPath();
     int result =
         JOptionPane
             .showConfirmDialog(
-                con,
+                parent,
                 String
                     .format(
-                        "Do you want to select a different install location for the modpack? Otherwise it will be installed in %s",
-                        new File("modpack").getAbsolutePath()));
+                        "Do you want to select a different install location for the modpack?\nOtherwise it will be installed in %s",
+                        folder.getAbsolutePath()), "Select MMP install location.",
+                JOptionPane.YES_NO_OPTION);
     if (result == JOptionPane.OK_OPTION) {
       JFileChooser chooser = new JFileChooser();
       chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -201,14 +210,21 @@ public class MineguildLauncher {
       if (result == JFileChooser.APPROVE_OPTION) {
         return chooser.getSelectedFile();
       } else {
-        return getInstallPath();
+        return getInstallPath(parent);
       }
 
     } else {
-      if (new File("modpack").mkdirs())
-        return new File("modpack");
-      else
-        return getInstallPath();
+      if (!folder.exists()) {
+        if (folder.mkdirs()) {
+          return folder;
+        } else {
+          return getInstallPath(parent);
+        }
+      } else if (folder.canWrite()) {
+        return folder;
+      } else {
+        return getInstallPath(parent);
+      }
     }
   }
 

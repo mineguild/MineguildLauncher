@@ -55,7 +55,9 @@ public class ModpackUtils {
   public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files,
       boolean exactCheck) {
     needed = new HashMap<String, String>();
-    ExecutorService executorService = Executors.newFixedThreadPool(4);
+    float start = System.currentTimeMillis();
+    Logger.logInfo("Checking local mods.");
+    ExecutorService executorService = Executors.newFixedThreadPool(OSUtils.getNumCores()*2);
     for (Map.Entry<String, String> entry : files.entrySet()) {
       try {
         Runnable worker =
@@ -63,6 +65,7 @@ public class ModpackUtils {
                 entry.getValue(), exactCheck);
         executorService.execute(worker);
       } catch (Exception ignored) {
+        Logger.logError("Unable to check modpack file!", ignored);
       }
     }
     executorService.shutdown();
@@ -72,6 +75,7 @@ public class ModpackUtils {
       executorService.shutdownNow();
       Thread.currentThread().interrupt();
     }
+    Logger.logInfo(String.format("Checking completed in %.2f seconds", (System.currentTimeMillis() - start)/1000));
     return needed;
   }
 
