@@ -125,7 +125,7 @@ public class Modpack {
 
 
   public boolean isNewer(Modpack otherPack) {
-    return otherPack.getReleaseTime() >= this.getReleaseTime();
+    return otherPack.getReleaseTime() <= this.getReleaseTime();
   }
 
 

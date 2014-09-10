@@ -126,7 +126,7 @@ public class ModpackBuilder extends JFrame {
   public void createUpdatedPack(final JFrame parent) {
     Modpack modPack = new Modpack(modpackDirectory);
     modPack.setMinecraftVersion("1.7.10");
-    modPack.setForgeVersion("1.7.10-10.13.1.1212-new");
+    modPack.setForgeVersion("1.7.10-10.13.0.1208");
     modPack.setVersion(ModpackBuilder.instance.versionField.getText());
     modPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);

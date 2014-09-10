@@ -13,8 +13,7 @@ public class Constants {
                   FileFilterUtils.suffixFileFilter("opt"),
                   FileFilterUtils.suffixFileFilter("disabled"))),
               FileFilterUtils.sizeFileFilter(1l, true));
-  public static final IOFileFilter MODPACK_DIR_FILTER = FileFilterUtils.or(
-      FileFilterUtils.prefixFileFilter("mods"), FileFilterUtils.prefixFileFilter("config"));
+  public static final IOFileFilter MODPACK_DIR_FILTER = FileFilterUtils.trueFileFilter();
 
   // Minecraft links
   public static final String MC_RES = "http://resources.download.minecraft.net/"; // Minecraft

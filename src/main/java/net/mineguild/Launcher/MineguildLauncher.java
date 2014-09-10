@@ -101,7 +101,7 @@ public class MineguildLauncher {
     baseDirectory = settings.getModpackPath();
     baseDirectory.mkdirs();
 
-    Modpack m;
+    Modpack m = null;
     boolean updated = true;
     Modpack newest =
         Modpack.fromJson(IOUtils
@@ -121,8 +121,8 @@ public class MineguildLauncher {
     } else {
       try {
         Modpack localPack = Modpack.fromJson(FileUtils.readFileToString(curpack));
-        Logger.logInfo(String.format("Local pack version: %s released on %s", newest.getVersion(),
-            newest.getReleaseDate()));
+        Logger.logInfo(String.format("Local pack version: %s released on %s", localPack.getVersion(),
+            localPack.getReleaseDate()));
         if (!newest.getHash().equals(localPack.getHash())) {
           if (newest.isNewer(localPack)) {
             int result =
@@ -137,6 +137,7 @@ public class MineguildLauncher {
               Logger.logInfo("Updating from Local to Remote");
               try {
                 ModpackUtils.updateModpack(localPack, newest);
+                m = newest;
               } catch (Exception e) {
                 Logger.logError("Modpack update interrupted!", e);
                 updated = false;
@@ -145,13 +146,12 @@ public class MineguildLauncher {
               // We let him launch the pack although he won't be able to play on the server.
               Logger.logInfo("Pack wasn't updated, because user denied.");
             }
-            m = newest;
           } else {
-            Logger.logInfo("Not updating, because not newer");
+            Logger.logInfo("Not updating, because not newer1");
             m = localPack;
           }
         } else {
-          Logger.logInfo("Not updating, because not newer");
+          Logger.logInfo("Not updating, because not newer2");
           m = localPack;
         }
       } catch (Exception e) {
