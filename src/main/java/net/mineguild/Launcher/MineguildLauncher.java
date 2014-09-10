@@ -114,7 +114,7 @@ public class MineguildLauncher {
       try {
         ModpackUtils.updateModpack(newest);
       } catch (Exception e) {
-        Logger.logError("Modpack update interuppted!", e);
+        Logger.logError("Modpack update interrupted!", e);
         updated = false;
       }
       m = newest;
