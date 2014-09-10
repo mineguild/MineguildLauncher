@@ -116,8 +116,10 @@ public class Modpack {
 
   public void addModpackFiles() {
     if (basePath != null) {
-      this.addFiles(FileUtils.listFiles(basePath, Constants.MODPACK_FILE_FILTER,
+      this.addFiles(FileUtils.listFiles(new File(basePath, "mods"), Constants.MODPACK_FILE_FILTER,
           Constants.MODPACK_DIR_FILTER));
+      this.addFiles(FileUtils.listFiles(new File(basePath, "config"),
+          Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER));
     }
   }
 

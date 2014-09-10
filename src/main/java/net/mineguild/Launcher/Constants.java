@@ -8,10 +8,10 @@ public class Constants {
   public static final IOFileFilter MODPACK_FILE_FILTER =
       FileFilterUtils
           .and(
-              FileFilterUtils.notFileFilter(FileFilterUtils.and(
-                  FileFilterUtils.suffixFileFilter(".dis"),
-                  FileFilterUtils.suffixFileFilter(".opt"),
-                  FileFilterUtils.suffixFileFilter(".disabled"))),
+              FileFilterUtils.notFileFilter(FileFilterUtils.or(
+                  FileFilterUtils.suffixFileFilter("dis"),
+                  FileFilterUtils.suffixFileFilter("opt"),
+                  FileFilterUtils.suffixFileFilter("disabled"))),
               FileFilterUtils.sizeFileFilter(1l, true));
   public static final IOFileFilter MODPACK_DIR_FILTER = FileFilterUtils.or(
       FileFilterUtils.prefixFileFilter("mods"), FileFilterUtils.prefixFileFilter("config"));

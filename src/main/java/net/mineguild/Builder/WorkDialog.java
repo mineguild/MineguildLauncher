@@ -3,6 +3,8 @@ package net.mineguild.Builder;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.util.Collection;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -37,9 +39,12 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
   }
 
   public void start(final Modpack targetModpack) {
-    worker =
-        new FileAddWorker(FileUtils.listFiles(targetModpack.getBasePath(),
-            Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER));
+    Collection<File> fileList =
+        FileUtils.listFiles(new File(targetModpack.getBasePath(), "mods"),
+            Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER);
+    fileList.addAll(FileUtils.listFiles(new File(targetModpack.getBasePath(), "config"),
+        Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER));
+    worker = new FileAddWorker(fileList);
     worker.addPropertyChangeListener(this);
     this.targetModpack = targetModpack;
     worker.execute();
