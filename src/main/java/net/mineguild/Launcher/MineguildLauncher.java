@@ -90,7 +90,7 @@ public class MineguildLauncher {
     LoginDialog dialog = new LoginDialog(con);
     dialog.run();
     if (!dialog.successfull) {
-      Logger.logError("Login not successfull... Exiting");
+      Logger.logError("Login not successful... Exiting");
       Thread.sleep(1000);
       System.exit(0);
     }
@@ -109,7 +109,7 @@ public class MineguildLauncher {
     Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         new Date(newest.getReleaseTime()).toString()));
     File curpack = new File(baseDirectory, "version.json");
-    forceUpdate = !curpack.exists() ? true : dialog.forceUpdate;
+    forceUpdate = !curpack.exists() || dialog.forceUpdate;
     if (forceUpdate) {
       try {
         ModpackUtils.updateModpack(newest);

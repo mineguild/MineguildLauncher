@@ -46,7 +46,7 @@ public class MineguildLauncherConsole {
     System.out.println(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         newest.getReleaseDate()));
     File curpack = new File("version.json");
-    forceUpdate = MineguildLauncher.forceUpdate ? true : !curpack.exists();
+    forceUpdate = MineguildLauncher.forceUpdate || !curpack.exists();
     if (forceUpdate)
       forceUpdate(newest);
     else {
