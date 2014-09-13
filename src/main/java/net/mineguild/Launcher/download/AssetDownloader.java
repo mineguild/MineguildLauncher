@@ -396,7 +396,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           }
 
           if (asset.local.exists()) {
-            instance.doHashCheck(asset, remoteHash);
+            AssetDownloader.doHashCheck(asset, remoteHash);
           }
 
           if (asset.local.exists()) {
@@ -460,7 +460,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 + remoteSize + " local: " + currentSize);
           }
 
-          if (downloadSuccess = instance.doHashCheck(asset, remoteHash)) {
+          if (downloadSuccess = AssetDownloader.doHashCheck(asset, remoteHash)) {
           }
         } catch (Exception e) {
           downloadSuccess = false;

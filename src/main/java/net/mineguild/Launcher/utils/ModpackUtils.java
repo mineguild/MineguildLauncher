@@ -1,16 +1,5 @@
 package net.mineguild.Launcher.utils;
 
-import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.Modpack;
-import net.mineguild.Launcher.download.DownloadDialog;
-import net.mineguild.Launcher.download.DownloadInfo;
-import net.mineguild.Launcher.download.MultithreadDownloadDialog;
-import net.mineguild.Launcher.log.Logger;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,6 +9,16 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import net.mineguild.Launcher.MineguildLauncher;
+import net.mineguild.Launcher.Modpack;
+import net.mineguild.Launcher.download.DownloadInfo;
+import net.mineguild.Launcher.download.MultithreadDownloadDialog;
+import net.mineguild.Launcher.log.Logger;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 
 public class ModpackUtils {
   public static Map<String, String> needed;
@@ -127,9 +126,8 @@ public class ModpackUtils {
       String path = FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(baseDirectory, f));
       if (!needed.contains(path)) {
         try {
-          FileUtils.moveFile(f, modsBackup);
+          FileUtils.moveFileToDirectory(f, modsBackup, false);
         } catch (IOException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
         System.out.printf("Moved %s - not in pack\n", f.getName());

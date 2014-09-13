@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.Date;
 
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -121,14 +120,15 @@ public class MineguildLauncher {
     } else {
       try {
         Modpack localPack = Modpack.fromJson(FileUtils.readFileToString(curpack));
-        Logger.logInfo(String.format("Local pack version: %s released on %s", localPack.getVersion(),
-            localPack.getReleaseDate()));
+        Logger.logInfo(String.format("Local pack version: %s released on %s",
+            localPack.getVersion(), localPack.getReleaseDate()));
         if (!newest.getHash().equals(localPack.getHash())) {
           if (newest.isNewer(localPack)) {
             int result =
                 JOptionPane.showConfirmDialog(con, String.format(
                     "A new version %s released on %s is available! Do you want to update?",
-                    newest.getVersion(), newest.getReleaseDate()));
+                    newest.getVersion(), newest.getReleaseDate()), "Update modpack?",
+                    JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION) {
               Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]",
                   localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
@@ -147,11 +147,11 @@ public class MineguildLauncher {
               Logger.logInfo("Pack wasn't updated, because user denied.");
             }
           } else {
-            Logger.logInfo("Not updating, because not newer1");
+            Logger.logInfo("Not updating, because not newer");
             m = localPack;
           }
         } else {
-          Logger.logInfo("Not updating, because not newer2");
+          Logger.logInfo("Not updating, because not newer");
           m = localPack;
         }
       } catch (Exception e) {
