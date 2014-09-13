@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 import javax.swing.InputVerifier;
@@ -31,6 +32,7 @@ import net.mineguild.Launcher.Modpack;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.common.collect.Lists;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -139,6 +141,14 @@ public class ModpackBuilder extends JFrame {
     JButton removeButton = new JButton("Remove selected entry/entries");
     JButton doneButton = new JButton("Done");
     JButton refreshButton = new JButton("Refresh");
+    JButton clientSide = new JButton("Toggle clientside");
+    clientSide.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        int[] rows = table.getSelectedRows();
+        mTableModel.toggleClientSide(rows);
+      }
+    });
     refreshButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -167,6 +177,7 @@ public class ModpackBuilder extends JFrame {
     showFilesDialog.add(tableView, BorderLayout.NORTH);
     JPanel bottomButtonPanel = new JPanel(new BorderLayout());
     bottomButtonPanel.add(removeButton, BorderLayout.NORTH);
+    bottomButtonPanel.add(clientSide, BorderLayout.CENTER);
     bottomButtonPanel.add(doneButton, BorderLayout.SOUTH);
     showFilesDialog.add(refreshButton, BorderLayout.CENTER);
     showFilesDialog.add(bottomButtonPanel, BorderLayout.SOUTH);
@@ -233,6 +244,24 @@ public class ModpackBuilder extends JFrame {
         default:
           return "Unkown";
       }
+    }
+    
+    public void toggleClientSide(int[] rows){
+      ArrayList<String> names = Lists.newArrayList();
+      for (int row : rows){
+        names.add((String) pack.getModpackFiles().keySet().toArray()[row]);
+      }
+      for(String name : names){
+        String newName = "";
+        if(name.endsWith(".client")){
+          newName = name.replace(".client", "");
+        } else {
+          newName = name + ".client";         
+        }
+        String hash = pack.getModpackFiles().remove(name);
+        pack.getModpackFiles().put(newName, hash);
+      }
+      fireTableDataChanged();
     }
 
     @Override

@@ -20,6 +20,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
+import com.google.common.collect.Maps;
+
 public class ModpackUtils {
   public static Map<String, String> needed;
 
@@ -31,20 +33,35 @@ public class ModpackUtils {
     }
     Map<String, String> neededFiles =
         getNeededFiles(getGameDir(), newPack.getModpackFiles(), MineguildLauncher.doExactCheck);
+    neededFiles = ModpackUtils.filterServerMods(neededFiles, false);
     if (neededFiles.size() > 0) {
       List<DownloadInfo> info = DownloadInfo.getDownloadInfo(getGameDir(), neededFiles);
       MultithreadDownloadDialog dialog =
-          new MultithreadDownloadDialog(info, "Updating Modpack", DownloadUtils.getTotalSize(neededFiles
-              .values()));
+          new MultithreadDownloadDialog(info, "Updating Modpack",
+              DownloadUtils.getTotalSize(neededFiles.values()));
       long startTime = System.currentTimeMillis();
       dialog.setVisible(true);
       boolean success = dialog.start();
       if (!success) {
         throw new Exception("Modpack updater cancelled!");
       }
-      MineguildLauncher.totalDownloadTime += System.currentTimeMillis()-startTime;
+      MineguildLauncher.totalDownloadTime += System.currentTimeMillis() - startTime;
       dialog.dispose();
     }
+  }
+
+  public static Map<String, String> filterServerMods(Map<String, String> allMods, boolean isServer) {
+    Map<String, String> filteredMods = Maps.newHashMap();
+    for (Map.Entry<String, String> entry : allMods.entrySet()) {
+      if (entry.getKey().endsWith(".client")) {
+        if (!isServer) {
+          filteredMods.put(entry.getKey().replace(".client", ""), entry.getValue());
+        }
+      } else {
+        filteredMods.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return filteredMods;
   }
 
   public static void updateModpack(Modpack newPack) throws Exception {
@@ -54,9 +71,9 @@ public class ModpackUtils {
   public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files,
       boolean exactCheck) {
     needed = new HashMap<String, String>();
-    float start = System.currentTimeMillis();
+    double start = System.currentTimeMillis();
     Logger.logInfo("Checking local mods.");
-    ExecutorService executorService = Executors.newFixedThreadPool(OSUtils.getNumCores()*2);
+    ExecutorService executorService = Executors.newFixedThreadPool(OSUtils.getNumCores() * 2);
     for (Map.Entry<String, String> entry : files.entrySet()) {
       try {
         Runnable worker =
@@ -74,7 +91,8 @@ public class ModpackUtils {
       executorService.shutdownNow();
       Thread.currentThread().interrupt();
     }
-    Logger.logInfo(String.format("Checking completed in %.2f seconds", (System.currentTimeMillis() - start)/1000));
+    Logger.logInfo(String.format("Checking completed in %.2f seconds",
+        (System.currentTimeMillis() - start) / 1000));
     return needed;
   }
 
@@ -113,7 +131,7 @@ public class ModpackUtils {
       }
     }
   }
-  
+
   public static void moveUntrackedMods(File baseDirectory, Map<String, String> files) {
     File mods = new File(baseDirectory, "mods");
     if (!mods.exists()) {

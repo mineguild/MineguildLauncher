@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class MineguildLauncherConsole {
 
@@ -95,6 +96,7 @@ public class MineguildLauncherConsole {
     }
     Map<String, String> neededFiles =
         ModpackUtils.getNeededFiles(baseDir, newPack.getModpackFiles(), true);
+    neededFiles = ModpackUtils.filterServerMods(neededFiles, true);
     List<DownloadInfo> downloads = DownloadInfo.getDownloadInfo(baseDir, neededFiles);
     amountOfFiles = downloads.size();
     start = System.nanoTime();
@@ -123,9 +125,6 @@ public class MineguildLauncherConsole {
     }
   }
 
-  public static void downloadFiles() {
-
-  }
 
   public static class FileDownloader implements Runnable {
 
