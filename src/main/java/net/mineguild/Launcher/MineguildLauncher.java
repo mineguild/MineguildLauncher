@@ -106,10 +106,10 @@ public class MineguildLauncher {
     baseDirectory = settings.getModpackPath();
     baseDirectory.mkdirs();
 
-    X_Modpack m = null;
+    XModpack m = null;
     boolean updated = true;
-    X_Modpack newest =
-        X_Modpack.fromJson(IOUtils
+    XModpack newest =
+        XModpack.fromJson(IOUtils
             .toString(new URL("https://mineguild.net/download/mmp/modpack.json")));
     Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         new Date(newest.getReleaseTime()).toString()));
@@ -125,7 +125,7 @@ public class MineguildLauncher {
       m = newest;
     } else {
       try {
-        X_Modpack localPack = X_Modpack.fromJson(FileUtils.readFileToString(curpack));
+        XModpack localPack = XModpack.fromJson(FileUtils.readFileToString(curpack));
         Logger.logInfo(String.format("Local pack version: %s released on %s",
             localPack.getVersion(), localPack.getReleaseDate()));
         if (!newest.getHash().equals(localPack.getHash())) {

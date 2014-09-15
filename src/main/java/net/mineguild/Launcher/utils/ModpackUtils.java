@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.X_Modpack;
+import net.mineguild.Launcher.XModpack;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadDownloadDialog;
 import net.mineguild.Launcher.log.Logger;
@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
 public class ModpackUtils {
   public static Map<String, String> needed;
 
-  public static void updateModpack(X_Modpack currentPack, X_Modpack newPack) throws Exception {
+  public static void updateModpack(XModpack currentPack, XModpack newPack) throws Exception {
     if (currentPack == null) {
       deleteUntrackedMods(getGameDir(), newPack.getModpackFiles());
     } else {
@@ -65,7 +65,7 @@ public class ModpackUtils {
     return filteredMods;
   }
 
-  public static void updateModpack(X_Modpack newPack) throws Exception {
+  public static void updateModpack(XModpack newPack) throws Exception {
     updateModpack(null, newPack);
   }
 

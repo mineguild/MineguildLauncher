@@ -12,7 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
 import net.mineguild.Launcher.Constants;
-import net.mineguild.Launcher.X_Modpack;
+import net.mineguild.Launcher.XModpack;
 
 import org.apache.commons.io.FileUtils;
 
@@ -21,7 +21,7 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
 
   public static WorkDialog instance;
   private JProgressBar bar;
-  private X_Modpack targetModpack;
+  private XModpack targetModpack;
   private FileAddWorker worker;
 
   public WorkDialog(JFrame owner) {
@@ -38,7 +38,7 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
     setLocationRelativeTo(null);
   }
 
-  public void start(final X_Modpack targetModpack) {
+  public void start(final XModpack targetModpack) {
     Collection<File> fileList =
         FileUtils.listFiles(new File(targetModpack.getBasePath(), "mods"),
             Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER);

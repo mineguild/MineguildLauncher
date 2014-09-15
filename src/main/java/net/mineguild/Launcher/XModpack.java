@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
-public class X_Modpack {
+public class XModpack {
   private @Expose @Getter @Setter String version;
   private @Expose @Getter String hash;
   private @Expose @Getter long releaseTime;
@@ -34,7 +34,7 @@ public class X_Modpack {
   private @Getter @Setter File basePath; // Local variable -- doesn't belong to json.
 
 
-  public X_Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
+  public XModpack(String version, long releaseTime, Map<String, String> modpackFiles) {
 
     this.version = version;
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
@@ -42,18 +42,18 @@ public class X_Modpack {
     this.modpackFiles = modpackFiles;
   }
 
-  public X_Modpack(long releaseTime) {
+  public XModpack(long releaseTime) {
     this.releaseTime = releaseTime;
   }
 
-  public X_Modpack(File basePath) {
+  public XModpack(File basePath) {
     this.releaseTime = -1;
     this.basePath = basePath;
   }
 
-  public static X_Modpack fromJson(String json) {
+  public static XModpack fromJson(String json) {
     Gson g = new Gson();
-    return g.fromJson(json, X_Modpack.class);
+    return g.fromJson(json, XModpack.class);
   }
 
   public String toJson() {
@@ -71,7 +71,7 @@ public class X_Modpack {
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
   }
 
-  public static HashMap<String, String> getNew(X_Modpack oldPack, X_Modpack newPack) {
+  public static HashMap<String, String> getNew(XModpack oldPack, XModpack newPack) {
     HashMap<String, String> newFiles = Maps.newHashMap();
     for (Map.Entry<String, String> newEntry : newPack.getModpackFiles().entrySet()) {
       if (oldPack.getModpackFiles().containsKey(newEntry.getKey())) {
@@ -85,7 +85,7 @@ public class X_Modpack {
     return newFiles;
   }
 
-  public static Map<String, String> getOld(X_Modpack oldPack, X_Modpack newPack) {
+  public static Map<String, String> getOld(XModpack oldPack, XModpack newPack) {
     Map<String, String> oldFiles = Maps.newHashMap();
     for (Map.Entry<String, String> oldEntry : oldPack.getModpackFiles().entrySet()) {
       if (newPack.getModpackFiles().containsKey(oldEntry.getKey())) {
@@ -99,12 +99,12 @@ public class X_Modpack {
     return oldFiles;
   }
 
-  public HashMap<String, String> getNew(X_Modpack newPack) {
-    return X_Modpack.getNew(this, newPack);
+  public HashMap<String, String> getNew(XModpack newPack) {
+    return XModpack.getNew(this, newPack);
   }
 
-  public Map<String, String> getOld(X_Modpack newPack) {
-    return X_Modpack.getOld(this, newPack);
+  public Map<String, String> getOld(XModpack newPack) {
+    return XModpack.getOld(this, newPack);
   }
 
 
@@ -124,7 +124,7 @@ public class X_Modpack {
   }
 
 
-  public boolean isNewer(X_Modpack otherPack) {
+  public boolean isNewer(XModpack otherPack) {
     return otherPack.getReleaseTime() <= this.getReleaseTime();
   }
 

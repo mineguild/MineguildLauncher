@@ -1,6 +1,7 @@
 package net.mineguild.Launcher;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.annotations.Expose;
 
@@ -53,23 +55,24 @@ public class ModPack {
   public void addFile(ModPackFile f) {
     files.add(f);
   }
-  
+
   public ModPackFile getFileByPath(String path) {
-    for(ModPackFile f : files){
-      if(f.getPath().equals(path)){
+    for (ModPackFile f : files) {
+      if (f.getPath().equals(path)) {
         return f;
       }
     }
     return null;
   }
-  
-  public ModPackFile getFileByHash(String hash) {
-    for(ModPackFile f : files){
-      if(f.getHash().equals(hash)){
-        return f;
+
+  public List<ModPackFile> getFilesByHash(String hash) {
+    List<ModPackFile> ret = Lists.newArrayList();
+    for (ModPackFile f : files) {
+      if (f.getHash().equals(hash)) {
+        ret.add(f);
       }
     }
-    return null;
+    return ret;
   }
 
 }

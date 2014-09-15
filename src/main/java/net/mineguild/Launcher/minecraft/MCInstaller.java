@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.X_Modpack;
+import net.mineguild.Launcher.XModpack;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadDownloadDialog;
@@ -45,7 +45,7 @@ public class MCInstaller {
   private static String packbasejson = new String();
   private static long totalAssetSize = 0;
 
-  public static void setup(final X_Modpack pack) throws Exception {
+  public static void setup(final XModpack pack) throws Exception {
     List<DownloadInfo> libraries = null;
     List<DownloadInfo> assets = null;
     packmcversion = pack.getMinecraftVersion();
@@ -88,7 +88,7 @@ public class MCInstaller {
     }
   }
 
-  private static List<DownloadInfo> getLibraries(X_Modpack pack) throws Exception {
+  private static List<DownloadInfo> getLibraries(XModpack pack) throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
     File forgeJson = new File(MineguildLauncher.baseDirectory, "pack.json");
     FileUtils.copyURLToFile(new URL(Constants.MG_FORGE + pack.getForgeVersion() + "/version.json"),
@@ -222,7 +222,7 @@ public class MCInstaller {
     return list;
   }
 
-  public static void launchMinecraft(X_Modpack pack, LoginResponse resp) {
+  public static void launchMinecraft(XModpack pack, LoginResponse resp) {
     try {
       File packDir = MineguildLauncher.baseDirectory;
       File gameDir = new File(packDir, "minecraft");
