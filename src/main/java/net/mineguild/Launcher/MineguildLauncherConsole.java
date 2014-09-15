@@ -41,8 +41,8 @@ public class MineguildLauncherConsole {
 
   public static void update() throws Exception {
     baseDir = new File(".");
-    Modpack newest =
-        Modpack.fromJson(IOUtils
+    X_Modpack newest =
+        X_Modpack.fromJson(IOUtils
             .toString(new URL("https://mineguild.net/download/mmp/modpack.json")));
     System.out.println(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         newest.getReleaseDate()));
@@ -52,7 +52,7 @@ public class MineguildLauncherConsole {
       forceUpdate(newest);
     else {
       try {
-        Modpack localPack = Modpack.fromJson(FileUtils.readFileToString(curpack));
+        X_Modpack localPack = X_Modpack.fromJson(FileUtils.readFileToString(curpack));
         System.out.println(String.format("Local pack version: %s released on %s",
             newest.getVersion(), newest.getReleaseDate()));
         if (newest.isNewer(localPack)) {
@@ -80,11 +80,11 @@ public class MineguildLauncherConsole {
 
   }
 
-  public static void forceUpdate(Modpack newPack) throws Exception {
+  public static void forceUpdate(X_Modpack newPack) throws Exception {
     updateModpack(null, newPack);
   }
 
-  public static void updateModpack(Modpack currentPack, Modpack newPack) throws IOException {
+  public static void updateModpack(X_Modpack currentPack, X_Modpack newPack) throws IOException {
     if (currentPack == null) {
       System.out.println("Moving untracked mods to modsBackup");
       File modsBackup = new File(baseDir, "modsBackup");

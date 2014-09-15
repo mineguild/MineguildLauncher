@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.Modpack;
+import net.mineguild.Launcher.X_Modpack;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadDownloadDialog;
 import net.mineguild.Launcher.log.Logger;
@@ -20,12 +20,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 
 public class ModpackUtils {
   public static Map<String, String> needed;
 
-  public static void updateModpack(Modpack currentPack, Modpack newPack) throws Exception {
+  public static void updateModpack(X_Modpack currentPack, X_Modpack newPack) throws Exception {
     if (currentPack == null) {
       deleteUntrackedMods(getGameDir(), newPack.getModpackFiles());
     } else {
@@ -64,15 +65,15 @@ public class ModpackUtils {
     return filteredMods;
   }
 
-  public static void updateModpack(Modpack newPack) throws Exception {
+  public static void updateModpack(X_Modpack newPack) throws Exception {
     updateModpack(null, newPack);
   }
 
   public static Map<String, String> getNeededFiles(File baseDirectory, Map<String, String> files,
       boolean exactCheck) {
     needed = new HashMap<String, String>();
-    double start = System.currentTimeMillis();
     Logger.logInfo("Checking local mods.");
+    Stopwatch watch = Stopwatch.createStarted();
     ExecutorService executorService = Executors.newFixedThreadPool(OSUtils.getNumCores() * 2);
     for (Map.Entry<String, String> entry : files.entrySet()) {
       try {
@@ -92,7 +93,7 @@ public class ModpackUtils {
       Thread.currentThread().interrupt();
     }
     Logger.logInfo(String.format("Checking completed in %.2f seconds",
-        (System.currentTimeMillis() - start) / 1000));
+        (float) watch.elapsed(TimeUnit.MILLISECONDS)/1000f));
     return needed;
   }
 

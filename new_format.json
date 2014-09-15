@@ -1,0 +1,586 @@
+{
+  "releaseTime": 1410807619031,
+  "files": [
+    {
+      "path": "mods/1.7.10/Baubles-1.7.10-1.0.1.5.jar",
+      "size": 91764,
+      "universal": true,
+      "optional": false,
+      "hash": "2da0f6449e1afae1f8f2ae0c4642dab7"
+    },
+    {
+      "path": "mods/1.7.10/CodeChickenLib-1.7.10-1.1.1.101-universal.jar",
+      "size": 299406,
+      "universal": true,
+      "optional": false,
+      "hash": "5c340f55e200b47385eba96ff4fb2b04"
+    },
+    {
+      "path": "mods/1.7.10/ForgeMultipart-1.7.10-1.1.0.300-universal.jar",
+      "size": 861893,
+      "universal": true,
+      "optional": false,
+      "hash": "cdea50c7944ecb00f19bb9401f7e954d"
+    },
+    {
+      "path": "mods/AnimationAPI-1.7.2-1.2.1.jar",
+      "size": 19759,
+      "universal": true,
+      "optional": false,
+      "hash": "390e437c8020864a52fb758034484ef6"
+    },
+    {
+      "path": "mods/Aroma1997Core-1.7.10-1.0.2.7.jar",
+      "size": 136489,
+      "universal": true,
+      "optional": false,
+      "hash": "fdb6dd82dd8ed68631795b00e1c2f7e8"
+    },
+    {
+      "path": "mods/Aroma1997s-Dimensional-World-1.7.2-1.0.2.16.jar",
+      "size": 35755,
+      "universal": true,
+      "optional": false,
+      "hash": "ba1581bf4786095ede79b4610bd2bdff"
+    },
+    {
+      "path": "mods/AsieLib-1.7.10-0.2.12.jar",
+      "size": 106801,
+      "universal": true,
+      "optional": false,
+      "hash": "90d5f8c9100dbfd5f39103b1f71a0790"
+    },
+    {
+      "path": "mods/BetterChests-1.7.10-1.1.1.3.jar",
+      "size": 217999,
+      "universal": true,
+      "optional": false,
+      "hash": "beb0339a1305ba7ad5a2aba4316592ec"
+    },
+    {
+      "path": "mods/BiblioCraft[v1.7.5][MC1.7.10].jar",
+      "size": 2248140,
+      "universal": true,
+      "optional": false,
+      "hash": "001c12531e5f4bc6fcc74d99530d8ffc"
+    },
+    {
+      "path": "mods/BiomesOPlenty-1.7.10-2.1.0.969-universal.jar",
+      "size": 5689854,
+      "universal": true,
+      "optional": false,
+      "hash": "4206f781ebc1249ae4d7b0eae7df6814"
+    },
+    {
+      "path": "mods/Blood Magic-v1.1.0(1.7.10).jar",
+      "size": 1470270,
+      "universal": true,
+      "optional": false,
+      "hash": "0a2bd8fa19cfbab587fcab334ef8490d"
+    },
+    {
+      "path": "mods/Botania r1.1-100.jar",
+      "size": 2985971,
+      "universal": true,
+      "optional": false,
+      "hash": "5bcecef1bd8f7d9c234ee66b03e81d56"
+    },
+    {
+      "path": "mods/Carpenter\u0027s Blocks v3.2.6 - MC 1.7.10.zip",
+      "size": 430882,
+      "universal": true,
+      "optional": false,
+      "hash": "328844e6a3dd56ce933211402ee0de0b"
+    },
+    {
+      "path": "mods/Chisel-1.7.10-1.5.6.jar",
+      "size": 2168438,
+      "universal": true,
+      "optional": false,
+      "hash": "b381a5839d00e33046a9e2cceb5570bd"
+    },
+    {
+      "path": "mods/CoFHCore-[1.7.10]3.0.0B3-26.jar",
+      "size": 942984,
+      "universal": true,
+      "optional": false,
+      "hash": "a843f2bfcbcccc9a7e5e4211bb4db15f"
+    },
+    {
+      "path": "mods/CoFHLib-[1.7.10]1.0.0B3-20.jar",
+      "size": 171638,
+      "universal": true,
+      "optional": false,
+      "hash": "7ffd5b1ab39c0e92cbb9dfcf5e71d680"
+    },
+    {
+      "path": "mods/CodeChickenCore-1.7.10-1.0.2.9-universal.jar",
+      "size": 155030,
+      "universal": true,
+      "optional": false,
+      "hash": "7e2e6998544a359efd6bd3d3bfced399"
+    },
+    {
+      "path": "mods/CompactSolars-1.7.10-4.4.37.314-universal.jar",
+      "size": 55921,
+      "universal": true,
+      "optional": false,
+      "hash": "d3137d5b5bc9b953bc1c20e9ce9da251"
+    },
+    {
+      "path": "mods/CompactWindmills-1.7.2-1.0.3.1.jar",
+      "size": 80805,
+      "universal": true,
+      "optional": false,
+      "hash": "ecb2db0713b6273dfabdb54562b15713"
+    },
+    {
+      "path": "mods/EnderStorage-1.7.10-1.4.4.6-universal.jar",
+      "size": 140656,
+      "universal": true,
+      "optional": false,
+      "hash": "61d81fc1bec1978fece1e809140dc6b9"
+    },
+    {
+      "path": "mods/ExtraCells-2.1.6.jar",
+      "size": 857620,
+      "universal": true,
+      "optional": false,
+      "hash": "93ee1f4dee3290979998fbf126f2e1cf"
+    },
+    {
+      "path": "mods/ExtraTiC-1.7.10-1.0.3.jar",
+      "size": 5751178,
+      "universal": true,
+      "optional": false,
+      "hash": "453c06ef469c660b4b195589a292132b"
+    },
+    {
+      "path": "mods/HEE_1.7.10_release-1.6.2.zip",
+      "size": 11580194,
+      "universal": true,
+      "optional": false,
+      "hash": "f1053e4e79f4e53518bb5985de0fb02c"
+    },
+    {
+      "path": "mods/HQM-The Journey (4.1.0).jar",
+      "size": 1185326,
+      "universal": true,
+      "optional": false,
+      "hash": "27a6f826332473641bafb8c86361bdba"
+    },
+    {
+      "path": "mods/IguanaTinkerTweaks-1.7.10-2.0.1B2.jar",
+      "size": 387868,
+      "universal": true,
+      "optional": false,
+      "hash": "61309bbc88cdd239aaee4d015dafddf3"
+    },
+    {
+      "path": "mods/InventoryTweaks-1.58-147.jar",
+      "size": 221921,
+      "universal": true,
+      "optional": false,
+      "hash": "c5d9271ea4afb47deae8c71f8bae61a1"
+    },
+    {
+      "path": "mods/Jabba-1.1.4_1.7.10.jar",
+      "size": 530762,
+      "universal": true,
+      "optional": false,
+      "hash": "3fb08cd3741ae159ebf70ecda3b57593"
+    },
+    {
+      "path": "mods/Mantle_mc1.7.10_0.3.0.jar",
+      "size": 192715,
+      "universal": true,
+      "optional": false,
+      "hash": "14cda5489848a896dfe6e3c552c0ed0f"
+    },
+    {
+      "path": "mods/Mekanism-1.7.10-7.0.0.75.jar",
+      "size": 13591630,
+      "universal": true,
+      "optional": false,
+      "hash": "041860ebd6ab2567955e588df58dd19b"
+    },
+    {
+      "path": "mods/MekanismGenerators-1.7.10-7.0.0.75.jar",
+      "size": 102681,
+      "universal": true,
+      "optional": false,
+      "hash": "22e6f95d9d168643c62339fc168ab2d5"
+    },
+    {
+      "path": "mods/MekanismTools-1.7.10-7.0.0.75.jar",
+      "size": 28799,
+      "universal": true,
+      "optional": false,
+      "hash": "538a43ed915192505d44a30c60abe2ff"
+    },
+    {
+      "path": "mods/MineFactoryReloaded-[1.7.10]2.8.0RC2-557.jar",
+      "size": 1899153,
+      "universal": true,
+      "optional": false,
+      "hash": "3a85c0d87c774e0c28eb58f12ecb7262"
+    },
+    {
+      "path": "mods/Morpheus-1.7.10-1.5.18.jar",
+      "size": 13273,
+      "universal": true,
+      "optional": false,
+      "hash": "0ed51ed482e6571bed4e6fe83de98510"
+    },
+    {
+      "path": "mods/NotEnoughItems-1.7.10-1.0.2.15-universal.jar",
+      "size": 449021,
+      "universal": true,
+      "optional": false,
+      "hash": "2d2398aebc0d3d247e6e59185a8cbb62"
+    },
+    {
+      "path": "mods/OpenBlocks-1.7.10-1.3-snapshot-431.jar",
+      "size": 2181824,
+      "universal": true,
+      "optional": false,
+      "hash": "45e2440892ef5214a18a34b000be32a5"
+    },
+    {
+      "path": "mods/OpenComputers-MC1.7.10-1.3.3.54-universal.jar",
+      "size": 7786909,
+      "universal": true,
+      "optional": false,
+      "hash": "d8627b9ee3eb0a0572dccd980876a453"
+    },
+    {
+      "path": "mods/OpenModsLib-1.7.10-0.6-snapshot-224.jar",
+      "size": 612572,
+      "universal": true,
+      "optional": false,
+      "hash": "7ed4a3bdecacbf9f2d41d5a109e62e51"
+    },
+    {
+      "path": "mods/Pam\u0027s HarvestCraft 1.7.10a.zip",
+      "size": 1492940,
+      "universal": true,
+      "optional": false,
+      "hash": "b00eb30d72a96493f7ed348551c1a60e"
+    },
+    {
+      "path": "mods/PneumaticCraft-1.2.2.jar",
+      "size": 5113758,
+      "universal": true,
+      "optional": false,
+      "hash": "3cfa1296c023a3c4872108e8f0f581c5"
+    },
+    {
+      "path": "mods/ProgressiveAutomation-1.7.10-1.4.3.jar",
+      "size": 167631,
+      "universal": true,
+      "optional": false,
+      "hash": "cf5a762c47754c66242e5c163fea0eb3"
+    },
+    {
+      "path": "mods/ProjectRed-Base-1.7.10-4.4.7.46.jar",
+      "size": 1294561,
+      "universal": true,
+      "optional": false,
+      "hash": "2ba7dd778a50e18cf2914b7fdf89a514"
+    },
+    {
+      "path": "mods/ProjectRed-Compat-1.7.10-4.4.7.46.jar",
+      "size": 74265,
+      "universal": true,
+      "optional": false,
+      "hash": "8a23dddc04fa68831845c711b493ea1c"
+    },
+    {
+      "path": "mods/ProjectRed-Integration-1.7.10-4.4.7.46.jar",
+      "size": 2794514,
+      "universal": true,
+      "optional": false,
+      "hash": "fa0744ea8d4c5d9850c2ea46804d9e75"
+    },
+    {
+      "path": "mods/ProjectRed-Lighting-1.7.10-4.4.7.46.jar",
+      "size": 745955,
+      "universal": true,
+      "optional": false,
+      "hash": "c02e8e06f7b8d584fa1567b71d630aac"
+    },
+    {
+      "path": "mods/ProjectRed-Mechanical_beta-1.7.10-4.4.7.46.jar",
+      "size": 1159339,
+      "universal": true,
+      "optional": false,
+      "hash": "63d89ff179c395866ca735a987ee44d6"
+    },
+    {
+      "path": "mods/ProjectRed-World-1.7.10-4.4.7.46.jar",
+      "size": 153809,
+      "universal": true,
+      "optional": false,
+      "hash": "28d0fc3f81f3f6e32707f1fb9f7c96e6"
+    },
+    {
+      "path": "mods/Railcraft_1.7.10-9.2.2.0.jar",
+      "size": 3157273,
+      "universal": true,
+      "optional": false,
+      "hash": "d6b2dca260cda0827c1a553dc5ed3cfb"
+    },
+    {
+      "path": "mods/RandomThings-2.1.2.jar",
+      "size": 2024260,
+      "universal": true,
+      "optional": false,
+      "hash": "b8a74191d845f77ceffbd37a8f156b15"
+    },
+    {
+      "path": "mods/RedstoneArsenal-[1.7.10]1.1.0B3-8.jar",
+      "size": 306310,
+      "universal": true,
+      "optional": false,
+      "hash": "7f3ec9be64a640c3679bc77a5c7b65e8"
+    },
+    {
+      "path": "mods/RemoteIO-1.7.X-1.2.0.B32-universal.jar",
+      "size": 375259,
+      "universal": true,
+      "optional": false,
+      "hash": "896fdaf5c69a9ebace422f0a5c8386f6"
+    },
+    {
+      "path": "mods/SimplyJetpacks-MC1.7.10-1.0.0.jar",
+      "size": 142092,
+      "universal": true,
+      "optional": false,
+      "hash": "2bfa781fa0a58366447322815950a346"
+    },
+    {
+      "path": "mods/SpiceOfLife-mc1.7.x-1.1.0.jar",
+      "size": 154265,
+      "universal": true,
+      "optional": false,
+      "hash": "afb512cf3e479533eddad725b239c6ba"
+    },
+    {
+      "path": "mods/StevesCarts2.0.0.b16.jar",
+      "size": 2531999,
+      "universal": true,
+      "optional": false,
+      "hash": "c7ac3f2cca2cd6943e923939badb3f33"
+    },
+    {
+      "path": "mods/StevesFactoryManagerA90.jar",
+      "size": 686636,
+      "universal": true,
+      "optional": false,
+      "hash": "86bea9b85d073fb04af39a2052766096"
+    },
+    {
+      "path": "mods/TConstruct_mc1.7.10_1.6.0d38.jar",
+      "size": 4708312,
+      "universal": true,
+      "optional": false,
+      "hash": "926004fc740c5106e21ec60ff982f531"
+    },
+    {
+      "path": "mods/Thaumcraft-1.7.10-4.2.0.0.jar",
+      "size": 9871056,
+      "universal": true,
+      "optional": false,
+      "hash": "4e3daa3ea7606210c3fc4af7793e2f36"
+    },
+    {
+      "path": "mods/ThaumicTinkerer-2.5-1.7.10-153.jar",
+      "size": 2000286,
+      "universal": true,
+      "optional": false,
+      "hash": "a95ee03ef479c906deb08a26114d805f"
+    },
+    {
+      "path": "mods/ThermalExpansion-[1.7.10]4.0.0B3-11.jar",
+      "size": 3676248,
+      "universal": true,
+      "optional": false,
+      "hash": "7048e8471e190948da1a5b7b60e2d697"
+    },
+    {
+      "path": "mods/ThermalFoundation-[1.7.10]1.0.0B1-6.jar",
+      "size": 1027688,
+      "universal": true,
+      "optional": false,
+      "hash": "e9212b40b41bd997e48b4ac796afda0b"
+    },
+    {
+      "path": "mods/TiC-Tooltips-mc1.7.10-1.1.9.jar",
+      "size": 43901,
+      "universal": true,
+      "optional": false,
+      "hash": "43003ad347dbee998c74ebed135ed34d"
+    },
+    {
+      "path": "mods/Touhou Items Mod ver2.76-1.7.10.zip",
+      "size": 1868634,
+      "universal": true,
+      "optional": false,
+      "hash": "84a7ace5f75deaaf3b505069c2cfc334"
+    },
+    {
+      "path": "mods/Waila-1.5.3_1.7.10.jar",
+      "size": 303830,
+      "universal": true,
+      "optional": false,
+      "hash": "187285fe5abd467e55c90151d1fc9fc7"
+    },
+    {
+      "path": "mods/WaslieCore-1.1.jar",
+      "size": 23065,
+      "universal": true,
+      "optional": false,
+      "hash": "ac1ab7b3b5bdd7545cd86d20a9b6fba3"
+    },
+    {
+      "path": "mods/appliedenergistics2-rv1-alpha-11.jar",
+      "size": 2211810,
+      "universal": true,
+      "optional": false,
+      "hash": "162e98b571b85fe2c96c75193eb70c1a"
+    },
+    {
+      "path": "mods/backpack-2.0.0-1.7.x.jar",
+      "size": 172513,
+      "universal": true,
+      "optional": false,
+      "hash": "c077ea4538f6a56b551bf5524a13a378"
+    },
+    {
+      "path": "mods/binnie-mods-2.0-dev3.jar",
+      "size": 3838069,
+      "universal": true,
+      "optional": false,
+      "hash": "5aedc059c03401da146b9c61e241bf7c"
+    },
+    {
+      "path": "mods/buildcraft-6.0.17.jar",
+      "size": 1799266,
+      "universal": true,
+      "optional": false,
+      "hash": "2ed9c4a0512c7fee0389cb9c795f5348"
+    },
+    {
+      "path": "mods/carpentersblocks/CarpentersBlocksCachedResources.zip",
+      "size": 31297,
+      "universal": true,
+      "optional": false,
+      "hash": "868835238252128733a22e67388d74a1"
+    },
+    {
+      "path": "mods/enderio-2.0_beta.180.jar",
+      "size": 3183398,
+      "universal": true,
+      "optional": false,
+      "hash": "370fbaa4dde485950abdf995c0ca1488"
+    },
+    {
+      "path": "mods/extrautilities-1.1.0g.jar",
+      "size": 1667798,
+      "universal": true,
+      "optional": false,
+      "hash": "34031a9dcec8f77c5a9c63df68d2b08c"
+    },
+    {
+      "path": "mods/forestry_1.7.10-3.0.0.90.jar",
+      "size": 3674448,
+      "universal": true,
+      "optional": false,
+      "hash": "41e8a71835c13e2c4a6a954bde532d92"
+    },
+    {
+      "path": "mods/gregtech-1.7.10.jar",
+      "size": 5337232,
+      "universal": true,
+      "optional": false,
+      "hash": "8f12b60ef3e8e358fee716c842bcd4f9"
+    },
+    {
+      "path": "mods/ic2/ejml-0.23.jar",
+      "size": 211938,
+      "universal": true,
+      "optional": false,
+      "hash": "2773bb49335358b2d042ac50690ea5d7"
+    },
+    {
+      "path": "mods/industrialcraft-2-2.2.540-experimental.jar",
+      "size": 4948537,
+      "universal": true,
+      "optional": false,
+      "hash": "dbdf64b394516b5b0604f81ad45be5da"
+    },
+    {
+      "path": "mods/ironchest-1.7.10-6.0.41.729-universal.jar",
+      "size": 157123,
+      "universal": true,
+      "optional": false,
+      "hash": "89e8d411dfb1c8314d8bf21b8072c1b3"
+    },
+    {
+      "path": "mods/magicalcrops-1.7.10_0.1.jar",
+      "size": 2746400,
+      "universal": true,
+      "optional": false,
+      "hash": "c01737e665d671ca3a495ee0060f9be0"
+    },
+    {
+      "path": "mods/modular-furnace-3.0.jar",
+      "size": 68194,
+      "universal": true,
+      "optional": false,
+      "hash": "df99caf0f11058d5bf90148e73fe4d6e"
+    },
+    {
+      "path": "mods/natura-1.7.10-2.2.0-b1.jar",
+      "size": 859973,
+      "universal": true,
+      "optional": false,
+      "hash": "71e1f3c7d0b317c0017af7dfb7f87de4"
+    },
+    {
+      "path": "mods/neiaddons-mc1710-1.12.2.9.jar",
+      "size": 133932,
+      "universal": true,
+      "optional": false,
+      "hash": "b239f324391abd05e16c646c77ddbdd7"
+    },
+    {
+      "path": "mods/statues-1.7.10-2.1.3.jar",
+      "size": 206777,
+      "universal": true,
+      "optional": false,
+      "hash": "75ba3573b5ddf250740d2c35a8c46d3f"
+    },
+    {
+      "path": "mods/twilightforest-1.7.2-2.2.3.jar",
+      "size": 3240230,
+      "universal": true,
+      "optional": false,
+      "hash": "424d914dce41446b838d037a387d979f"
+    },
+    {
+      "path": "mods/warpbook-1.2.29.jar",
+      "size": 393029,
+      "universal": true,
+      "optional": false,
+      "hash": "b03f1f4f2d39e22fbfaf6069de4ce9ff"
+    },
+    {
+      "path": "mods/witchery-1.7.10-0.20.5.jar",
+      "size": 4106704,
+      "universal": true,
+      "optional": false,
+      "hash": "035d79842d77679ed9de7f6b46efb2b4"
+    }
+  ]
+}

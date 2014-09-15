@@ -1,69 +1,33 @@
 package net.mineguild.Launcher;
 
-import java.io.File;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
-import net.mineguild.Launcher.utils.RelativePath;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.hash.Hashing;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.common.collect.Sets;
 import com.google.gson.annotations.Expose;
 
-public class Modpack {
+public class ModPack {
   private @Expose @Getter @Setter String version;
-  private @Expose @Getter String hash;
-  private @Expose @Getter long releaseTime;
-  private @Expose @Getter @Setter Map<String, String> modpackFiles = new HashMap<String, String>();
   private @Expose @Getter @Setter String forgeVersion;
   private @Expose @Getter @Setter String minecraftVersion;
+  private @Expose @Getter String hash;
+  private @Expose @Getter long releaseTime;
+  private @Expose @Getter Set<ModPackFile> files = Sets.newTreeSet();
 
-  private List<File> unprocessedFiles = Lists.newArrayList(); // Local variable
-  private @Getter @Setter File basePath; // Local variable -- doesn't belong to json.
-
-
-  public Modpack(String version, long releaseTime, Map<String, String> modpackFiles) {
-
+  public ModPack(String version, long releaseTime, Set<ModPackFile> files) {
     this.version = version;
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
     this.releaseTime = releaseTime;
-    this.modpackFiles = modpackFiles;
+    setFiles(files);
   }
 
-  public Modpack(long releaseTime) {
+  public ModPack(long releaseTime) {
     this.releaseTime = releaseTime;
-  }
-
-  public Modpack(File basePath) {
-    this.releaseTime = -1;
-    this.basePath = basePath;
-  }
-
-  public static Modpack fromJson(String json) {
-    Gson g = new Gson();
-    return g.fromJson(json, Modpack.class);
-  }
-
-  public String toJson() {
-    if (unprocessedFiles != null) {
-      if (unprocessedFiles.size() > 0) {
-        processFiles();
-      }
-    }
-    Gson g = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
-    return g.toJson(this);
   }
 
   public void setReleaseTime(long releaseTime) {
@@ -71,102 +35,41 @@ public class Modpack {
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
   }
 
-  public static HashMap<String, String> getNew(Modpack oldPack, Modpack newPack) {
-    HashMap<String, String> newFiles = Maps.newHashMap();
-    for (Map.Entry<String, String> newEntry : newPack.getModpackFiles().entrySet()) {
-      if (oldPack.getModpackFiles().containsKey(newEntry.getKey())) {
-        if (!oldPack.getModpackFiles().get(newEntry.getKey()).equals(newEntry.getValue())) {
-          newFiles.put(newEntry.getKey(), newEntry.getValue());
-        }
-      } else {
-        newFiles.put(newEntry.getKey(), newEntry.getValue());
-      }
+  public void setFiles(Set<ModPackFile> files) {
+    if (!(files instanceof TreeSet<?>)) {
+      files = Sets.newTreeSet(files);
     }
-    return newFiles;
+    this.files = files;
   }
 
-  public static Map<String, String> getOld(Modpack oldPack, Modpack newPack) {
-    Map<String, String> oldFiles = Maps.newHashMap();
-    for (Map.Entry<String, String> oldEntry : oldPack.getModpackFiles().entrySet()) {
-      if (newPack.getModpackFiles().containsKey(oldEntry.getKey())) {
-        if (!newPack.getModpackFiles().get(oldEntry.getKey()).equals(oldEntry.getValue())) {
-          oldFiles.put(oldEntry.getKey(), oldEntry.getValue());
-        }
-      } else {
-        oldFiles.put(oldEntry.getKey(), oldEntry.getValue());
-      }
-    }
-    return oldFiles;
-  }
-
-  public HashMap<String, String> getNew(Modpack newPack) {
-    return Modpack.getNew(this, newPack);
-  }
-
-  public Map<String, String> getOld(Modpack newPack) {
-    return Modpack.getOld(this, newPack);
-  }
-
-
-  public void addModpackFiles(Map<File, String> modpackFiles) {
-    for (Map.Entry<File, String> entry : modpackFiles.entrySet()) {
-      this.addFile(entry.getKey(), entry.getValue());
-    }
-  }
-
-  public void addModpackFiles() {
-    if (basePath != null) {
-      this.addFiles(FileUtils.listFiles(new File(basePath, "mods"), Constants.MODPACK_FILE_FILTER,
-          Constants.MODPACK_DIR_FILTER));
-      this.addFiles(FileUtils.listFiles(new File(basePath, "config"),
-          Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER));
-    }
-  }
-
-
-  public boolean isNewer(Modpack otherPack) {
+  public boolean isNewer(ModPack otherPack) {
     return otherPack.getReleaseTime() <= this.getReleaseTime();
-  }
-
-
-  public void addFile(File file, String checkSum) {
-    if (basePath != null) {
-      modpackFiles.put(
-          FilenameUtils.separatorsToUnix(RelativePath.getRelativePath(basePath, file)), checkSum);
-    }
-  }
-
-  public void processFiles() {
-    Map<File, String> result = ChecksumUtil.getChecksum(unprocessedFiles, Hashing.md5());
-    for (Map.Entry<File, String> entry : result.entrySet()) {
-      addFile(entry.getKey(), entry.getValue());
-    }
-    unprocessedFiles.clear();
-  }
-
-  public void addFile(File file) {
-    unprocessedFiles.add(file);
-    processFiles();
-  }
-
-  public void addFiles(Collection<File> files) {
-    unprocessedFiles.addAll(files);
-    processFiles();
-  }
-
-  public Collection<String> getFilesBySum(String sum) {
-    Collection<String> files = Lists.newArrayList();
-    for (Map.Entry<String, String> entry : modpackFiles.entrySet()) {
-      if (entry.getValue().equals(sum)) {
-        files.add(entry.getKey());
-      }
-    }
-    return files;
   }
 
   public String getReleaseDate() {
     return new Date(releaseTime).toString();
   }
 
+  public void addFile(ModPackFile f) {
+    files.add(f);
+  }
+  
+  public ModPackFile getFileByPath(String path) {
+    for(ModPackFile f : files){
+      if(f.getPath().equals(path)){
+        return f;
+      }
+    }
+    return null;
+  }
+  
+  public ModPackFile getFileByHash(String hash) {
+    for(ModPackFile f : files){
+      if(f.getHash().equals(hash)){
+        return f;
+      }
+    }
+    return null;
+  }
 
 }

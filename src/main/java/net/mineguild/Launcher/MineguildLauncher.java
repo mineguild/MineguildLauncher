@@ -20,10 +20,12 @@ import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
 import net.mineguild.Launcher.utils.AuthWorkDialog;
+import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.OSUtils;
-import net.mineguild.Launcher.utils.json.JSONFactory;
+import net.mineguild.Launcher.utils.json.JsonFactory;
+import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
 
 import org.apache.commons.io.FileUtils;
@@ -43,6 +45,10 @@ public class MineguildLauncher {
   public static void main(String[] args) throws Exception {
     DownloadUtils.ssl_hack();
     System.setProperty("java.net.preferIPv4Stack", "true");
+    ModPack test = new ModPack(System.currentTimeMillis());
+    test.setFiles(ChecksumUtil.getFiles(new File("testPack"), FileUtils.listFiles(new File("testPack/mods"), Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER)));
+    JsonWriter.saveModpack(test, new File("new_format.json"));
+    System.exit(0);
     if (args.length == 1) {
       if (args[0].equals("-updateServer")) {
         MineguildLauncherConsole.update();
@@ -75,11 +81,11 @@ public class MineguildLauncher {
     Logger.addListener(con);
 
     try {
-      settings = JSONFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
+      settings = JsonFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
     } catch (IOException e) {
       OSUtils.getLocalDir().mkdirs();
       settings = new Settings(getInstallPath(null));
-      JSONFactory.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+      JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
     }
     if (settings.getModpackPath() == null) {
       settings.setModpackPath(getInstallPath(null));
@@ -93,17 +99,17 @@ public class MineguildLauncher {
       Thread.sleep(1000);
       System.exit(0);
     }
-    JSONFactory.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+    JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
 
     addSaveHook();
     LoginResponse res = dialog.response;
     baseDirectory = settings.getModpackPath();
     baseDirectory.mkdirs();
 
-    Modpack m = null;
+    X_Modpack m = null;
     boolean updated = true;
-    Modpack newest =
-        Modpack.fromJson(IOUtils
+    X_Modpack newest =
+        X_Modpack.fromJson(IOUtils
             .toString(new URL("https://mineguild.net/download/mmp/modpack.json")));
     Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         new Date(newest.getReleaseTime()).toString()));
@@ -119,7 +125,7 @@ public class MineguildLauncher {
       m = newest;
     } else {
       try {
-        Modpack localPack = Modpack.fromJson(FileUtils.readFileToString(curpack));
+        X_Modpack localPack = X_Modpack.fromJson(FileUtils.readFileToString(curpack));
         Logger.logInfo(String.format("Local pack version: %s released on %s",
             localPack.getVersion(), localPack.getReleaseDate()));
         if (!newest.getHash().equals(localPack.getHash())) {
@@ -247,7 +253,7 @@ public class MineguildLauncher {
       @Override
       public void run() {
         try {
-          JSONFactory.saveSettings(MineguildLauncher.settings, new File(OSUtils.getLocalDir(),
+          JsonWriter.saveSettings(MineguildLauncher.settings, new File(OSUtils.getLocalDir(),
               "settings.json"));
         } catch (Exception e) {
           e.printStackTrace();

@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 
+import net.mineguild.Launcher.ModPack;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
 
@@ -13,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class JSONFactory {
+public class JsonFactory {
   public static final Gson GSON;
 
   static {
@@ -41,8 +42,9 @@ public class JSONFactory {
     return GSON.fromJson(reader, Settings.class);
   }
 
-  public static void saveSettings(Settings set, File json) throws IOException {
-    FileUtils.write(json, GSON.toJson(set, Settings.class));
+  public static ModPack loadModpack(File json) throws IOException {
+    FileReader reader = new FileReader(json);
+    return GSON.fromJson(reader, ModPack.class);
   }
 
 

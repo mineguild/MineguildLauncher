@@ -28,7 +28,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
 
 import lombok.Getter;
-import net.mineguild.Launcher.Modpack;
+import net.mineguild.Launcher.X_Modpack;
 
 import org.apache.commons.io.FileUtils;
 
@@ -126,9 +126,9 @@ public class ModpackBuilder extends JFrame {
   }
 
   public void createUpdatedPack(final JFrame parent) {
-    Modpack modPack = new Modpack(modpackDirectory);
+    X_Modpack modPack = new X_Modpack(modpackDirectory);
     modPack.setMinecraftVersion("1.7.10");
-    modPack.setForgeVersion("1.7.10-10.13.0.1208");
+    modPack.setForgeVersion("1.7.10-10.13.1.1217");
     modPack.setVersion(ModpackBuilder.instance.versionField.getText());
     modPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
@@ -219,9 +219,9 @@ public class ModpackBuilder extends JFrame {
   public static class ModpackTableModel extends AbstractTableModel {
 
     @Getter
-    Modpack pack;
+    X_Modpack pack;
 
-    public ModpackTableModel(Modpack pack) {
+    public ModpackTableModel(X_Modpack pack) {
       this.pack = pack;
       this.pack.setModpackFiles(new TreeMap<String, String>(pack.getModpackFiles()));
     }

@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.Modpack;
+import net.mineguild.Launcher.X_Modpack;
 import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadDownloadDialog;
@@ -28,7 +28,7 @@ import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
-import net.mineguild.Launcher.utils.json.JSONFactory;
+import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Library;
 import net.mineguild.Launcher.utils.json.versions.Version;
@@ -45,7 +45,7 @@ public class MCInstaller {
   private static String packbasejson = new String();
   private static long totalAssetSize = 0;
 
-  public static void setup(final Modpack pack) throws Exception {
+  public static void setup(final X_Modpack pack) throws Exception {
     List<DownloadInfo> libraries = null;
     List<DownloadInfo> assets = null;
     packmcversion = pack.getMinecraftVersion();
@@ -88,7 +88,7 @@ public class MCInstaller {
     }
   }
 
-  private static List<DownloadInfo> getLibraries(Modpack pack) throws Exception {
+  private static List<DownloadInfo> getLibraries(X_Modpack pack) throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
     File forgeJson = new File(MineguildLauncher.baseDirectory, "pack.json");
     FileUtils.copyURLToFile(new URL(Constants.MG_FORGE + pack.getForgeVersion() + "/version.json"),
@@ -97,7 +97,7 @@ public class MCInstaller {
     File local;
     File libDir = new File(MineguildLauncher.baseDirectory, "libraries");
 
-    Version forgeVersion = JSONFactory.loadVersion(forgeJson);
+    Version forgeVersion = JsonFactory.loadVersion(forgeJson);
     if (forgeVersion.jar != null && !forgeVersion.jar.isEmpty())
       packmcversion = forgeVersion.jar;
     if (forgeVersion.inheritsFrom != null && !forgeVersion.inheritsFrom.isEmpty())
@@ -142,7 +142,7 @@ public class MCInstaller {
             "{MC_VER}", packbasejson));
     FileUtils.copyURLToFile(url, json);
 
-    Version mcJson = JSONFactory.loadVersion(json);
+    Version mcJson = JsonFactory.loadVersion(json);
 
     for (Library lib : mcJson.getLibraries()) {
       if (lib.natives == null) {
@@ -173,7 +173,7 @@ public class MCInstaller {
   private static List<DownloadInfo> getAssets() throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
     File forgeJson = new File(MineguildLauncher.baseDirectory, "pack.json");
-    Version version = JSONFactory.loadVersion(forgeJson);
+    Version version = JsonFactory.loadVersion(forgeJson);
 
     File json =
         new File(MineguildLauncher.baseDirectory, "assets/indexes/{MC_VER}.json".replace(
@@ -182,7 +182,7 @@ public class MCInstaller {
         new URL("https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(
             "${version}", version.getAssets())), json);
 
-    AssetIndex index = JSONFactory.loadAssetIndex(json);
+    AssetIndex index = JsonFactory.loadAssetIndex(json);
 
     Collection<DownloadInfo> tmp;
     Logger.logInfo("Starting asset hash checking... Please wait...");
@@ -222,7 +222,7 @@ public class MCInstaller {
     return list;
   }
 
-  public static void launchMinecraft(Modpack pack, LoginResponse resp) {
+  public static void launchMinecraft(X_Modpack pack, LoginResponse resp) {
     try {
       File packDir = MineguildLauncher.baseDirectory;
       File gameDir = new File(packDir, "minecraft");
@@ -240,7 +240,7 @@ public class MCInstaller {
       }
       natDir.mkdirs();
       Version base =
-          JSONFactory.loadVersion(new File(packDir, "/versions/{MC_VER}/{MC_VER}.json".replace(
+          JsonFactory.loadVersion(new File(packDir, "/versions/{MC_VER}/{MC_VER}.json".replace(
               "{MC_VER}", packbasejson)));
       byte[] buf = new byte[1024];
       for (Library lib : base.getLibraries()) {
@@ -279,7 +279,7 @@ public class MCInstaller {
       List<File> classpath = Lists.newArrayList();
       Version packjson = new Version();
       if (new File(packDir, "pack.json").exists()) {
-        packjson = JSONFactory.loadVersion(new File(packDir, "pack.json"));
+        packjson = JsonFactory.loadVersion(new File(packDir, "pack.json"));
         for (Library lib : packjson.getLibraries()) {
           Logger.logError(new File(libDir, lib.getPath()).getAbsolutePath());
           classpath.add(new File(libDir, lib.getPath()));

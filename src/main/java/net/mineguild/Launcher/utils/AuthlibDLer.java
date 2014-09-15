@@ -75,8 +75,10 @@ public class AuthlibDLer extends SwingWorker<Boolean, Void> {
 
   public void addURL(URL u) throws IOException {
     URLClassLoader sysloader = (URLClassLoader) this.getClass().getClassLoader();
+    @SuppressWarnings("rawtypes")
     Class sysclass = URLClassLoader.class;
     try {
+      @SuppressWarnings("unchecked")
       Method method = sysclass.getDeclaredMethod("addURL", new Class[] {URL.class});
       method.setAccessible(true);
       method.invoke(sysloader, u);

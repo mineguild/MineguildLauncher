@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
+
 /**
  * this class provides functions used to generate a relative path from two absolute paths
  *
@@ -87,7 +89,6 @@ public class RelativePath {
     homelist = getPathList(home);
     filelist = getPathList(f);
     s = matchPathLists(homelist, filelist);
-
-    return s;
+    return FilenameUtils.separatorsToUnix(s);
   }
 }
