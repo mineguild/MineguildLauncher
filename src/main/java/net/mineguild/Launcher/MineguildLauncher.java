@@ -24,7 +24,7 @@ import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.OSUtils;
-import net.mineguild.Launcher.utils.json.JsonFactoryX;
+import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
 
@@ -81,7 +81,7 @@ public class MineguildLauncher {
     Logger.addListener(con);
 
     try {
-      settings = JsonFactoryX.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
+      settings = JsonFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
     } catch (IOException e) {
       OSUtils.getLocalDir().mkdirs();
       settings = new Settings(getInstallPath(null));

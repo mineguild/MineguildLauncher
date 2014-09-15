@@ -14,7 +14,7 @@ import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
-import net.mineguild.Launcher.utils.json.JsonFactoryX;
+import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.OldPropertyMapSerializer;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex.Asset;
@@ -237,7 +237,7 @@ public class MCLauncher {
     // Logger.logInfo("Syncing Assets:");
     final File objects = new File(assetDir, "objects");
     AssetIndex index =
-        JsonFactoryX.loadAssetIndex(new File(assetDir, "indexes/{INDEX}.json".replace("{INDEX}",
+        JsonFactory.loadAssetIndex(new File(assetDir, "indexes/{INDEX}.json".replace("{INDEX}",
             indexName)));
 
     if (!index.virtual)
