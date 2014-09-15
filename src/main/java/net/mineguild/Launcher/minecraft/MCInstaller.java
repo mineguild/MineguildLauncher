@@ -28,7 +28,7 @@ import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
-import net.mineguild.Launcher.utils.json.JsonFactory;
+import net.mineguild.Launcher.utils.json.JsonFactoryX;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Library;
 import net.mineguild.Launcher.utils.json.versions.Version;
@@ -97,7 +97,7 @@ public class MCInstaller {
     File local;
     File libDir = new File(MineguildLauncher.baseDirectory, "libraries");
 
-    Version forgeVersion = JsonFactory.loadVersion(forgeJson);
+    Version forgeVersion = JsonFactoryX.loadVersion(forgeJson);
     if (forgeVersion.jar != null && !forgeVersion.jar.isEmpty())
       packmcversion = forgeVersion.jar;
     if (forgeVersion.inheritsFrom != null && !forgeVersion.inheritsFrom.isEmpty())
@@ -142,7 +142,7 @@ public class MCInstaller {
             "{MC_VER}", packbasejson));
     FileUtils.copyURLToFile(url, json);
 
-    Version mcJson = JsonFactory.loadVersion(json);
+    Version mcJson = JsonFactoryX.loadVersion(json);
 
     for (Library lib : mcJson.getLibraries()) {
       if (lib.natives == null) {
@@ -173,7 +173,7 @@ public class MCInstaller {
   private static List<DownloadInfo> getAssets() throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
     File forgeJson = new File(MineguildLauncher.baseDirectory, "pack.json");
-    Version version = JsonFactory.loadVersion(forgeJson);
+    Version version = JsonFactoryX.loadVersion(forgeJson);
 
     File json =
         new File(MineguildLauncher.baseDirectory, "assets/indexes/{MC_VER}.json".replace(
@@ -182,7 +182,7 @@ public class MCInstaller {
         new URL("https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(
             "${version}", version.getAssets())), json);
 
-    AssetIndex index = JsonFactory.loadAssetIndex(json);
+    AssetIndex index = JsonFactoryX.loadAssetIndex(json);
 
     Collection<DownloadInfo> tmp;
     Logger.logInfo("Starting asset hash checking... Please wait...");
@@ -240,7 +240,7 @@ public class MCInstaller {
       }
       natDir.mkdirs();
       Version base =
-          JsonFactory.loadVersion(new File(packDir, "/versions/{MC_VER}/{MC_VER}.json".replace(
+          JsonFactoryX.loadVersion(new File(packDir, "/versions/{MC_VER}/{MC_VER}.json".replace(
               "{MC_VER}", packbasejson)));
       byte[] buf = new byte[1024];
       for (Library lib : base.getLibraries()) {
@@ -279,7 +279,7 @@ public class MCInstaller {
       List<File> classpath = Lists.newArrayList();
       Version packjson = new Version();
       if (new File(packDir, "pack.json").exists()) {
-        packjson = JsonFactory.loadVersion(new File(packDir, "pack.json"));
+        packjson = JsonFactoryX.loadVersion(new File(packDir, "pack.json"));
         for (Library lib : packjson.getLibraries()) {
           Logger.logError(new File(libDir, lib.getPath()).getAbsolutePath());
           classpath.add(new File(libDir, lib.getPath()));
