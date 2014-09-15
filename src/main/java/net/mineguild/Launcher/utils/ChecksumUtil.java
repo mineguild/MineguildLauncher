@@ -1,10 +1,5 @@
 package net.mineguild.Launcher.utils;
 
-import com.google.common.collect.Sets;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import com.google.common.io.Files;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -18,9 +13,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import net.mineguild.Launcher.ModPack;
 import net.mineguild.Launcher.ModPackFile;
 import net.mineguild.Launcher.log.Logger;
+
+import com.google.common.collect.Sets;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
 
 public class ChecksumUtil {
 

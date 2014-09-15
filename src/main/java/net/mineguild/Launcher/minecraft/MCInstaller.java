@@ -16,7 +16,6 @@ import javax.swing.JOptionPane;
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.XModpack;
-import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadDownloadDialog;
 import net.mineguild.Launcher.log.LogEntry;

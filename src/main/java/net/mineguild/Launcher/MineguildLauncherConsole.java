@@ -24,7 +24,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class MineguildLauncherConsole {
 

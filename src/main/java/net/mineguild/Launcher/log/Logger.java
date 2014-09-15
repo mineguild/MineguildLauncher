@@ -27,6 +27,7 @@ public class Logger {
   }
   
   public static Vector<LogEntry> getBufferedEntries(){
+    @SuppressWarnings("unchecked")
     Vector<LogEntry> newVector = (Vector<LogEntry>) logEntries.clone();
     while(newVector.size() > BUFFER_SIZE){
       newVector.remove(0);

@@ -9,8 +9,6 @@ import net.mineguild.Launcher.ModPack;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
 
-import org.apache.commons.io.FileUtils;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

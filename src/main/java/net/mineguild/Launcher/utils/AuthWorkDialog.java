@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
