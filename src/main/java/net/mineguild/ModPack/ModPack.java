@@ -1,4 +1,4 @@
-package net.mineguild.Launcher;
+package net.mineguild.ModPack;
 
 import java.util.Date;
 import java.util.List;

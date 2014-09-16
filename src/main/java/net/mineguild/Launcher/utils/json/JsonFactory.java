@@ -5,9 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 
-import net.mineguild.Launcher.ModPack;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
+import net.mineguild.ModPack.ModPack;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

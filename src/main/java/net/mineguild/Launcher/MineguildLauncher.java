@@ -5,12 +5,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
@@ -27,9 +29,14 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
+import net.mineguild.ModPack.ModPack;
+import net.mineguild.ModPack.ModPackInstaller;
+import net.mineguild.ModPack.Side;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+
+import com.google.gson.GsonBuilder;
 
 public class MineguildLauncher {
 
@@ -48,6 +55,8 @@ public class MineguildLauncher {
     ModPack test = new ModPack(System.currentTimeMillis());
     test.setFiles(ChecksumUtil.getFiles(new File("testPack"), FileUtils.listFiles(new File("testPack/mods"), Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER)));
     JsonWriter.saveModpack(test, new File("new_format.json"));
+    List<DownloadInfo> dinfo = ModPackInstaller.checkNeededFiles(new File("modpack"), test.getFiles(), Side.UNIVERSAL);
+    System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dinfo));
     System.exit(0);
     if (args.length == 1) {
       if (args[0].equals("-updateServer")) {

@@ -13,8 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import net.mineguild.Launcher.ModPackFile;
 import net.mineguild.Launcher.log.Logger;
+import net.mineguild.ModPack.ModPackFile;
 
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashFunction;
@@ -47,8 +47,8 @@ public class ChecksumUtil {
   }
 
 
-  public static synchronized Set<ModPackFile> getFiles(final File baseDirectory, Collection<File> files)
-      throws InterruptedException, ExecutionException {
+  public static synchronized Set<ModPackFile> getFiles(final File baseDirectory,
+      Collection<File> files) throws InterruptedException, ExecutionException {
     Set<ModPackFile> results =
         Sets.newTreeSet(new Parallel.ForEach<File, ModPackFile>(files)
             .withFixedThreads(2 * OSUtils.getNumCores()).apply(new Parallel.F<File, ModPackFile>() {
@@ -61,7 +61,7 @@ public class ChecksumUtil {
                   Logger.logError("Exception while trying to process file!", e1);
                   return null;
                 }
-                
+
               }
             }).values());
     return results;

@@ -1,4 +1,4 @@
-package net.mineguild.Launcher;
+package net.mineguild.ModPack;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static net.mineguild.Launcher.utils.RelativePath.getRelativePath;
@@ -15,7 +15,7 @@ public class ModPackFile implements Comparable<ModPackFile> {
   private @Getter @Expose String path;
   private @Getter @Setter @Expose long size;
   private @Getter @Setter @Expose String name;
-  private @Getter @Setter @Expose boolean universal = true;
+  private @Getter @Setter @Expose Side side = Side.UNIVERSAL;
   private @Getter @Setter @Expose boolean optional = false;
   private @Getter @Expose String hash;
   private @Getter @Setter File localFile; // We just keep this here...
@@ -37,7 +37,7 @@ public class ModPackFile implements Comparable<ModPackFile> {
     checkNotNull(baseDirectory);
     return new File(baseDirectory, path);
   }
-
+  
   @Override
   public int compareTo(ModPackFile o) {
     return this.path.compareTo(o.path);
@@ -47,5 +47,6 @@ public class ModPackFile implements Comparable<ModPackFile> {
   public String toString(){
     return new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create().toJson(this);
   }
+  
 
 }

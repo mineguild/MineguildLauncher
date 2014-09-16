@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import net.mineguild.Launcher.ModPack;
+import net.mineguild.ModPack.ModPack;
 
 import org.apache.commons.io.FileUtils;
 
