@@ -17,6 +17,7 @@ import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
 import net.mineguild.Launcher.log.Logger;
+import net.mineguild.Launcher.log.StdOutLogger;
 import net.mineguild.Launcher.minecraft.LoginDialog;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.MCInstaller;
@@ -55,8 +56,10 @@ public class MineguildLauncher {
     ModPack test = new ModPack(System.currentTimeMillis());
     test.setFiles(ChecksumUtil.getFiles(new File("testPack"), FileUtils.listFiles(new File("testPack/mods"), Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER)));
     JsonWriter.saveModpack(test, new File("new_format.json"));
-    List<DownloadInfo> dinfo = ModPackInstaller.checkNeededFiles(new File("modpack"), test.getFiles(), Side.UNIVERSAL);
-    System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dinfo));
+    Logger.addListener(new StdOutLogger());
+    ModPackInstaller.clearFolder(new File("mods"), test, new File("bakup"));
+    //List<DownloadInfo> dinfo = ModPackInstaller.checkNeededFiles(new File("modpack"), test, Side.UNIVERSAL);
+    //System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dinfo));
     System.exit(0);
     if (args.length == 1) {
       if (args[0].equals("-updateServer")) {

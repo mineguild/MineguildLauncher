@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.Set;
-
-import com.google.common.collect.Lists;
 
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.download.DownloadInfo;
@@ -19,16 +16,33 @@ import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
 
+import org.apache.commons.io.FileExistsException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
+import com.google.common.collect.Lists;
+
 public class ModPackInstaller {
-  
+
   public static long totalSize = 0;
 
+
+  /**
+   * Determines the files that are needed to update/repair/install the ModPack
+   * 
+   * @param installDirectory The directory as {@link File} to check.
+   * @param pack The {@link ModPack} to check against.
+   * @param side The {@link Side} that should be installed, should be {@link Side.SERVER} or
+   *        {@link Side.CLIENT}
+   * @return A List of needed {@link DownloadInfo}
+   * @throws Exception
+   */
   public static synchronized List<DownloadInfo> checkNeededFiles(final File installDirectory,
-      Set<ModPackFile> files, final Side side) throws Exception {
+      ModPack pack, final Side side) throws Exception {
     checkNotNull(installDirectory);
     totalSize = 0l;
     List<DownloadInfo> result =
-        (List<DownloadInfo>) new Parallel.ForEach<ModPackFile, DownloadInfo>(files)
+        (List<DownloadInfo>) new Parallel.ForEach<ModPackFile, DownloadInfo>(pack.getFiles())
             .withFixedThreads(OSUtils.getNumCores() * 2)
             .apply(new Parallel.F<ModPackFile, DownloadInfo>() {
 
@@ -46,13 +60,16 @@ public class ModPackInstaller {
                     }
                   }
                   try {
-                    DownloadInfo ret = localFile.exists() ? null : new DownloadInfo(new URL(
-                        Constants.MG_GET_SCRIPT + "?data=" + packFile.getHash()), localFile,
-                        packFile.getName(), Lists.newArrayList(packFile.getHash()), "md5",
-                        DLType.ContentMD5, DLType.NONE);
-                    totalSize += packFile.getSize();
-                    ret.size = packFile.getSize();
-                    return ret;
+                    if (!localFile.exists()) {
+                      DownloadInfo ret =
+                          new DownloadInfo(new URL(Constants.MG_GET_SCRIPT + "?data="
+                              + packFile.getHash()), localFile, packFile.getName(), Lists
+                              .newArrayList(packFile.getHash()), "md5", DLType.ContentMD5,
+                              DLType.NONE);
+                      totalSize += packFile.getSize();
+                      ret.size = packFile.getSize();
+                      return ret;
+                    }
                   } catch (MalformedURLException e) {
                     Logger.logError("Couldn't process url!", e);
                   }
@@ -62,6 +79,65 @@ public class ModPackInstaller {
 
             }).values();
     return result;
+  }
+
+
+  /**
+   * Clears a folder of all files that are not in the ModPack, or not matching the needed side.
+   * 
+   * @param target Directory to clear.
+   * @param pack The {@link ModPack} to check against.
+   * @param backupDirectory The place to backup the cleared files to. No backup if <code>null</code>
+   * 
+   * @throws NullPointerException if pack or target <code>null</code>.
+   */
+  public static synchronized void clearFolder(final File target, final ModPack pack,
+      final File backupDirectory) {
+    checkNotNull(target);
+    checkNotNull(pack);
+    final boolean doBackup = !backupDirectory.equals(null);
+    if (doBackup) {
+      if (!backupDirectory.exists() || !backupDirectory.isDirectory()) {
+        backupDirectory.delete();
+        backupDirectory.mkdirs();
+      }
+    }
+    Parallel.ForEach<File, Void> p =
+        new Parallel.ForEach<File, Void>(FileUtils.listFiles(target,
+            FileFilterUtils.trueFileFilter(), FileFilterUtils.trueFileFilter()));
+    try {
+      p.withFixedThreads(OSUtils.getNumCores() * 2).apply(new Parallel.F<File, Void>() {
+
+        @Override
+        public Void apply(File f) {
+          try {
+            String hash = ChecksumUtil.getMD5(f);
+            if (pack.getFilesByHash(hash).isEmpty()) {
+              if (doBackup) {
+                Logger.logInfo(String.format("Moving file %s to backup folder - not in pack!",
+                    f.getName()));
+                try {
+                  FileUtils.moveFileToDirectory(f, new File(backupDirectory, f.getParent()), true);
+                } catch (FileExistsException e2) {
+                  Logger.logInfo(String.format("Not moving file %s!", f.getName()), e2);
+                  f.delete();
+                }
+              } else {
+                Logger.logInfo(String.format("Deleting file %s - not in pack!", f.getName()));
+                f.delete();
+              }
+            }
+          } catch (IOException e1) {
+            Logger.logError(String.format("Unable to check hash of %s!", f.getName()), e1);
+          }
+
+          return null;
+        }
+      }).values();
+    } catch (Exception e) {
+      Logger.logError("Parallel execution exception", e);
+    }
+
   }
 
 }
