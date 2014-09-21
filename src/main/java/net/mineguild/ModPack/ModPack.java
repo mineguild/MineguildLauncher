@@ -1,16 +1,14 @@
 package net.mineguild.ModPack;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
+import java.util.TreeMap;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
 
 public class ModPack {
@@ -19,9 +17,9 @@ public class ModPack {
   private @Expose @Getter @Setter String minecraftVersion;
   private @Expose @Getter String hash;
   private @Expose @Getter long releaseTime;
-  private @Expose @Getter Set<ModPackFile> files = Sets.newTreeSet();
+  private @Expose @Getter Map<String, ModPackFile> files;
 
-  public ModPack(String version, long releaseTime, Set<ModPackFile> files) {
+  public ModPack(String version, long releaseTime, Map<String, ModPackFile> files) {
     this.version = version;
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
     this.releaseTime = releaseTime;
@@ -37,9 +35,9 @@ public class ModPack {
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
   }
 
-  public void setFiles(Set<ModPackFile> files) {
-    if (!(files instanceof TreeSet<?>)) {
-      files = Sets.newTreeSet(files);
+  public void setFiles(Map<String, ModPackFile> files) {
+    if (!(files instanceof TreeMap<?, ?>)) {
+      files = Maps.newTreeMap();
     }
     this.files = files;
   }
@@ -52,24 +50,16 @@ public class ModPack {
     return new Date(releaseTime).toString();
   }
 
-  public void addFile(ModPackFile f) {
-    files.add(f);
-  }
 
   public ModPackFile getFileByPath(String path) {
-    for (ModPackFile f : files) {
-      if (f.getPath().equals(path)) {
-        return f;
-      }
-    }
-    return null;
+    return files.get(path);
   }
 
-  public List<ModPackFile> getFilesByHash(String hash) {
-    List<ModPackFile> ret = Lists.newArrayList();
-    for (ModPackFile f : files) {
-      if (f.getHash().equals(hash)) {
-        ret.add(f);
+  public Map<String, ModPackFile> getFilesByHash(String hash) {
+    Map<String, ModPackFile> ret = Maps.newTreeMap();
+    for (Map.Entry<String, ModPackFile> entry : files.entrySet()) {
+      if (entry.getValue().getHash().equals(hash)) {
+        ret.put(entry.getKey(), entry.getValue());
       }
     }
     return ret;

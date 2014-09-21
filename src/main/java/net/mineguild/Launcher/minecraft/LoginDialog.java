@@ -175,11 +175,11 @@ public class LoginDialog extends JDialog {
       }
 
       private void resetStuff() {
-        if (MineguildLauncher.settings.getMojangdata() != null) {
-          if (!((String) MineguildLauncher.settings.getMojangdata().get("username"))
+        if (MineguildLauncher.settings.getProfile() != null) {
+          if (!((String) MineguildLauncher.settings.getProfile().get("username"))
               .equals(userField.getText())) {
             saveTokenBox.setSelected(false);
-            MineguildLauncher.settings.setMojangdata(null);
+            MineguildLauncher.settings.setProfile(null);
             loginButton.setText("Login");
             passwordField.setEnabled(true);
           }
@@ -196,7 +196,7 @@ public class LoginDialog extends JDialog {
 
     boolean token = false;
 
-    if (MineguildLauncher.settings.getMojangdata() != null) {
+    if (MineguildLauncher.settings.getProfile() != null) {
       saveTokenBox.setSelected(true);
       token = true;
       loginButton.setText("Login(MCToken)");
@@ -236,7 +236,7 @@ public class LoginDialog extends JDialog {
     YggdrasilUserAuthentication authentication =
         (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(Proxy.NO_PROXY,
             MineguildLauncher.settings.getClientToken()).createUserAuthentication(Agent.MINECRAFT);
-    Map<String, Object> m = MineguildLauncher.settings.getMojangdata();
+    Map<String, Object> m = MineguildLauncher.settings.getProfile();
     String user = userField.getText();
     String pass = new String(passwordField.getPassword());
     boolean mojangData = false;
@@ -259,7 +259,7 @@ public class LoginDialog extends JDialog {
     } catch (InvalidCredentialsException e) {
       if (mojangData) {
         loginButton.setText("Login");
-        MineguildLauncher.settings.setMojangdata(null);
+        MineguildLauncher.settings.setProfile(null);
         JOptionPane.showMessageDialog(this,
             "MCToken is probably invalid! Please retry auth with password.");
         passwordField.setEnabled(true);
@@ -299,9 +299,9 @@ public class LoginDialog extends JDialog {
         MineguildLauncher.settings.clearPassword();
       }
       if (saveTokenBox.isSelected()) {
-        MineguildLauncher.settings.setMojangdata(authentication.saveForStorage());
+        MineguildLauncher.settings.setProfile(authentication.saveForStorage());
       } else {
-        MineguildLauncher.settings.setMojangdata(null);
+        MineguildLauncher.settings.setProfile(null);
       }
       
       forceUpdate = chckbxForceUpdate.isSelected();

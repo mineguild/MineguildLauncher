@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.download.DownloadInfo;
@@ -42,14 +44,16 @@ public class ModPackInstaller {
     checkNotNull(installDirectory);
     totalSize = 0l;
     List<DownloadInfo> result =
-        (List<DownloadInfo>) new Parallel.ForEach<ModPackFile, DownloadInfo>(pack.getFiles())
+        (List<DownloadInfo>) new Parallel.ForEach<Entry<String, ModPackFile>, DownloadInfo>(pack.getFiles().entrySet())
             .withFixedThreads(OSUtils.getNumCores() * 2)
-            .apply(new Parallel.F<ModPackFile, DownloadInfo>() {
+            .apply(new Parallel.F<Map.Entry<String, ModPackFile>, DownloadInfo>() {
 
               @Override
-              public DownloadInfo apply(ModPackFile packFile) {
+              public DownloadInfo apply(Map.Entry<String, ModPackFile> entry) {
+                String path = entry.getKey();
+                ModPackFile packFile = entry.getValue();
                 if (packFile.getSide() == side || packFile.getSide() == Side.UNIVERSAL) {
-                  File localFile = packFile.getFile(installDirectory);
+                  File localFile = new File(installDirectory, path);
                   if (localFile.exists()) {
                     try {
                       if (!ChecksumUtil.getMD5(localFile).equals(packFile.getHash())) {
@@ -63,7 +67,7 @@ public class ModPackInstaller {
                     if (!localFile.exists()) {
                       DownloadInfo ret =
                           new DownloadInfo(new URL(Constants.MG_GET_SCRIPT + "?data="
-                              + packFile.getHash()), localFile, packFile.getName(), Lists
+                              + packFile.getHash()), localFile, localFile.getName(), Lists
                               .newArrayList(packFile.getHash()), "md5", DLType.ContentMD5,
                               DLType.NONE);
                       totalSize += packFile.getSize();

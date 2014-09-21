@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -29,6 +30,7 @@ import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
+import net.mineguild.Launcher.utils.json.assets.AssetIndex.Asset;
 import net.mineguild.Launcher.utils.json.versions.Library;
 import net.mineguild.Launcher.utils.json.versions.Version;
 import net.mineguild.Launcher.utils.winreg.JavaFinder;
@@ -68,18 +70,20 @@ public class MCInstaller {
         throw new Exception("Download was interrupted!");
       }
       dlDialog.dispose();
-      MineguildLauncher.totalDownloadTime += System.currentTimeMillis()-startTime;
+      MineguildLauncher.totalDownloadTime += System.currentTimeMillis() - startTime;
     }
     if (libraries.size() > 0) {
       long startTime = System.currentTimeMillis();
-      dlDialog = new MultithreadDownloadDialog(libraries, "Downloading Libraries", DownloadUtils.getTotalSize(libraries));
+      dlDialog =
+          new MultithreadDownloadDialog(libraries, "Downloading Libraries",
+              DownloadUtils.getTotalSize(libraries));
       dlDialog.setVisible(true);
       if (!dlDialog.start()) {
         dlDialog.dispose();
         throw new Exception("Download was interrupted!");
       }
       dlDialog.dispose();
-      MineguildLauncher.totalDownloadTime += System.currentTimeMillis()-startTime;
+      MineguildLauncher.totalDownloadTime += System.currentTimeMillis() - startTime;
     }
     if (libraries.size() + assets.size() > 0) {
       JOptionPane.showMessageDialog(null, libraries.size() + assets.size()
@@ -103,30 +107,19 @@ public class MCInstaller {
       packbasejson = forgeVersion.inheritsFrom;
 
     for (Library lib : forgeVersion.getLibraries()) {
-      if (lib.natives == null) {
-        local = new File(libDir, lib.getPath());
-        if (!local.exists() || MineguildLauncher.forceUpdate) {
-          if (lib.checksums != null) {
-            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local,
-                local.getName(), lib.checksums, "sha1", DownloadInfo.DLType.NONE,
-                DownloadInfo.DLType.NONE));
-          } else if (lib.download != null && lib.download) {
-            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
-          } else {
-            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
-          }
-        }
-      } else {
-        local = new File(libDir, lib.getPathNatives());
+      local = new File(libDir, lib.getPath());
+      if (!local.exists() || MineguildLauncher.forceUpdate) {
         if (lib.checksums != null) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local
-              .getName(), lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
-        } else if (lib.download != null && lib.download) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local
-              .getName()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
+              lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
+        } else if (lib.url != null) {
+          if (lib.url.toLowerCase().equals(Constants.MG_LIBS)) {
+            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local,
+                local.getName(), null, "md5", DownloadInfo.DLType.ContentMD5,
+                DownloadInfo.DLType.ContentMD5));
+          }
         } else {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPathNatives()), local, local
-              .getName()));
+          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
         }
       }
     }
@@ -168,7 +161,6 @@ public class MCInstaller {
     return list;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   private static List<DownloadInfo> getAssets() throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
     File forgeJson = new File(MineguildLauncher.baseDirectory, "pack.json");
@@ -186,9 +178,10 @@ public class MCInstaller {
     Collection<DownloadInfo> tmp;
     Logger.logInfo("Starting asset hash checking... Please wait...");
     long start = System.currentTimeMillis();
-    Parallel.TaskHandler th =
-        new Parallel.ForEach(index.objects.entrySet()).withFixedThreads(2 * OSUtils.getNumCores())
-        // .configurePoolSize(2*2*OSUtils.getNumCores(), 10)
+    Parallel.TaskHandler<DownloadInfo> th =
+        new Parallel.ForEach<Entry<String, Asset>, DownloadInfo>(index.objects.entrySet())
+            .withFixedThreads(2 * OSUtils.getNumCores())
+            // .configurePoolSize(2*2*OSUtils.getNumCores(), 10)
             .apply(new Parallel.F<Map.Entry<String, AssetIndex.Asset>, DownloadInfo>() {
               public DownloadInfo apply(Map.Entry<String, AssetIndex.Asset> e) {
                 try {
@@ -213,7 +206,8 @@ public class MCInstaller {
               }
             });
     tmp = th.values();
-    Logger.logInfo(String.format("Finished asset hash checking in %d seconds.", (System.currentTimeMillis()-start)/1000));
+    Logger.logInfo(String.format("Finished asset hash checking in %d seconds.",
+        (System.currentTimeMillis() - start) / 1000));
     list.addAll(tmp);
     // kill executorservice
     th.shutdown();

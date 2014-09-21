@@ -52,15 +52,15 @@ public class MineguildLauncher {
 
   public static void main(String[] args) throws Exception {
     DownloadUtils.ssl_hack();
-    System.setProperty("java.net.preferIPv4Stack", "true");
+    /*System.setProperty("java.net.preferIPv4Stack", "true");
     ModPack test = new ModPack(System.currentTimeMillis());
     test.setFiles(ChecksumUtil.getFiles(new File("testPack"), FileUtils.listFiles(new File("testPack/mods"), Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER)));
     JsonWriter.saveModpack(test, new File("new_format.json"));
+    //ModPackInstaller.clearFolder(new File("mods"), test, new File("bakup"));
+    List<DownloadInfo> dinfo = ModPackInstaller.checkNeededFiles(new File("modpack"), test, Side.UNIVERSAL);
+    System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dinfo));
+    System.exit(0);*/
     Logger.addListener(new StdOutLogger());
-    ModPackInstaller.clearFolder(new File("mods"), test, new File("bakup"));
-    //List<DownloadInfo> dinfo = ModPackInstaller.checkNeededFiles(new File("modpack"), test, Side.UNIVERSAL);
-    //System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dinfo));
-    System.exit(0);
     if (args.length == 1) {
       if (args[0].equals("-updateServer")) {
         MineguildLauncherConsole.update();

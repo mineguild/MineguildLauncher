@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.gson.annotations.Expose;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.log.Logger;
@@ -11,13 +13,13 @@ import net.mineguild.Launcher.utils.CryptoUtils;
 
 public class Settings {
 
-  private @Getter @Setter Map<String, Object> mojangdata;
-  private String clientToken;
-  private @Getter @Setter String MCUser;
-  private String MCPassword;
-  private @Getter @Setter String modpack_hash;
+  private @Expose @Getter @Setter Map<String, Object> profile;
+  private @Expose String clientToken;
+  private @Expose @Getter @Setter String MCUser;
+  private @Expose String MCPassword;
+  private @Expose @Getter @Setter String modpack_hash;
   private @Getter @Setter String additional_java_args;
-  private @Getter @Setter File modpackPath;
+  private @Expose @Getter @Setter File modpackPath;
 
   public Settings(File modpackPath) {
     this.modpackPath = modpackPath;

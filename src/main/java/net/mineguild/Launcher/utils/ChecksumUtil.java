@@ -1,12 +1,14 @@
 package net.mineguild.Launcher.utils;
 
+import static net.mineguild.Launcher.utils.RelativePath.getRelativePath;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.ModPack.ModPackFile;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
@@ -47,24 +49,49 @@ public class ChecksumUtil {
   }
 
 
-  public static synchronized Set<ModPackFile> getFiles(final File baseDirectory,
+  public static synchronized Map<String, ModPackFile> getFiles(final File baseDirectory,
       Collection<File> files) throws InterruptedException, ExecutionException {
-    Set<ModPackFile> results =
-        Sets.newTreeSet(new Parallel.ForEach<File, ModPackFile>(files)
-            .withFixedThreads(2 * OSUtils.getNumCores()).apply(new Parallel.F<File, ModPackFile>() {
+    Collection<Entry<String, ModPackFile>> results = new Parallel.ForEach<File, Entry<String, ModPackFile>>(files)
+            .withFixedThreads(2 * OSUtils.getNumCores()).apply(new Parallel.F<File, Entry<String, ModPackFile>>() {
               @Override
-              public ModPackFile apply(File e) {
+              public Entry<String, ModPackFile> apply(final File e) {
                 try {
-                  String hash = getMD5(e);
-                  return new ModPackFile(baseDirectory, e, hash);
+                  final String hash = getMD5(e);
+                  final String path = getRelativePath(baseDirectory, e);
+                  
+                  return new Entry<String, ModPackFile>() {
+                    
+                    ModPackFile value = new ModPackFile(hash, e.length());
+                    
+                    @Override
+                    public ModPackFile setValue(ModPackFile value) {
+                      ModPackFile old = this.value;
+                      this.value = value;
+                      return old;
+                    }
+                    
+                    @Override
+                    public ModPackFile getValue() {
+                      return value;
+                    }
+                    
+                    @Override
+                    public String getKey() {
+                      return path;
+                    }
+                  };
                 } catch (Exception e1) {
                   Logger.logError("Exception while trying to process file!", e1);
                   return null;
                 }
 
               }
-            }).values());
-    return results;
+            }).values();
+    Map<String, ModPackFile> ret = Maps.newTreeMap();
+    for(Entry<String, ModPackFile> e : results){
+      ret.put(e.getKey(), e.getValue());
+    }
+    return ret;
   }
 
   public static String getHash(HashFunction hf, String str) {
