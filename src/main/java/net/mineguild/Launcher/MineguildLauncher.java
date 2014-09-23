@@ -13,7 +13,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import net.mineguild.Launcher.download.DownloadInfo;
-import net.mineguild.Launcher.download.MultithreadDownloadDialog;
+import net.mineguild.Launcher.download.MultithreadedDownloadDialog;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
@@ -32,8 +32,8 @@ import net.mineguild.Launcher.utils.json.Settings;
 import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModPackInstaller;
 import net.mineguild.ModPack.Side;
-
 import org.apache.commons.io.FileUtils;
+
 
 public class MineguildLauncher {
 
@@ -120,14 +120,14 @@ public class MineguildLauncher {
     boolean updated = true;
     FileUtils
         .copyURLToFile(
-            new URL(
-                "https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
-            new File(OSUtils.getLocalDir(), "newest.json"));
-    ModPack newest = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
+                new URL(
+                        "https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
+                new File(OSUtils.getLocalDir(), "newest.json"));
+    ModPack remotePack = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
     boolean needsUpdate = false;
 
-    Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
-        new Date(newest.getReleaseTime()).toString()));
+    Logger.logInfo(String.format("Newest pack version: %s released on %s", remotePack.getVersion(),
+            new Date(remotePack.getReleaseTime()).toString()));
     File localPackFile = new File(baseDirectory, "currentPack.json");
     ModPack localPack = null;
     try {
@@ -137,17 +137,23 @@ public class MineguildLauncher {
       Logger.logError("Unable to load current ModPack! Fresh-Install!", e);
     }
     forceUpdate = !localPackFile.exists() || dialog.forceUpdate;
-    needsUpdate = forceUpdate ? true : needsUpdate(localPack, newest);
-    ModPack packUpdatedTo = newest;
-    if (needsUpdate) {
+    needsUpdate = forceUpdate || needsUpdate(localPack, remotePack);
+      if (needsUpdate) {
+          if(!(localPack == null)) {
+              Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]", localPack.getVersion(),
+                      localPack.getReleaseDate(), localPack.getHash()));
+          }
+          Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]",
+                  remotePack.getVersion(), remotePack.getReleaseDate(), remotePack.getHash()));
+          Logger.logInfo("Updating to Remote");
       if (forceUpdate) {
-        ModPackInstaller.clearFolder(OSUtils.getGameDir(), packUpdatedTo, null);
+        ModPackInstaller.clearFolder(OSUtils.getGameDir(), remotePack, null);
       }
       List<DownloadInfo> dlinfo =
-          ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), packUpdatedTo,
+          ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), remotePack,
               Side.CLIENT);
-      MultithreadDownloadDialog dlDialog =
-          new MultithreadDownloadDialog(dlinfo, "Updating ModPack", con);
+      MultithreadedDownloadDialog dlDialog =
+          new MultithreadedDownloadDialog(dlinfo, "Updating ModPack", con);
       dlDialog.setVisible(true);
       if (!dlDialog.run()) {
         Logger.logError("No success downloading!");
@@ -155,7 +161,7 @@ public class MineguildLauncher {
         JOptionPane.showMessageDialog(con, "Updating didn't finish!", "Update error!",
             JOptionPane.ERROR_MESSAGE);
       } else {
-        localPack = packUpdatedTo;
+        localPack = remotePack;
       }
     }
 
@@ -247,16 +253,7 @@ public class MineguildLauncher {
               newestPack.getVersion(), newestPack.getReleaseDate()), "Update modpack?",
               JOptionPane.YES_NO_OPTION);
       if (result == JOptionPane.YES_OPTION) {
-        Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]", localPack.getVersion(),
-            localPack.getReleaseDate(), localPack.getHash()));
-        Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]",
-            newestPack.getVersion(), newestPack.getReleaseDate(), newestPack.getHash()));
-        Logger.logInfo("Updating from Local to Remote");
-        try {
-          return true;
-        } catch (Exception e) {
-          Logger.logError("Modpack update interrupted!", e);
-        }
+        return true;
       } else {
         // We let him launch the pack although he won't be able to play on the server.
         Logger.logInfo("Pack wasn't updated, because user denied.");

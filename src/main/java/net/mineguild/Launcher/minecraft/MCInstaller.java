@@ -17,7 +17,7 @@ import javax.swing.JOptionPane;
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.download.DownloadInfo;
-import net.mineguild.Launcher.download.MultithreadDownloadDialog;
+import net.mineguild.Launcher.download.MultithreadedDownloadDialog;
 import net.mineguild.Launcher.log.LogEntry;
 import net.mineguild.Launcher.log.LogLevel;
 import net.mineguild.Launcher.log.Logger;
@@ -60,11 +60,11 @@ public class MCInstaller {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    MultithreadDownloadDialog dlDialog;
+    MultithreadedDownloadDialog dlDialog;
     if (assets.size() > 0) {
       long startTime = System.currentTimeMillis();
       dlDialog =
-          new MultithreadDownloadDialog(MineguildLauncher.con, assets, "Downloading Assets",
+          new MultithreadedDownloadDialog(MineguildLauncher.con, assets, "Downloading Assets",
               totalAssetSize);
       dlDialog.setVisible(true);
       if (!dlDialog.run()) {
@@ -77,7 +77,7 @@ public class MCInstaller {
     if (libraries.size() > 0) {
       long startTime = System.currentTimeMillis();
       dlDialog =
-          new MultithreadDownloadDialog(MineguildLauncher.con, libraries, "Downloading Libraries",
+          new MultithreadedDownloadDialog(MineguildLauncher.con, libraries, "Downloading Libraries",
               DownloadUtils.getTotalSize(libraries));
       dlDialog.setVisible(true);
       if (!dlDialog.run()) {

@@ -26,16 +26,14 @@ import com.google.common.collect.Lists;
 
 public class ModPackInstaller {
 
-
-
   /**
    * Determines the files that are needed to update/repair/install the ModPack
    * 
    * @param installDirectory The directory as {@link File} to check.
-   * @param pack The {@link ModPack} to check against.
-   * @param side The {@link Side} that should be installed, should be {@link Side.SERVER} or
-   *        {@link Side.CLIENT}
-   * @return A List of needed {@link DownloadInfo}
+   * @param pack The {@link net.mineguild.ModPack.ModPack} to check against.
+   * @param side The {@link net.mineguild.ModPack.Side} that should be installed, should be SERVER or
+   *        CLIENT
+   * @return A List of needed {@link net.mineguild.Launcher.download.DownloadInfo}
    * @throws Exception
    */
   public static synchronized List<DownloadInfo> checkNeededFiles(final File installDirectory,

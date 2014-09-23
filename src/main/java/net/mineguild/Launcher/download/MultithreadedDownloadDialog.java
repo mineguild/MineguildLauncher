@@ -26,7 +26,7 @@ import javax.swing.JProgressBar;
 import net.mineguild.Launcher.log.Logger;
 
 @SuppressWarnings("serial")
-public class MultithreadDownloadDialog extends JDialog implements PropertyChangeListener {
+public class MultithreadedDownloadDialog extends JDialog implements PropertyChangeListener {
 
   private static Image icon = null;
   public JLabel status;
@@ -46,7 +46,7 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
   /**
    * @wbp.parser.constructor
    */
-  public MultithreadDownloadDialog(Frame parent, List<DownloadInfo> info, String title) {
+  public MultithreadedDownloadDialog(Frame parent, List<DownloadInfo> info, String title) {
     super(parent);
     this.setTitle(title);
     try {
@@ -78,13 +78,13 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
     });
   }
 
-  public MultithreadDownloadDialog(Frame parent, List<DownloadInfo> info, String title,
-      long totalSize) {
+  public MultithreadedDownloadDialog(Frame parent, List<DownloadInfo> info, String title,
+                                     long totalSize) {
     this(parent, info, title);
     this.totalFilesSize = totalSize;
   }
 
-  public MultithreadDownloadDialog(List<DownloadInfo> dlinfo, String title, Frame parent) {
+  public MultithreadedDownloadDialog(List<DownloadInfo> dlinfo, String title, Frame parent) {
     this(parent, dlinfo, title);
     for (DownloadInfo info : dlinfo) {
       totalFilesSize += info.size;
