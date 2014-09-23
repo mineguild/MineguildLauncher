@@ -3,21 +3,20 @@ package net.mineguild.Builder;
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingWorker;
 
+import net.mineguild.Launcher.log.Logger;
+import net.mineguild.Launcher.utils.ChecksumUtil;
+import net.mineguild.Launcher.utils.ChecksumUtil.ModPackEntry;
 import net.mineguild.Launcher.utils.OSUtils;
+import net.mineguild.Launcher.utils.Parallel;
+import net.mineguild.ModPack.ModPackFile;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import com.google.common.io.Files;
+import com.google.common.collect.Maps;
 
 
-public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
+public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
 
   @Override
   protected void done() {
@@ -25,25 +24,44 @@ public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
     firePropertyChange("done", null, true);
   }
 
-  private static ConcurrentHashMap<File, String> results;
-  private static FileAddWorker instance;
   private Collection<File> files;
   private float progressPerFile;
+  private File baseDirectory;
+  private int progress;
 
-  public FileAddWorker(Collection<File> files) {
+  public FileAddWorker(Collection<File> files, File baseDirectory) {
     this.files = files;
+    this.baseDirectory = baseDirectory;
     this.progressPerFile = 100f / files.size();
-    FileAddWorker.instance = this;
   }
 
   public void updateProgress() {
-    setProgress((int) (progressPerFile * results.size()));
+    setProgress((int) (progressPerFile * ++progress));
   }
 
 
   @Override
-  protected Map<File, String> doInBackground() throws Exception {
-    results = new ConcurrentHashMap<File, String>();
+  protected Map<String, ModPackFile> doInBackground() throws Exception {
+    Collection<ModPackEntry> result = new Parallel.ForEach<File, ModPackEntry>(files).withFixedThreads(OSUtils.getNumCores() * 2).apply(new Parallel.F<File, ModPackEntry>() {
+      
+      @Override
+      public ModPackEntry apply(File e) {
+        try {
+          ModPackEntry entry = ChecksumUtil.getFile(baseDirectory, e);
+          updateProgress();
+          return entry;
+        } catch (Exception e1) {
+          Logger.logError("Unable to add file!", e1);
+        }
+        return null;
+      }
+    }).values();
+    Map<String, ModPackFile> ret = Maps.newTreeMap();
+    for(ModPackEntry entry : result){
+      ret.put(entry.getKey(), entry.getValue());
+    }
+    return ret;
+    /*
     ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores());
     for (File file : files) {
       try {
@@ -60,28 +78,19 @@ public class FileAddWorker extends SwingWorker<Map<File, String>, Void> {
       executor.shutdownNow();
       Thread.currentThread().interrupt();
     }
-    return results;
+    return results;*/
   }
-
-  public static class WorkerTask implements Runnable {
-
-    File file;
-    HashFunction hf;
-
-    WorkerTask(File file, HashFunction hf) {
-      this.file = file;
-      this.hf = hf;
-    }
-
-    @Override
-    public void run() {
-      try {
-        results.put(file, Files.hash(file, hf).toString());
-        FileAddWorker.instance.updateProgress();
-      } catch (Exception ignored) {
-      }
-
-    }
-  }
+  /*
+   * public static class WorkerTask implements Runnable {
+   * 
+   * File file; HashFunction hf;
+   * 
+   * WorkerTask(File file, HashFunction hf) { this.file = file; this.hf = hf; }
+   * 
+   * @Override public void run() { try { results.put(file, Files.hash(file, hf).toString());
+   * FileAddWorker.instance.updateProgress(); } catch (Exception ignored) { }
+   * 
+   * } }
+   */
 
 }

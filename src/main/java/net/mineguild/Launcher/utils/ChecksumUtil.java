@@ -15,7 +15,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import net.mineguild.Launcher.log.Logger;
+import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModPackFile;
 
 import com.google.common.collect.Maps;
@@ -49,49 +52,52 @@ public class ChecksumUtil {
   }
 
 
+  /**
+   * Creates a {@link Map} [ {@link String} : {@link ModPackFile} ] from the list of files and the relative directory.
+   * @see ModPack
+   * 
+   * @param baseDirectory The directory the pack is located (containing config and mods directory).
+   *        This is used for the relative path.
+   * @param files a {@link Collection} of {@link File} to use
+   * @return the resulting {@link Map}
+   * @throws InterruptedException if thread was interrupted
+   * @throws ExecutionException if some other kind of {@link Exception} occurred while trying to execute this.
+   */
   public static synchronized Map<String, ModPackFile> getFiles(final File baseDirectory,
       Collection<File> files) throws InterruptedException, ExecutionException {
-    Collection<Entry<String, ModPackFile>> results = new Parallel.ForEach<File, Entry<String, ModPackFile>>(files)
-            .withFixedThreads(2 * OSUtils.getNumCores()).apply(new Parallel.F<File, Entry<String, ModPackFile>>() {
+    Collection<Entry<String, ModPackFile>> results =
+        new Parallel.ForEach<File, Entry<String, ModPackFile>>(files)
+            .withFixedThreads(2 * OSUtils.getNumCores())
+            .apply(new Parallel.F<File, Entry<String, ModPackFile>>() {
               @Override
               public Entry<String, ModPackFile> apply(final File e) {
                 try {
-                  final String hash = getMD5(e);
-                  final String path = getRelativePath(baseDirectory, e);
-                  
-                  return new Entry<String, ModPackFile>() {
-                    
-                    ModPackFile value = new ModPackFile(hash, e.length());
-                    
-                    @Override
-                    public ModPackFile setValue(ModPackFile value) {
-                      ModPackFile old = this.value;
-                      this.value = value;
-                      return old;
-                    }
-                    
-                    @Override
-                    public ModPackFile getValue() {
-                      return value;
-                    }
-                    
-                    @Override
-                    public String getKey() {
-                      return path;
-                    }
-                  };
+                  return getFile(baseDirectory, e);
                 } catch (Exception e1) {
-                  Logger.logError("Exception while trying to process file!", e1);
-                  return null;
+                  Logger.logError("Unable to add file to pack!", e1);
                 }
-
+                return null;
               }
             }).values();
     Map<String, ModPackFile> ret = Maps.newTreeMap();
-    for(Entry<String, ModPackFile> e : results){
+    for (Entry<String, ModPackFile> e : results) {
       ret.put(e.getKey(), e.getValue());
     }
     return ret;
+  }
+
+  /**
+   * Creates {@link ModPackEntry} from given file and baseDirectory.
+   * 
+   * @param baseDirectory The directory the pack is located (containing config and mods directory).
+   *        This is used for the relative path.
+   * @param f The file to get the path, size and hash from
+   * @return resulting {@link ModPackEntry}
+   * @throws Exception If an {@link Exception} of any kind occurs
+   */
+  public static ModPackEntry getFile(File baseDirectory, File f) throws Exception {
+    return new ModPackEntry(getRelativePath(baseDirectory, f), new ModPackFile(getMD5(f),
+        f.length()));
   }
 
   public static String getHash(HashFunction hf, String str) {
@@ -133,6 +139,33 @@ public class ChecksumUtil {
       }
 
     }
+  }
+
+  public static class ModPackEntry implements Map.Entry<String, ModPackFile> {
+
+    final String key;
+    final ModPackFile value;
+
+    public ModPackEntry(String key, ModPackFile value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    @Override
+    public String getKey() {
+      return key;
+    }
+
+    @Override
+    public ModPackFile getValue() {
+      return value;
+    }
+
+    @Override
+    public ModPackFile setValue(ModPackFile value) {
+      throw new NotImplementedException("Not in this implementation!");
+    }
+
   }
 
 }

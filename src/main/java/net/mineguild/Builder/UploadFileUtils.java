@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import net.mineguild.ModPack.ModPackFile;
+
 import org.apache.commons.io.FileUtils;
 
 public class UploadFileUtils {
 
-  public static void placeUploadFiles(String basePath, Map<String, String> files) {
+  public static void placeUploadFiles(String basePath, Map<String, ModPackFile> files) {
     File uploadDir = new File("upload");
     uploadDir.mkdir();
     try {
@@ -16,10 +18,10 @@ public class UploadFileUtils {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    for (Map.Entry<String, String> entry : files.entrySet()) {
+    for (Map.Entry<String, ModPackFile> entry : files.entrySet()) {
       File file = new File(basePath, entry.getKey());
-      File newDirectory = new File(uploadDir, entry.getValue().substring(0, 2));
-      File newFile = new File(newDirectory, entry.getValue());
+      File newDirectory = new File(uploadDir, entry.getValue().getHash().substring(0, 2));
+      File newFile = new File(newDirectory, entry.getValue().getHash());
       if (file.exists()) {
         try {
           FileUtils.copyFile(file, newFile);

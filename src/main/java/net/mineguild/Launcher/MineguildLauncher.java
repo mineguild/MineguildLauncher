@@ -5,14 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
-import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
@@ -23,7 +21,6 @@ import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
 import net.mineguild.Launcher.utils.AuthWorkDialog;
-import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.OSUtils;
@@ -31,13 +28,9 @@ import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
 import net.mineguild.ModPack.ModPack;
-import net.mineguild.ModPack.ModPackInstaller;
-import net.mineguild.ModPack.Side;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-
-import com.google.gson.GsonBuilder;
 
 public class MineguildLauncher {
 
@@ -52,14 +45,16 @@ public class MineguildLauncher {
 
   public static void main(String[] args) throws Exception {
     DownloadUtils.ssl_hack();
-    /*System.setProperty("java.net.preferIPv4Stack", "true");
-    ModPack test = new ModPack(System.currentTimeMillis());
-    test.setFiles(ChecksumUtil.getFiles(new File("testPack"), FileUtils.listFiles(new File("testPack/mods"), Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER)));
-    JsonWriter.saveModpack(test, new File("new_format.json"));
-    //ModPackInstaller.clearFolder(new File("mods"), test, new File("bakup"));
-    List<DownloadInfo> dinfo = ModPackInstaller.checkNeededFiles(new File("modpack"), test, Side.UNIVERSAL);
-    System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dinfo));
-    System.exit(0);*/
+    /*
+     * System.setProperty("java.net.preferIPv4Stack", "true"); ModPack test = new
+     * ModPack(System.currentTimeMillis()); test.setFiles(ChecksumUtil.getFiles(new
+     * File("testPack"), FileUtils.listFiles(new File("testPack/mods"),
+     * Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER))); JsonWriter.saveModpack(test,
+     * new File("new_format.json")); //ModPackInstaller.clearFolder(new File("mods"), test, new
+     * File("bakup")); List<DownloadInfo> dinfo = ModPackInstaller.checkNeededFiles(new
+     * File("modpack"), test, Side.UNIVERSAL); System.out.println(new
+     * GsonBuilder().setPrettyPrinting().create().toJson(dinfo)); System.exit(0);
+     */
     Logger.addListener(new StdOutLogger());
     if (args.length == 1) {
       if (args[0].equals("-updateServer")) {
@@ -118,11 +113,12 @@ public class MineguildLauncher {
     baseDirectory = settings.getModpackPath();
     baseDirectory.mkdirs();
 
-    XModpack m = null;
+    
     boolean updated = true;
-    XModpack newest =
-        XModpack.fromJson(IOUtils
-            .toString(new URL("https://mineguild.net/download/mmp/modpack.json")));
+    FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"), new File(OSUtils.getLocalDir(), "newest.json"));
+    ModPack newest = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
+    ModPack localPack;
+    
     Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         new Date(newest.getReleaseTime()).toString()));
     File curpack = new File(baseDirectory, "version.json");
@@ -134,10 +130,9 @@ public class MineguildLauncher {
         Logger.logError("Modpack update interrupted!", e);
         updated = false;
       }
-      m = newest;
     } else {
       try {
-        XModpack localPack = XModpack.fromJson(FileUtils.readFileToString(curpack));
+        localPack = JsonFactory.loadModpack(new File(baseDirectory, "currentPack.json"));
         Logger.logInfo(String.format("Local pack version: %s released on %s",
             localPack.getVersion(), localPack.getReleaseDate()));
         if (!newest.getHash().equals(localPack.getHash())) {
@@ -155,7 +150,7 @@ public class MineguildLauncher {
               Logger.logInfo("Updating from Local to Remote");
               try {
                 ModpackUtils.updateModpack(localPack, newest);
-                m = newest;
+                localPack = newest;
               } catch (Exception e) {
                 Logger.logError("Modpack update interrupted!", e);
                 updated = false;
@@ -166,30 +161,28 @@ public class MineguildLauncher {
             }
           } else {
             Logger.logInfo("Not updating, because not newer");
-            m = localPack;
           }
         } else {
           Logger.logInfo("Not updating, because not newer");
-          m = localPack;
         }
       } catch (Exception e) {
         Logger.logError("Unable to load local pack, fresh-installing.", e);
         try {
           ModpackUtils.updateModpack(newest);
+          localPack = newest;
         } catch (Exception e1) {
           Logger.logError("Modpack update interrupted!", e1);
           updated = false;
         }
-        m = newest;
       }
     }
     if (updated) {
       Logger.logInfo("Successfully updated/installed modpack.");
-      FileUtils.write(new File(baseDirectory, "version.json"), m.toJson());
+      JsonWriter.saveModpack(localPack, new File(baseDirectory, "currentPack.json"));
       boolean success = true;
       try {
         Logger.logInfo("Preparing MC for launch.");
-        MCInstaller.setup(m);
+        MCInstaller.setup(localPack);
         Logger.logInfo("Downloaded for " + totalDownloadTime / 1000 + " seconds.");
       } catch (Exception e) {
         Logger.logError("Couldn't prepare MC for launch.", e);

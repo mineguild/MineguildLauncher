@@ -45,6 +45,4 @@ public class JsonFactory {
     return GSON.fromJson(reader, ModPack.class);
   }
 
-
-
 }

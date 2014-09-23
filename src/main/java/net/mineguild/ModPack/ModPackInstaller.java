@@ -26,8 +26,6 @@ import com.google.common.collect.Lists;
 
 public class ModPackInstaller {
 
-  public static long totalSize = 0;
-
 
   /**
    * Determines the files that are needed to update/repair/install the ModPack
@@ -42,10 +40,9 @@ public class ModPackInstaller {
   public static synchronized List<DownloadInfo> checkNeededFiles(final File installDirectory,
       ModPack pack, final Side side) throws Exception {
     checkNotNull(installDirectory);
-    totalSize = 0l;
     List<DownloadInfo> result =
-        (List<DownloadInfo>) new Parallel.ForEach<Entry<String, ModPackFile>, DownloadInfo>(pack.getFiles().entrySet())
-            .withFixedThreads(OSUtils.getNumCores() * 2)
+        (List<DownloadInfo>) new Parallel.ForEach<Entry<String, ModPackFile>, DownloadInfo>(pack
+            .getFiles().entrySet()).withFixedThreads(OSUtils.getNumCores() * 2)
             .apply(new Parallel.F<Map.Entry<String, ModPackFile>, DownloadInfo>() {
 
               @Override
@@ -70,7 +67,6 @@ public class ModPackInstaller {
                               + packFile.getHash()), localFile, localFile.getName(), Lists
                               .newArrayList(packFile.getHash()), "md5", DLType.ContentMD5,
                               DLType.NONE);
-                      totalSize += packFile.getSize();
                       ret.size = packFile.getSize();
                       return ret;
                     }

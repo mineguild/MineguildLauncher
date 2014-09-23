@@ -12,20 +12,31 @@ public class ModPackFile {
   private @Getter @Setter @Expose boolean optional = false;
   private @Getter @Expose String hash;
 
+
+  /**
+   * Creates a new instance of {@link ModPackFile} with the given size and hash.
+   * 
+   * @param hash The file's MD5 hash (hexdigest)
+   * @param size The file's size in bytes
+   */
   public ModPackFile(String hash, long size) {
     this(hash);
-    this.size = size; 
+    this.size = checkNotNull(size);
   }
 
+  /**
+   * Creates a new instance of {@link ModPackFile} with the given hash.
+   * 
+   * @param hash The file's MD5 hash (hexdigest)
+   */
   public ModPackFile(String hash) {
-    checkNotNull(hash);
-    this.hash = hash;
+    this.hash = checkNotNull(hash);
   }
-  
+
   @Override
-  public String toString(){
+  public String toString() {
     return String.format("ModPackFile Hash: %s Size: %.2d", hash, size);
   }
-  
+
 
 }

@@ -12,7 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
 import net.mineguild.Launcher.Constants;
-import net.mineguild.Launcher.XModpack;
+import net.mineguild.ModPack.ModPack;
 
 import org.apache.commons.io.FileUtils;
 
@@ -21,7 +21,7 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
 
   public static WorkDialog instance;
   private JProgressBar bar;
-  private XModpack targetModpack;
+  private ModPack targetModpack;
   private FileAddWorker worker;
 
   public WorkDialog(JFrame owner) {
@@ -38,13 +38,13 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
     setLocationRelativeTo(null);
   }
 
-  public void start(final XModpack targetModpack) {
+  public void start(final ModPack targetModpack) {
     Collection<File> fileList =
-        FileUtils.listFiles(new File(targetModpack.getBasePath(), "mods"),
+        FileUtils.listFiles(new File(ModpackBuilder.modpackDirectory, "mods"),
             Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER);
-    fileList.addAll(FileUtils.listFiles(new File(targetModpack.getBasePath(), "config"),
+    fileList.addAll(FileUtils.listFiles(new File(ModpackBuilder.modpackDirectory, "config"),
         Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER));
-    worker = new FileAddWorker(fileList);
+    worker = new FileAddWorker(fileList, ModpackBuilder.modpackDirectory);
     worker.addPropertyChangeListener(this);
     this.targetModpack = targetModpack;
     worker.execute();
@@ -58,7 +58,7 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
       bar.setValue((Integer) event.getNewValue());
     } else if (event.getPropertyName().equals("done")) {
       try {
-        targetModpack.addModpackFiles(worker.get());
+        targetModpack.setFiles(worker.get());
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();

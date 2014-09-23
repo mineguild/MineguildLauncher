@@ -3,6 +3,7 @@ package net.mineguild.Launcher.download;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -21,6 +22,7 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -50,7 +52,8 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
   /**
    * @wbp.parser.constructor
    */
-  public DownloadDialog(List<DownloadInfo> info, String title) {
+  public DownloadDialog(Frame parent, List<DownloadInfo> info, String title) {
+    super(parent);
     this.setTitle(title);
     try {
       icon = ImageIO.read(getClass().getResourceAsStream("/icon.png"));
@@ -81,9 +84,16 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     });
   }
 
-  public DownloadDialog(List<DownloadInfo> info, String title, long totalSize) {
-    this(info, title);
+  public DownloadDialog(Frame parent, List<DownloadInfo> info, String title, long totalSize) {
+    this(parent, info, title);
     this.totalFilesSize = totalSize;
+  }
+  
+  public DownloadDialog(List<DownloadInfo> info, String title, Frame parent){
+    this(parent, info, title);
+    for(DownloadInfo inf : info){
+      totalFilesSize += inf.size;
+    }
   }
 
   public boolean start() {

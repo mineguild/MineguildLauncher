@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 import javax.swing.InputVerifier;
 import javax.swing.JButton;
@@ -28,9 +27,12 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
 
 import lombok.Getter;
-import net.mineguild.Launcher.XModpack;
-
-import org.apache.commons.io.FileUtils;
+import net.mineguild.Launcher.log.Logger;
+import net.mineguild.Launcher.log.StdOutLogger;
+import net.mineguild.Launcher.utils.json.JsonWriter;
+import net.mineguild.ModPack.ModPack;
+import net.mineguild.ModPack.ModPackFile;
+import net.mineguild.ModPack.Side;
 
 import com.google.common.collect.Lists;
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -126,7 +128,7 @@ public class ModpackBuilder extends JFrame {
   }
 
   public void createUpdatedPack(final JFrame parent) {
-    XModpack modPack = new XModpack(modpackDirectory);
+    ModPack modPack = new ModPack();
     modPack.setMinecraftVersion("1.7.10");
     modPack.setForgeVersion("1.7.10-10.13.1.1217");
     modPack.setVersion(ModpackBuilder.instance.versionField.getText());
@@ -169,32 +171,30 @@ public class ModpackBuilder extends JFrame {
       public void actionPerformed(ActionEvent e) {
         int[] rows = table.getSelectedRows();
         mTableModel.removeFiles(rows);
-        table.clearSelection();
       }
     });
     Font font = new Font("Monospaced", Font.PLAIN, 12);
     table.setFont(font);
-    showFilesDialog.add(tableView, BorderLayout.NORTH);
     JPanel bottomButtonPanel = new JPanel(new BorderLayout());
     bottomButtonPanel.add(removeButton, BorderLayout.NORTH);
     bottomButtonPanel.add(clientSide, BorderLayout.CENTER);
     bottomButtonPanel.add(doneButton, BorderLayout.SOUTH);
-    showFilesDialog.add(refreshButton, BorderLayout.CENTER);
+    showFilesDialog.add(refreshButton, BorderLayout.NORTH);
     showFilesDialog.add(bottomButtonPanel, BorderLayout.SOUTH);
+    showFilesDialog.add(tableView, BorderLayout.CENTER);
     showFilesDialog.pack();
     showFilesDialog.setMinimumSize(new Dimension(700, getHeight()));
     showFilesDialog.setLocationRelativeTo(null);
     showFilesDialog.setModal(true);
     showFilesDialog.setVisible(true);
-    System.out.println(modPack.toJson());
     try {
-      FileUtils.write(new File("modpack.json"), modPack.toJson());
+      JsonWriter.saveModpack(modPack, new File("modpack.json"));
     } catch (IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     UploadFileUtils.placeUploadFiles(ModpackBuilder.modpackDirectory.getAbsolutePath(),
-        modPack.getModpackFiles());
+        modPack.getFiles());
     System.exit(0);
   }
 
@@ -212,6 +212,7 @@ public class ModpackBuilder extends JFrame {
     } catch (Exception e) {
       e.printStackTrace();
     }
+    Logger.addListener(new StdOutLogger());
     new ModpackBuilder();
   }
 
@@ -219,18 +220,16 @@ public class ModpackBuilder extends JFrame {
   public static class ModpackTableModel extends AbstractTableModel {
 
     @Getter
-    XModpack pack;
+    ModPack pack;
 
-    public ModpackTableModel(XModpack pack) {
+    public ModpackTableModel(ModPack pack) {
       this.pack = pack;
-      this.pack.setModpackFiles(new TreeMap<String, String>(pack.getModpackFiles()));
     }
 
 
     @Override
     public int getColumnCount() {
-      // TODO Auto-generated method stub
-      return 2;
+      return 3;
     }
 
 
@@ -240,6 +239,8 @@ public class ModpackBuilder extends JFrame {
         case 0:
           return "Filename";
         case 1:
+          return "Side";
+        case 2:
           return "MD5-Hash";
         default:
           return "Unkown";
@@ -249,28 +250,33 @@ public class ModpackBuilder extends JFrame {
     public void toggleClientSide(int[] rows){
       ArrayList<String> names = Lists.newArrayList();
       for (int row : rows){
-        names.add((String) pack.getModpackFiles().keySet().toArray()[row]);
+        names.add((String) pack.getFiles().keySet().toArray()[row]);
       }
       for(String name : names){
-        String newName = "";
-        if(name.endsWith(".client")){
-          newName = name.replace(".client", "");
-        } else {
-          newName = name + ".client";         
+        ModPackFile packFile = pack.getFileByPath(name);
+        switch(packFile.getSide()){
+          case CLIENT:
+            packFile.setSide(Side.UNIVERSAL);
+            break;
+          case UNIVERSAL:
+            packFile.setSide(Side.CLIENT);
+            break;
+          case SERVER:
+            break;
+          default:
+            break;
         }
-        String hash = pack.getModpackFiles().remove(name);
-        pack.getModpackFiles().put(newName, hash);
       }
-      fireTableDataChanged();
+      fireTableRowsUpdated(rows[0], rows[rows.length-1]);
     }
 
     @Override
     public int getRowCount() {
-      return pack.getModpackFiles().size();
+      return pack.getFiles().size();
     }
 
     public void removeFile(int row) {
-      removeFile((String) pack.getModpackFiles().keySet().toArray()[row]);
+      removeFile((String) pack.getFiles().keySet().toArray()[row]);
     }
 
     public void removeFiles(int[] rows) {
@@ -285,15 +291,20 @@ public class ModpackBuilder extends JFrame {
 
     public void removeFile(String name) {
       System.out.printf("Removing %s\n", name);
-      pack.getModpackFiles().remove(name);
+      pack.getFiles().remove(name);
     }
 
     @Override
     public Object getValueAt(int row, int column) {
-      if (column == 0) {
-        return pack.getModpackFiles().keySet().toArray()[row];
-      } else {
-        return pack.getModpackFiles().values().toArray()[row];
+      switch(column){
+        case 0:
+          return pack.getFiles().keySet().toArray()[row];
+        case 1:
+          return ((ModPackFile) pack.getFiles().values().toArray()[row]).getSide();
+        case 2:
+          return ((ModPackFile) pack.getFiles().values().toArray()[row]).getHash();
+        default:
+          return null;
       }
     }
 
