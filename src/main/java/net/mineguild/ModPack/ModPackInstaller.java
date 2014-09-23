@@ -64,9 +64,9 @@ public class ModPackInstaller {
                   }
                   try {
                     if (!localFile.exists()) {
+                      String dlPath = packFile.getHash().substring(0, 2) + "/" + packFile.getHash();
                       DownloadInfo ret =
-                          new DownloadInfo(new URL(Constants.MG_GET_SCRIPT + "?data="
-                              + packFile.getHash()), localFile, localFile.getName(), Lists
+                          new DownloadInfo(new URL(Constants.MG_MMP_FILES + dlPath), localFile, localFile.getName(), Lists
                               .newArrayList(packFile.getHash()), "md5", DLType.ContentMD5,
                               DLType.NONE);
                       ret.size = packFile.getSize();

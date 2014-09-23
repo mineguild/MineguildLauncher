@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import net.mineguild.Launcher.download.DownloadDialog;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadDownloadDialog;
 import net.mineguild.Launcher.log.Console;
@@ -36,7 +35,6 @@ import net.mineguild.ModPack.ModPackInstaller;
 import net.mineguild.ModPack.Side;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 public class MineguildLauncher {
 
@@ -121,7 +119,7 @@ public class MineguildLauncher {
 
 
     boolean updated = true;
-    FileUtils.copyURLToFile(new URL("https://code.mineguild.net/Mineguild/Launcher/rawfile/88d940102f199d6eecb50828a90b3d55dc7986f4/new_format.json"),
+    FileUtils.copyURLToFile(new URL("https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
         new File(OSUtils.getLocalDir(), "newest.json"));
     ModPack newest = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
     boolean needsUpdate = false;
@@ -144,7 +142,7 @@ public class MineguildLauncher {
       if(forceUpdate){
         ModPackInstaller.clearFolder(ModpackUtils.getGameDir(), packUpdatedTo, null);
       }
-      List<DownloadInfo> dlinfo = ModPackInstaller.checkNeededFiles(baseDirectory, packUpdatedTo, Side.CLIENT);
+      List<DownloadInfo> dlinfo = ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), packUpdatedTo, Side.CLIENT);
       MultithreadDownloadDialog dlDialog = new MultithreadDownloadDialog(dlinfo, "Updating ModPack", con);
       dlDialog.setVisible(true);
       if(!dlDialog.run()){

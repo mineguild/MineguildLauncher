@@ -97,10 +97,12 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
     task.run();
     try {
       boolean success = task.get();
+      dispose();
       return success;
     } catch (Exception e) {
       Logger.logError("Download didnt work!", e);
       e.printStackTrace();
+      dispose();
       return false;
     }
   }
