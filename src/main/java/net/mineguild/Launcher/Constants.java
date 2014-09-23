@@ -20,7 +20,7 @@ public class Constants {
 
   // Mineguild links
   public static final String MG_MMP = "https://mineguild.net/download/mmp/";
-  public static final String MG_MMP_FILES = MG_MMP+"files/";
+  public static final String MG_MMP_FILES = MG_MMP + "files/";
   public static final String MG_FORGE = MG_MMP + "forge/";
   public static final String MG_LIBS = MG_FORGE + "libs/";
   public static final String MG_INFO_SCRIPT = MG_MMP + "php/info.php";

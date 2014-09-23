@@ -41,8 +41,8 @@ public class MineguildLauncherConsole {
   public static void update() throws Exception {
     baseDir = new File(".");
     XModpack newest =
-        XModpack.fromJson(IOUtils
-            .toString(new URL("https://mineguild.net/download/mmp/modpack.json")));
+        XModpack.fromJson(IOUtils.toString(new URL(
+            "https://mineguild.net/download/mmp/modpack.json")));
     System.out.println(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         newest.getReleaseDate()));
     File curpack = new File("version.json");

@@ -93,7 +93,7 @@ public class ModpackUtils {
       Thread.currentThread().interrupt();
     }
     Logger.logInfo(String.format("Checking completed in %.2f seconds",
-        (float) watch.elapsed(TimeUnit.MILLISECONDS)/1000f));
+        (float) watch.elapsed(TimeUnit.MILLISECONDS) / 1000f));
     return needed;
   }
 

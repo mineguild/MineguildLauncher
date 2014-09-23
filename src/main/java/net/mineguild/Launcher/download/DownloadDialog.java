@@ -22,7 +22,6 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -88,10 +87,10 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     this(parent, info, title);
     this.totalFilesSize = totalSize;
   }
-  
-  public DownloadDialog(List<DownloadInfo> info, String title, Frame parent){
+
+  public DownloadDialog(List<DownloadInfo> info, String title, Frame parent) {
     this(parent, info, title);
-    for(DownloadInfo inf : info){
+    for (DownloadInfo inf : info) {
       totalFilesSize += inf.size;
     }
   }

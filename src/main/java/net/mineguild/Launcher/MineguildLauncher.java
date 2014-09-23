@@ -119,8 +119,11 @@ public class MineguildLauncher {
 
 
     boolean updated = true;
-    FileUtils.copyURLToFile(new URL("https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
-        new File(OSUtils.getLocalDir(), "newest.json"));
+    FileUtils
+        .copyURLToFile(
+            new URL(
+                "https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
+            new File(OSUtils.getLocalDir(), "newest.json"));
     ModPack newest = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
     boolean needsUpdate = false;
 
@@ -130,25 +133,28 @@ public class MineguildLauncher {
     ModPack localPack = null;
     try {
       localPack = JsonFactory.loadModpack(localPackFile);
-    } catch (Exception e){
+    } catch (Exception e) {
       localPackFile.delete();
       Logger.logError("Unable to load current ModPack! Fresh-Install!", e);
     }
     forceUpdate = !localPackFile.exists() || dialog.forceUpdate;
-    needsUpdate =
-        forceUpdate ? true : needsUpdate(localPack, newest);
+    needsUpdate = forceUpdate ? true : needsUpdate(localPack, newest);
     ModPack packUpdatedTo = newest;
-    if(needsUpdate) {
-      if(forceUpdate){
+    if (needsUpdate) {
+      if (forceUpdate) {
         ModPackInstaller.clearFolder(ModpackUtils.getGameDir(), packUpdatedTo, null);
       }
-      List<DownloadInfo> dlinfo = ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), packUpdatedTo, Side.CLIENT);
-      MultithreadDownloadDialog dlDialog = new MultithreadDownloadDialog(dlinfo, "Updating ModPack", con);
+      List<DownloadInfo> dlinfo =
+          ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), packUpdatedTo,
+              Side.CLIENT);
+      MultithreadDownloadDialog dlDialog =
+          new MultithreadDownloadDialog(dlinfo, "Updating ModPack", con);
       dlDialog.setVisible(true);
-      if(!dlDialog.run()){
+      if (!dlDialog.run()) {
         Logger.logError("No success downloading!");
         updated = false;
-        JOptionPane.showMessageDialog(con, "Updating didn't finish!", "Update error!", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(con, "Updating didn't finish!", "Update error!",
+            JOptionPane.ERROR_MESSAGE);
       } else {
         localPack = packUpdatedTo;
       }
@@ -259,7 +265,7 @@ public class MineguildLauncher {
     } else {
       Logger.logInfo("Not updating, because not newer");
     }
-    
+
     return false;
   }
 

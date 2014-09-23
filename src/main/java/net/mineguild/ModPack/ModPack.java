@@ -29,8 +29,8 @@ public class ModPack {
   public ModPack(long releaseTime) {
     this.releaseTime = releaseTime;
   }
-  
-  public ModPack(){ }
+
+  public ModPack() {}
 
   public void setReleaseTime(long releaseTime) {
     this.releaseTime = releaseTime;

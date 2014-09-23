@@ -25,9 +25,8 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import com.google.common.collect.Lists;
 
 public class ModPackInstaller {
-  
-  
-  
+
+
 
   /**
    * Determines the files that are needed to update/repair/install the ModPack
@@ -66,9 +65,9 @@ public class ModPackInstaller {
                     if (!localFile.exists()) {
                       String dlPath = packFile.getHash().substring(0, 2) + "/" + packFile.getHash();
                       DownloadInfo ret =
-                          new DownloadInfo(new URL(Constants.MG_MMP_FILES + dlPath), localFile, localFile.getName(), Lists
-                              .newArrayList(packFile.getHash()), "md5", DLType.ContentMD5,
-                              DLType.NONE);
+                          new DownloadInfo(new URL(Constants.MG_MMP_FILES + dlPath), localFile,
+                              localFile.getName(), Lists.newArrayList(packFile.getHash()), "md5",
+                              DLType.ContentMD5, DLType.NONE);
                       ret.size = packFile.getSize();
                       return ret;
                     }
@@ -100,10 +99,10 @@ public class ModPackInstaller {
     boolean temp = false;
     try {
       temp = !backupDirectory.equals(null);
-    } catch (Exception ignored){
+    } catch (Exception ignored) {
     }
     final boolean doBackup = temp;
-    
+
     if (doBackup) {
       if (!backupDirectory.exists() || !backupDirectory.isDirectory()) {
         backupDirectory.delete();

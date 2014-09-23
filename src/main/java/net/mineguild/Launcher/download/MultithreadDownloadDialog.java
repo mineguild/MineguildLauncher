@@ -78,14 +78,15 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
     });
   }
 
-  public MultithreadDownloadDialog(Frame parent, List<DownloadInfo> info, String title, long totalSize) {
+  public MultithreadDownloadDialog(Frame parent, List<DownloadInfo> info, String title,
+      long totalSize) {
     this(parent, info, title);
     this.totalFilesSize = totalSize;
   }
 
   public MultithreadDownloadDialog(List<DownloadInfo> dlinfo, String title, Frame parent) {
     this(parent, dlinfo, title);
-    for (DownloadInfo info : dlinfo){
+    for (DownloadInfo info : dlinfo) {
       totalFilesSize += info.size;
     }
   }

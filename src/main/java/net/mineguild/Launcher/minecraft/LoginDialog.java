@@ -114,15 +114,15 @@ public class LoginDialog extends JDialog {
     checkBoxPanel = new JPanel();
     bottomPanel.add(checkBoxPanel, BorderLayout.NORTH);
     checkBoxPanel.setLayout(new BorderLayout(0, 0));
-    
+
     panel = new JPanel();
     checkBoxPanel.add(panel, BorderLayout.SOUTH);
     panel.setLayout(new BorderLayout(0, 0));
-    
+
     chckbxForceUpdate = new JCheckBox("Force Update");
     chckbxForceUpdate.setHorizontalAlignment(SwingConstants.CENTER);
     panel.add(chckbxForceUpdate, BorderLayout.NORTH);
-    
+
     btnChangeInstallLocation = new JButton("Change install location");
     btnChangeInstallLocation.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -130,17 +130,17 @@ public class LoginDialog extends JDialog {
       }
     });
     panel.add(btnChangeInstallLocation);
-    
+
     panel_1 = new JPanel();
     checkBoxPanel.add(panel_1, BorderLayout.NORTH);
-    
-        savePasswordBox = new JCheckBox("Save password");
-        panel_1.add(savePasswordBox);
-        savePasswordBox.setHorizontalAlignment(SwingConstants.CENTER);
-        
-            saveTokenBox = new JCheckBox("Save MCToken");
-            panel_1.add(saveTokenBox);
-            saveTokenBox.setHorizontalAlignment(SwingConstants.LEFT);
+
+    savePasswordBox = new JCheckBox("Save password");
+    panel_1.add(savePasswordBox);
+    savePasswordBox.setHorizontalAlignment(SwingConstants.CENTER);
+
+    saveTokenBox = new JCheckBox("Save MCToken");
+    panel_1.add(saveTokenBox);
+    saveTokenBox.setHorizontalAlignment(SwingConstants.LEFT);
 
     dataPanel = new JPanel();
     dataPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -176,8 +176,8 @@ public class LoginDialog extends JDialog {
 
       private void resetStuff() {
         if (MineguildLauncher.settings.getProfile() != null) {
-          if (!((String) MineguildLauncher.settings.getProfile().get("username"))
-              .equals(userField.getText())) {
+          if (!((String) MineguildLauncher.settings.getProfile().get("username")).equals(userField
+              .getText())) {
             saveTokenBox.setSelected(false);
             MineguildLauncher.settings.setProfile(null);
             loginButton.setText("Login");
@@ -303,7 +303,7 @@ public class LoginDialog extends JDialog {
       } else {
         MineguildLauncher.settings.setProfile(null);
       }
-      
+
       forceUpdate = chckbxForceUpdate.isSelected();
       successfull = true;
       dispose();

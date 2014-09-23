@@ -299,7 +299,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     }
   }
 
-  public static boolean doHashCheck(DownloadInfo asset, final List<String> remoteHash) throws IOException {
+  public static boolean doHashCheck(DownloadInfo asset, final List<String> remoteHash)
+      throws IOException {
     String hash = DownloadUtils.fileHash(asset.local, asset.hashType).toLowerCase();
     List<String> assetHash = asset.hash;
     boolean good = false;

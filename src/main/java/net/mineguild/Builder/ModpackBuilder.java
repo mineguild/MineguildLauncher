@@ -246,15 +246,15 @@ public class ModpackBuilder extends JFrame {
           return "Unkown";
       }
     }
-    
-    public void toggleClientSide(int[] rows){
+
+    public void toggleClientSide(int[] rows) {
       ArrayList<String> names = Lists.newArrayList();
-      for (int row : rows){
+      for (int row : rows) {
         names.add((String) pack.getFiles().keySet().toArray()[row]);
       }
-      for(String name : names){
+      for (String name : names) {
         ModPackFile packFile = pack.getFileByPath(name);
-        switch(packFile.getSide()){
+        switch (packFile.getSide()) {
           case CLIENT:
             packFile.setSide(Side.UNIVERSAL);
             break;
@@ -267,7 +267,7 @@ public class ModpackBuilder extends JFrame {
             break;
         }
       }
-      fireTableRowsUpdated(rows[0], rows[rows.length-1]);
+      fireTableRowsUpdated(rows[0], rows[rows.length - 1]);
     }
 
     @Override
@@ -296,7 +296,7 @@ public class ModpackBuilder extends JFrame {
 
     @Override
     public Object getValueAt(int row, int column) {
-      switch(column){
+      switch (column) {
         case 0:
           return pack.getFiles().keySet().toArray()[row];
         case 1:

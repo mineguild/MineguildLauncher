@@ -16,7 +16,6 @@ import javax.swing.JOptionPane;
 
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.XModpack;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadDownloadDialog;
 import net.mineguild.Launcher.log.LogEntry;
@@ -64,7 +63,9 @@ public class MCInstaller {
     MultithreadDownloadDialog dlDialog;
     if (assets.size() > 0) {
       long startTime = System.currentTimeMillis();
-      dlDialog = new MultithreadDownloadDialog(MineguildLauncher.con, assets, "Downloading Assets", totalAssetSize);
+      dlDialog =
+          new MultithreadDownloadDialog(MineguildLauncher.con, assets, "Downloading Assets",
+              totalAssetSize);
       dlDialog.setVisible(true);
       if (!dlDialog.run()) {
         dlDialog.dispose();

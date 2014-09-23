@@ -42,43 +42,36 @@ public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
 
   @Override
   protected Map<String, ModPackFile> doInBackground() throws Exception {
-    Collection<ModPackEntry> result = new Parallel.ForEach<File, ModPackEntry>(files).withFixedThreads(OSUtils.getNumCores() * 2).apply(new Parallel.F<File, ModPackEntry>() {
-      
-      @Override
-      public ModPackEntry apply(File e) {
-        try {
-          ModPackEntry entry = ChecksumUtil.getFile(baseDirectory, e);
-          updateProgress();
-          return entry;
-        } catch (Exception e1) {
-          Logger.logError("Unable to add file!", e1);
-        }
-        return null;
-      }
-    }).values();
+    Collection<ModPackEntry> result =
+        new Parallel.ForEach<File, ModPackEntry>(files).withFixedThreads(OSUtils.getNumCores() * 2)
+            .apply(new Parallel.F<File, ModPackEntry>() {
+
+              @Override
+              public ModPackEntry apply(File e) {
+                try {
+                  ModPackEntry entry = ChecksumUtil.getFile(baseDirectory, e);
+                  updateProgress();
+                  return entry;
+                } catch (Exception e1) {
+                  Logger.logError("Unable to add file!", e1);
+                }
+                return null;
+              }
+            }).values();
     Map<String, ModPackFile> ret = Maps.newTreeMap();
-    for(ModPackEntry entry : result){
+    for (ModPackEntry entry : result) {
       ret.put(entry.getKey(), entry.getValue());
     }
     return ret;
     /*
-    ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores());
-    for (File file : files) {
-      try {
-        Runnable worker = new WorkerTask(file, Hashing.md5());
-        executor.execute(worker);
-      } catch (Exception ignored) {
-      }
-
-    }
-    executor.shutdown();
-    try {
-      executor.awaitTermination(60, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      executor.shutdownNow();
-      Thread.currentThread().interrupt();
-    }
-    return results;*/
+     * ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores()); for (File
+     * file : files) { try { Runnable worker = new WorkerTask(file, Hashing.md5());
+     * executor.execute(worker); } catch (Exception ignored) { }
+     * 
+     * } executor.shutdown(); try { executor.awaitTermination(60, TimeUnit.SECONDS); } catch
+     * (InterruptedException e) { executor.shutdownNow(); Thread.currentThread().interrupt(); }
+     * return results;
+     */
   }
   /*
    * public static class WorkerTask implements Runnable {

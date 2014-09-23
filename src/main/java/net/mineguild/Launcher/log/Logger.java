@@ -25,11 +25,11 @@ public class Logger {
     logEntries.add(entry);
     logThread.handleLog(entry);
   }
-  
-  public static Vector<LogEntry> getBufferedEntries(){
+
+  public static Vector<LogEntry> getBufferedEntries() {
     @SuppressWarnings("unchecked")
     Vector<LogEntry> newVector = (Vector<LogEntry>) logEntries.clone();
-    while(newVector.size() > BUFFER_SIZE){
+    while (newVector.size() > BUFFER_SIZE) {
       newVector.remove(0);
     }
     return newVector;

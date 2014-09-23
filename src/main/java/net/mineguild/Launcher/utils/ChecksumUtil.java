@@ -53,7 +53,9 @@ public class ChecksumUtil {
 
 
   /**
-   * Creates a {@link Map} [ {@link String} : {@link ModPackFile} ] from the list of files and the relative directory.
+   * Creates a {@link Map} [ {@link String} : {@link ModPackFile} ] from the list of files and the
+   * relative directory.
+   * 
    * @see ModPack
    * 
    * @param baseDirectory The directory the pack is located (containing config and mods directory).
@@ -61,7 +63,8 @@ public class ChecksumUtil {
    * @param files a {@link Collection} of {@link File} to use
    * @return the resulting {@link Map}
    * @throws InterruptedException if thread was interrupted
-   * @throws ExecutionException if some other kind of {@link Exception} occurred while trying to execute this.
+   * @throws ExecutionException if some other kind of {@link Exception} occurred while trying to
+   *         execute this.
    */
   public static synchronized Map<String, ModPackFile> getFiles(final File baseDirectory,
       Collection<File> files) throws InterruptedException, ExecutionException {
