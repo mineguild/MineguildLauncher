@@ -1,5 +1,7 @@
 {
   "releaseTime": 1411332423588,
+  "minecraftVersion": "1.7.10",
+  "forgeVersion": "1.7.10-10.13.1.1217",
   "files": {
     "mods/1.7.10/Baubles-1.7.10-1.0.1.5.jar": {
       "size": 91764,

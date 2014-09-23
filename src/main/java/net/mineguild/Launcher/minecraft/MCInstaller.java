@@ -64,9 +64,9 @@ public class MCInstaller {
     MultithreadDownloadDialog dlDialog;
     if (assets.size() > 0) {
       long startTime = System.currentTimeMillis();
-      dlDialog = new MultithreadDownloadDialog(assets, "Downloading Assets", totalAssetSize);
+      dlDialog = new MultithreadDownloadDialog(MineguildLauncher.con, assets, "Downloading Assets", totalAssetSize);
       dlDialog.setVisible(true);
-      if (!dlDialog.start()) {
+      if (!dlDialog.run()) {
         dlDialog.dispose();
         throw new Exception("Download was interrupted!");
       }
@@ -76,10 +76,10 @@ public class MCInstaller {
     if (libraries.size() > 0) {
       long startTime = System.currentTimeMillis();
       dlDialog =
-          new MultithreadDownloadDialog(libraries, "Downloading Libraries",
+          new MultithreadDownloadDialog(MineguildLauncher.con, libraries, "Downloading Libraries",
               DownloadUtils.getTotalSize(libraries));
       dlDialog.setVisible(true);
-      if (!dlDialog.start()) {
+      if (!dlDialog.run()) {
         dlDialog.dispose();
         throw new Exception("Download was interrupted!");
       }

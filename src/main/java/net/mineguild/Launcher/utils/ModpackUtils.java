@@ -38,11 +38,11 @@ public class ModpackUtils {
     if (neededFiles.size() > 0) {
       List<DownloadInfo> info = DownloadInfo.getDownloadInfo(getGameDir(), neededFiles);
       MultithreadDownloadDialog dialog =
-          new MultithreadDownloadDialog(info, "Updating Modpack",
+          new MultithreadDownloadDialog(MineguildLauncher.con, info, "Updating Modpack",
               DownloadUtils.getTotalSize(neededFiles.values()));
       long startTime = System.currentTimeMillis();
       dialog.setVisible(true);
-      boolean success = dialog.start();
+      boolean success = dialog.run();
       if (!success) {
         throw new Exception("Modpack updater cancelled!");
       }

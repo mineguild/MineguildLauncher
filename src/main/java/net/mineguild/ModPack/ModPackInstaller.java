@@ -25,7 +25,9 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import com.google.common.collect.Lists;
 
 public class ModPackInstaller {
-
+  
+  
+  
 
   /**
    * Determines the files that are needed to update/repair/install the ModPack
@@ -95,7 +97,13 @@ public class ModPackInstaller {
       final File backupDirectory) {
     checkNotNull(target);
     checkNotNull(pack);
-    final boolean doBackup = !backupDirectory.equals(null);
+    boolean temp = false;
+    try {
+      temp = !backupDirectory.equals(null);
+    } catch (Exception ignored){
+    }
+    final boolean doBackup = temp;
+    
     if (doBackup) {
       if (!backupDirectory.exists() || !backupDirectory.isDirectory()) {
         backupDirectory.delete();

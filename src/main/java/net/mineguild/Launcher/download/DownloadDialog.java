@@ -96,7 +96,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
     }
   }
 
-  public boolean start() {
+  public boolean run() {
     task = new AssetDownloader(info, totalFilesSize);
     task.addPropertyChangeListener(this);
     task.run();
@@ -108,11 +108,13 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
        * else { JOptionPane.showMessageDialog(this, "Files are missing!", "Error!",
        * JOptionPane.ERROR_MESSAGE); }
        */
+      dispose();
       return success;
     } catch (Exception e) {
       // JOptionPane
       // .showMessageDialog(this, "Files are missing!", "Error!", JOptionPane.ERROR_MESSAGE);
       e.printStackTrace();
+      dispose();
       return false;
     }
   }

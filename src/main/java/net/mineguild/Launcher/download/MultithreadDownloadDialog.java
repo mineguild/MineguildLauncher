@@ -2,6 +2,7 @@ package net.mineguild.Launcher.download;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -45,7 +46,8 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
   /**
    * @wbp.parser.constructor
    */
-  public MultithreadDownloadDialog(List<DownloadInfo> info, String title) {
+  public MultithreadDownloadDialog(Frame parent, List<DownloadInfo> info, String title) {
+    super(parent);
     this.setTitle(title);
     try {
       icon = ImageIO.read(getClass().getResourceAsStream("/icon.png"));
@@ -76,12 +78,19 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
     });
   }
 
-  public MultithreadDownloadDialog(List<DownloadInfo> info, String title, long totalSize) {
-    this(info, title);
+  public MultithreadDownloadDialog(Frame parent, List<DownloadInfo> info, String title, long totalSize) {
+    this(parent, info, title);
     this.totalFilesSize = totalSize;
   }
 
-  public boolean start() {
+  public MultithreadDownloadDialog(List<DownloadInfo> dlinfo, String title, Frame parent) {
+    this(parent, dlinfo, title);
+    for (DownloadInfo info : dlinfo){
+      totalFilesSize += info.size;
+    }
+  }
+
+  public boolean run() {
     task = new AssetDownloader(info, totalFilesSize);
     task.setMultithread(true);
     task.addPropertyChangeListener(this);
@@ -158,6 +167,4 @@ public class MultithreadDownloadDialog extends JDialog implements PropertyChange
       speedLabel.setText(String.format("%.2f KB/s", (Double) evt.getNewValue()));
     }
   }
-
-
 }
