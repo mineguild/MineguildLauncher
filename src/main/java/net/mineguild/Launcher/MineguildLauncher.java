@@ -25,7 +25,6 @@ import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
 import net.mineguild.Launcher.utils.AuthWorkDialog;
 import net.mineguild.Launcher.utils.DownloadUtils;
-import net.mineguild.Launcher.utils.ModpackUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
@@ -142,7 +141,7 @@ public class MineguildLauncher {
     ModPack packUpdatedTo = newest;
     if (needsUpdate) {
       if (forceUpdate) {
-        ModPackInstaller.clearFolder(ModpackUtils.getGameDir(), packUpdatedTo, null);
+        ModPackInstaller.clearFolder(OSUtils.getGameDir(), packUpdatedTo, null);
       }
       List<DownloadInfo> dlinfo =
           ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), packUpdatedTo,

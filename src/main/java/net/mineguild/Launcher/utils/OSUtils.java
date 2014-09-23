@@ -2,6 +2,7 @@ package net.mineguild.Launcher.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -11,6 +12,7 @@ import java.net.SocketException;
 import java.util.Enumeration;
 
 import lombok.Getter;
+import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.utils.winreg.RuntimeStreamer;
 
 import org.apache.commons.io.FileUtils;
@@ -276,6 +278,16 @@ public class OSUtils {
     }
 
 
+  }
+
+  public static File getGameDir() throws IOException {
+    File gameDir = new File(MineguildLauncher.baseDirectory, "minecraft");
+    if (!gameDir.exists()) {
+      if (!gameDir.mkdirs()) {
+        throw new IOException("Unable to create game directory!");
+      }
+    }
+    return new File(MineguildLauncher.baseDirectory, "minecraft");
   }
 
 }

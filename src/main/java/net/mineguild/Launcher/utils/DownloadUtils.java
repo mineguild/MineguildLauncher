@@ -27,6 +27,7 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 
+@SuppressWarnings("unused")
 public class DownloadUtils {
 
   public static String fileHash(File file, String type) throws IOException {
@@ -81,47 +82,6 @@ public class DownloadUtils {
       HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     } catch (Exception ignored) {
     }
-  }
-
-  public static long getTotalSize(Collection<String> hashes) {
-    Gson g = new Gson();
-    String json_hashes = g.toJson(hashes);
-    // System.out.println(json_hashes);
-    URL script = null;
-    try {
-      script = new URL(Constants.MG_INFO_SCRIPT);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return -1l;
-    }
-    try {
-      HttpURLConnection con = (HttpURLConnection) script.openConnection();
-      String body = "data=" + BaseEncoding.base64().encode(json_hashes.getBytes());
-      con.setDoOutput(true);
-      con.setDoInput(true);
-      con.setRequestMethod("POST");
-      con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-      con.setRequestProperty("charset", "utf-8");
-      con.setRequestProperty("Content-Length", "" + Integer.toString(body.length()));
-      con.setUseCaches(false);
-      con.connect();
-      DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-      wr.writeBytes(body);
-      wr.flush();
-      wr.close();
-
-      try {
-        List<String> lines = IOUtils.readLines(con.getInputStream());
-        Logger.logInfo(lines.get(0));
-        return Long.parseLong(lines.get(lines.size() - 1));
-      } catch (NumberFormatException e) {
-        System.out.println("Invalid file(s)!");
-      }
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return 0;
   }
 
   public static long getTotalSize(List<DownloadInfo> downloads) {
