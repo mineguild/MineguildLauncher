@@ -48,8 +48,8 @@ public class MineguildLauncher {
 
   public static void main(String[] args) throws Exception {
     DownloadUtils.ssl_hack();
+    System.setProperty("java.net.preferIPv4Stack", "true");
     /*
-     * System.setProperty("java.net.preferIPv4Stack", "true"); ModPack test = new
      * ModPack(System.currentTimeMillis()); test.setFiles(ChecksumUtil.getFiles(new
      * File("testPack"), FileUtils.listFiles(new File("testPack/mods"),
      * Constants.MODPACK_FILE_FILTER, Constants.MODPACK_DIR_FILTER))); JsonWriter.saveModpack(test,
@@ -58,21 +58,20 @@ public class MineguildLauncher {
      * File("modpack"), test, Side.UNIVERSAL); System.out.println(new
      * GsonBuilder().setPrettyPrinting().create().toJson(dinfo)); System.exit(0);
      */
-    Logger.addListener(new StdOutLogger());
-    if (args.length == 1) {
-      if (args[0].equals("-updateServer")) {
-        MineguildLauncherConsole.update();
-        System.exit(0);
+    if (args.length >= 1) {
+      if (args.length == 2) {
+        forceUpdate = args[1].equals("--forceUpdate");
       }
-    } else if (args.length == 2) {
-      if (args[0].equals("-updateServer")) {
-        if (args[1].equals("forceUpdate")) {
-          forceUpdate = true;
-          MineguildLauncherConsole.update();
-          System.exit(0);
-        }
+      if (args[0].equals("updateServer")) {
+        MineguildLauncherConsole.update(Side.SERVER);
+      } else if (args[0].equals("updateClient")) {
+        MineguildLauncherConsole.update(Side.CLIENT);
+      } else if (args[0].equals("updateBoth")) {
+        MineguildLauncherConsole.update(Side.BOTH);
       }
+      System.exit(0);
     }
+    Logger.addListener(new StdOutLogger());
     try {
       for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {
@@ -120,14 +119,14 @@ public class MineguildLauncher {
     boolean updated = true;
     FileUtils
         .copyURLToFile(
-                new URL(
-                        "https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
-                new File(OSUtils.getLocalDir(), "newest.json"));
+            new URL(
+                "https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
+            new File(OSUtils.getLocalDir(), "newest.json"));
     ModPack remotePack = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
     boolean needsUpdate = false;
 
     Logger.logInfo(String.format("Newest pack version: %s released on %s", remotePack.getVersion(),
-            new Date(remotePack.getReleaseTime()).toString()));
+        new Date(remotePack.getReleaseTime()).toString()));
     File localPackFile = new File(baseDirectory, "currentPack.json");
     ModPack localPack = null;
     try {
@@ -137,15 +136,15 @@ public class MineguildLauncher {
       Logger.logError("Unable to load current ModPack! Fresh-Install!", e);
     }
     forceUpdate = !localPackFile.exists() || dialog.forceUpdate;
-    needsUpdate = forceUpdate || needsUpdate(localPack, remotePack);
-      if (needsUpdate) {
-          if(!(localPack == null)) {
-              Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]", localPack.getVersion(),
-                      localPack.getReleaseDate(), localPack.getHash()));
-          }
-          Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]",
-                  remotePack.getVersion(), remotePack.getReleaseDate(), remotePack.getHash()));
-          Logger.logInfo("Updating to Remote");
+    needsUpdate = forceUpdate || needsUpdate(localPack, remotePack, true);
+    if (needsUpdate) {
+      if (!(localPack == null)) {
+        Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]", localPack.getVersion(),
+            localPack.getReleaseDate(), localPack.getHash()));
+      }
+      Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]", remotePack.getVersion(),
+          remotePack.getReleaseDate(), remotePack.getHash()));
+      Logger.logInfo("Updating to Remote");
       if (forceUpdate) {
         ModPackInstaller.clearFolder(OSUtils.getGameDir(), remotePack, null);
       }
@@ -198,6 +197,7 @@ public class MineguildLauncher {
     }
   }
 
+
   public static File getInstallPath(Component par) {
     Component parent = (par == null) ? con : par;
     File folder;
@@ -242,21 +242,25 @@ public class MineguildLauncher {
     }
   }
 
-  public static boolean needsUpdate(ModPack localPack, ModPack newestPack) {
+  public static boolean needsUpdate(ModPack localPack, ModPack newestPack, boolean askUpdate) {
 
     Logger.logInfo(String.format("Local pack version: %s released on %s", localPack.getVersion(),
         localPack.getReleaseDate()));
     if (newestPack.isNewer(localPack)) {
-      int result =
-          JOptionPane.showConfirmDialog(con, String.format(
-              "A new version %s released on %s is available! Do you want to update?",
-              newestPack.getVersion(), newestPack.getReleaseDate()), "Update modpack?",
-              JOptionPane.YES_NO_OPTION);
-      if (result == JOptionPane.YES_OPTION) {
-        return true;
+      if (askUpdate) {
+        int result =
+            JOptionPane.showConfirmDialog(con, String.format(
+                "A new version %s released on %s is available! Do you want to update?",
+                newestPack.getVersion(), newestPack.getReleaseDate()), "Update modpack?",
+                JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+          return true;
+        } else {
+          // We let him launch the pack although he won't be able to play on the server.
+          Logger.logInfo("Pack wasn't updated, because user denied.");
+        }
       } else {
-        // We let him launch the pack although he won't be able to play on the server.
-        Logger.logInfo("Pack wasn't updated, because user denied.");
+        return true;
       }
     } else {
       Logger.logInfo("Not updating, because not newer");

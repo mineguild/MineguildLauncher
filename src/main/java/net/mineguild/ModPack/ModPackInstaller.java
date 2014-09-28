@@ -48,7 +48,7 @@ public class ModPackInstaller {
               public DownloadInfo apply(Map.Entry<String, ModPackFile> entry) {
                 String path = entry.getKey();
                 ModPackFile packFile = entry.getValue();
-                if (packFile.getSide() == side || packFile.getSide() == Side.UNIVERSAL) {
+                if (side == Side.BOTH || packFile.getSide() == side || packFile.getSide() == Side.UNIVERSAL) {
                   File localFile = new File(installDirectory, path);
                   if (localFile.exists()) {
                     try {

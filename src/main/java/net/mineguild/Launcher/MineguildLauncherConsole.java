@@ -2,13 +2,11 @@ package net.mineguild.Launcher;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,11 +15,15 @@ import net.mineguild.Launcher.download.AssetDownloader;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadInfo.DLType;
 import net.mineguild.Launcher.log.Logger;
-import net.mineguild.Launcher.utils.ModpackUtils;
+import net.mineguild.Launcher.log.StdOutLogger;
 import net.mineguild.Launcher.utils.OSUtils;
+import net.mineguild.Launcher.utils.json.JsonFactory;
+import net.mineguild.Launcher.utils.json.JsonWriter;
+import net.mineguild.ModPack.ModPack;
+import net.mineguild.ModPack.ModPackInstaller;
+import net.mineguild.ModPack.Side;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import com.google.common.collect.Lists;
 
@@ -37,13 +39,16 @@ public class MineguildLauncherConsole {
   public static double start = 0;
   public static double speed = 0;
   public static long totalBytesRead = 0;
+  public static Side side;
 
-  public static void update() throws Exception {
+  public static void update(Side side) throws Exception {
+    MineguildLauncherConsole.side = side;
+    Logger.addListener(new StdOutLogger());
+    File newestFile = new File(".newest.json");
+    FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"), newestFile);
+    ModPack newest = JsonFactory.loadModpack(newestFile);
     baseDir = new File(".");
-    XModpack newest =
-        XModpack.fromJson(IOUtils.toString(new URL(
-            "https://mineguild.net/download/mmp/modpack.json")));
-    System.out.println(String.format("Newest pack version: %s released on %s", newest.getVersion(),
+    Logger.logInfo(String.format("Newest pack version: %s released on %s", newest.getVersion(),
         newest.getReleaseDate()));
     File curpack = new File("version.json");
     forceUpdate = MineguildLauncher.forceUpdate || !curpack.exists();
@@ -51,52 +56,44 @@ public class MineguildLauncherConsole {
       forceUpdate(newest);
     else {
       try {
-        XModpack localPack = XModpack.fromJson(FileUtils.readFileToString(curpack));
-        System.out.println(String.format("Local pack version: %s released on %s",
-            newest.getVersion(), newest.getReleaseDate()));
+        ModPack localPack = JsonFactory.loadModpack(new File("version.json"));
+        Logger.logInfo(String.format("Local pack version: %s released on %s", newest.getVersion(),
+            newest.getReleaseDate()));
         if (newest.isNewer(localPack)) {
-          System.out.println(String.format("Local: %s [Released: %s] [Hash: %s]",
+          Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]",
               localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
-          System.out.println(String.format("Remote: %s [Released: %s] [Hash: %s]",
-              newest.getVersion(), newest.getReleaseDate(), newest.getHash()));
-          System.out.println("Updating from Local to Remote");
+          Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]", newest.getVersion(),
+              newest.getReleaseDate(), newest.getHash()));
+          Logger.logInfo("Updating from Local to Remote");
           try {
             updateModpack(localPack, newest);
           } catch (Exception e) {
-            System.err.println("Can't update modpack!");
-            e.printStackTrace();
+            Logger.logError("Can't update modpack!", e);
           }
         }
       } catch (Exception e) {
         try {
           forceUpdate(newest);
         } catch (Throwable t) {
-          System.err.println("Can't update modpack!");
-          t.printStackTrace();
+          Logger.logError("Can't update modpack!", t);
         }
       }
     }
 
   }
 
-  public static void forceUpdate(XModpack newPack) throws Exception {
+  public static void forceUpdate(ModPack newPack) throws Exception {
     updateModpack(null, newPack);
   }
 
-  public static void updateModpack(XModpack currentPack, XModpack newPack) throws IOException {
-    if (currentPack == null) {
-      System.out.println("Moving untracked mods to modsBackup");
-      File modsBackup = new File(baseDir, "modsBackup");
-      modsBackup.mkdirs();
-      FileUtils.cleanDirectory(modsBackup);
-      ModpackUtils.moveUntrackedMods(baseDir, newPack.getModpackFiles());
-    } else {
-      ModpackUtils.deleteOldFiles(baseDir, newPack.getModpackFiles(), currentPack.getOld(newPack));
-    }
-    Map<String, String> neededFiles =
-        ModpackUtils.getNeededFiles(baseDir, newPack.getModpackFiles(), true);
-    neededFiles = ModpackUtils.filterServerMods(neededFiles, true);
-    List<DownloadInfo> downloads = DownloadInfo.getDownloadInfo(baseDir, neededFiles);
+  public static void updateModpack(ModPack currentPack, ModPack newPack) throws Exception {
+    Logger.logInfo("Moving untracked mods to modsBackup");
+    File modsBackup = new File(baseDir, "modsBackup");
+    modsBackup.mkdirs();
+    FileUtils.cleanDirectory(modsBackup);
+
+    ModPackInstaller.clearFolder(new File(baseDir, "mods"), newPack, modsBackup);
+    List<DownloadInfo> downloads = ModPackInstaller.checkNeededFiles(baseDir, newPack, side);
     amountOfFiles = downloads.size();
     start = System.nanoTime();
     ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores() * 2);
@@ -117,10 +114,10 @@ public class MineguildLauncherConsole {
     }
 
     if (allDownloaded) {
-      System.out.println("Update successfull!");
-      FileUtils.write(new File(baseDir, "version.json"), newPack.toJson());
+      Logger.logInfo("Update successfull!");
+      JsonWriter.saveModpack(newPack, new File("version.json"));
     } else {
-      System.err.println("Update unsuccessfull!");
+      Logger.logError("Update unsuccessfull!");
     }
   }
 
@@ -147,8 +144,8 @@ public class MineguildLauncherConsole {
             remoteHash = Lists.newArrayList();
           }
           if (attempt++ > 0) {
-            System.out.println("Connecting.. Try " + attempt + " of " + attempts + " for: "
-                + asset.url);
+            Logger
+                .logInfo("Connecting.. Try " + attempt + " of " + attempts + " for: " + asset.url);
           }
 
           // Will this break something?
@@ -200,10 +197,13 @@ public class MineguildLauncherConsole {
           if (asset.local.exists()) {
             AssetDownloader.doHashCheck(asset, remoteHash);
           }
-          /*
-           * if (asset.local.exists()) { downloadSuccess = true; AssetDownloader.totalBytesRead +=
-           * remoteSize; continue; }
-           */
+
+          if (asset.local.exists()) {
+            downloadSuccess = true;
+            totalBytesRead += remoteSize;
+            continue;
+          }
+
 
           // download if needed
 
@@ -262,6 +262,7 @@ public class MineguildLauncherConsole {
 
           if (downloadSuccess = AssetDownloader.doHashCheck(asset, remoteHash)) {
           }
+
         } catch (Exception e) {
           downloadSuccess = false;
           e.printStackTrace();

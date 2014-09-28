@@ -79,7 +79,7 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
   }
 
   public MultithreadedDownloadDialog(Frame parent, List<DownloadInfo> info, String title,
-                                     long totalSize) {
+      long totalSize) {
     this(parent, info, title);
     this.totalFilesSize = totalSize;
   }
