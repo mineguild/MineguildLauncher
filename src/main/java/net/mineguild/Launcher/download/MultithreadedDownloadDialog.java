@@ -23,6 +23,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import org.apache.commons.io.FileUtils;
+
 import net.mineguild.Launcher.log.Logger;
 
 @SuppressWarnings("serial")
@@ -167,7 +169,8 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     } else if (evt.getPropertyName().equals("note")) {
       status.setText((String) evt.getNewValue());
     } else if (evt.getPropertyName().equals("speed")) {
-      speedLabel.setText(String.format("%.2f KB/s", (Double) evt.getNewValue()));
+      long speed = (Long) evt.getNewValue();
+      speedLabel.setText(FileUtils.byteCountToDisplaySize(speed)+"/s");
     }
   }
 }

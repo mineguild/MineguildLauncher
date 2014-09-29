@@ -33,7 +33,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   private long totalSize = 0;
   private int currentFile = 0;
   private float percentPerFile = 0;
-  private double speed;
+  private long speed;
   private long totalBytesRead = 0;
   private double start;
 
@@ -113,8 +113,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     firePropertyChange("info", null, data);
   }
 
-  public synchronized void setSpeed(double newSpeed) {
-    double oldSpeed = speed;
+  public synchronized void setSpeed(long newSpeed) {
+    long oldSpeed = speed;
     speed = newSpeed;
     firePropertyChange("speed", oldSpeed, speed);
   }
@@ -262,11 +262,11 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             prog = 0;
           }
           if (totalSize == 0) {
-            setSpeed(NANOS_PER_SECOND / BYTES_PER_KILOBYTE * currentSize
-                / (System.nanoTime() - start + 1));
+            setSpeed((long)(NANOS_PER_SECOND / 1 * currentSize
+                / (System.nanoTime() - start + 1)));
           } else {
-            setSpeed(NANOS_PER_SECOND / BYTES_PER_KILOBYTE * totalBytesRead
-                / (System.nanoTime() - start + 1));
+            setSpeed((long)(NANOS_PER_SECOND / 1 * totalBytesRead
+                / (System.nanoTime() - start + 1)));
           }
 
           setProgress(prog);
@@ -440,8 +440,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
               prog = 0;
             }
 
-            instance.setSpeed(NANOS_PER_SECOND / BYTES_PER_KILOBYTE * instance.totalBytesRead
-                / (System.nanoTime() - instance.start + 1));
+            instance.setSpeed((long) (NANOS_PER_SECOND / 1 * instance.totalBytesRead
+                / (System.nanoTime() - instance.start + 1)));
 
             if (instance.totalSize > 0) {
               instance.setTotalProgress(instance.calculateTotalProgress(currentSize, remoteSize));
