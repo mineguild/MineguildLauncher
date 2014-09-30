@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingWorker;
 
+import org.apache.commons.io.FileUtils;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.Constants;
@@ -34,6 +36,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   private int currentFile = 0;
   private float percentPerFile = 0;
   private long speed;
+  private String speedLabel = "";
   private long totalBytesRead = 0;
   private double start;
 
@@ -114,9 +117,10 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   }
 
   public synchronized void setSpeed(long newSpeed) {
-    long oldSpeed = speed;
     speed = newSpeed;
-    firePropertyChange("speed", oldSpeed, speed);
+    String oldSpeedLabel = speedLabel;
+    speedLabel = FileUtils.byteCountToDisplaySize(speed)+"/s";
+    firePropertyChange("speed", oldSpeedLabel, speedLabel);
   }
 
   public synchronized int calculateTotalProgress(long currentSize, long remoteSize) {
@@ -239,7 +243,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         if (totalSize == 0) {
           start = System.nanoTime();
         }
-        final double BYTES_PER_KILOBYTE = 1024;
         final double NANOS_PER_SECOND = 1000000000.0;
         InputStream input = con.getInputStream();
         FileOutputStream output = new FileOutputStream(asset.local);
@@ -417,7 +420,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           asset.local.getParentFile().mkdirs();
           int readLen;
           long currentSize = 0;
-          final double BYTES_PER_KILOBYTE = 1024;
           final double NANOS_PER_SECOND = 1000000000.0;
           InputStream input = con.getInputStream();
           FileOutputStream output = new FileOutputStream(asset.local);

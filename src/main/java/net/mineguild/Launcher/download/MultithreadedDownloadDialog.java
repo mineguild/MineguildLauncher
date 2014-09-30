@@ -169,8 +169,7 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     } else if (evt.getPropertyName().equals("note")) {
       status.setText((String) evt.getNewValue());
     } else if (evt.getPropertyName().equals("speed")) {
-      long speed = (Long) evt.getNewValue();
-      speedLabel.setText(FileUtils.byteCountToDisplaySize(speed)+"/s");
+      speedLabel.setText((String) evt.getNewValue());
     }
   }
 }
