@@ -22,6 +22,10 @@ version = '1.0'
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven { 
+    	url "https://libraries.minecraft.net/";
+  	}
 }
 
 launch4j {
@@ -36,7 +40,6 @@ macAppBundle {
 
 dependencies {
     compile group: 'com.jgoodies', name: 'forms', version: '1.2.1'
-    compile 'com.intellij:forms_rt:7.0.3'
     compile 'commons-io:commons-io:2.4'
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile "org.projectlombok:lombok:1.14.4"
@@ -45,13 +48,13 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.0.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
-    compile files('libs/authlib-1.5.16.jar')
+    compile group: 'com.mojang', name: 'authlib', version: '1.5.16'
 }
 
 shadowJar {
     dependencies {
-        exclude(dependency('org.projectlombok:lombok:1.14.4'))
-        exclude(dependency('authlib:authlib-1.5.16'))
+        exclude(dependency('org.projectlombok:lombok'))
+        exclude(dependency('com.mojang:authlib'))
     }
     baseName = "MineguildLauncher"
     classifier = ''
