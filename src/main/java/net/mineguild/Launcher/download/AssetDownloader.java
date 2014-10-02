@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -100,6 +103,21 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     status = newStatus;
     firePropertyChange("note", oldStatus, status);
   }
+  
+  public synchronized void updateIndividualProgress(String threadId, int progress){
+    Object[] data = {threadId, progress};
+    firePropertyChange("indProgress", null, data);
+  }
+  
+  public synchronized void addIndividualProgress(String threadId, String fName){
+    Object[] data = {threadId, fName};
+    firePropertyChange("addIndProgress", null, data);
+  }
+  
+  public synchronized void removeIndividualProgress(String threadId){
+    firePropertyChange("removeIndProgress", null, threadId);
+  }
+  
 
   public synchronized void updateStatus(String filename) {
     HashMap<String, Object> data = Maps.newHashMap();
@@ -327,6 +345,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   public static class DownloadWorker implements Runnable {
 
     DownloadInfo asset;
+    public int prog;
 
     public DownloadWorker(DownloadInfo asset) {
       this.asset = asset;
@@ -338,6 +357,10 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
       boolean downloadSuccess = false;
       List<String> remoteHash = asset.hash;
       int attempt = 0;
+      final String threadId = Thread.currentThread().getName();
+      System.out.println(threadId);
+      System.out.println(Thread.currentThread().getId());
+      
       final int attempts = 5;
       while (!downloadSuccess && (attempt < attempts)) {
         try {
@@ -423,24 +446,28 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           final double NANOS_PER_SECOND = 1000000000.0;
           InputStream input = con.getInputStream();
           FileOutputStream output = new FileOutputStream(asset.local);
+          
+          instance.addIndividualProgress(threadId, asset.name);
           while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {
             if (AssetDownloader.instance.isCancelled()) {
               input.close();
               output.close();
               asset.local.delete();
+              instance.removeIndividualProgress(threadId);
               return;
             }
             output.write(buffer, 0, readLen);
             currentSize += readLen;
             AssetDownloader.instance.totalBytesRead += readLen;
 
-            int prog = (int) ((currentSize * 100) / remoteSize);
+            prog = (int) ((currentSize * 100) / remoteSize);
             if (prog > 100) {
               prog = 100;
             }
             if (prog < 0) {
               prog = 0;
             }
+            instance.updateIndividualProgress(threadId, prog);
 
             instance.setSpeed((long) (NANOS_PER_SECOND / 1 * instance.totalBytesRead
                 / (System.nanoTime() - instance.start + 1)));
@@ -451,6 +478,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
 
           }
 
+          instance.removeIndividualProgress(threadId);
           input.close();
           output.close();
 

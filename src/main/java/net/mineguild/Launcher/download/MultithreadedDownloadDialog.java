@@ -2,9 +2,11 @@ package net.mineguild.Launcher.download;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -15,6 +17,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -22,10 +25,16 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 
-import org.apache.commons.io.FileUtils;
+import com.google.common.collect.Maps;
 
 import net.mineguild.Launcher.log.Logger;
+
+import javax.swing.JList;
+import net.miginfocom.swing.MigLayout;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.BevelBorder;
 
 @SuppressWarnings("serial")
 public class MultithreadedDownloadDialog extends JDialog implements PropertyChangeListener {
@@ -40,6 +49,9 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
   private long totalFilesSize = 0;
   private AssetDownloader task;
   private JPanel mainPanel;
+  private JScrollPane scrollPane;
+  private JPanel progressPanel;
+  private Map<String, JProgressBar> progressBarMap = Maps.newHashMap();
 
   {
     initGUI();
@@ -59,6 +71,7 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     }
     this.info = info;
     pack();
+    System.out.println(getSize().getWidth());
     setMinimumSize(new Dimension(300, getHeight()));
     setLocationRelativeTo(null);
     getRootPane().setDefaultButton(buttonCancel);
@@ -112,8 +125,9 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
 
 
   public void initGUI() {
+    getContentPane().setLayout(new MigLayout("", "[284px,grow]", "[100px][100px,grow]"));
     mainPanel = new JPanel();
-    getContentPane().add(mainPanel, BorderLayout.CENTER);
+    getContentPane().add(mainPanel, "cell 0 0,grow");
     GridBagLayout gbl_mainPanel = new GridBagLayout();
     gbl_mainPanel.columnWeights = new double[] {1.0, 0.0};
     gbl_mainPanel.rowWeights = new double[] {0.0, 0.0, 0.0};
@@ -150,9 +164,20 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     speedPanel.add(speedLabel);
 
     JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new BorderLayout(0, 0));
+    getContentPane().add(buttonPanel, "cell 0 1,grow");
     buttonCancel = new JButton("Cancel");
     buttonPanel.add(buttonCancel, BorderLayout.CENTER);
-    getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+    
+    scrollPane = new JScrollPane();
+    scrollPane.setViewportBorder(null);
+    scrollPane.setAutoscrolls(true);
+    progressPanel = new JPanel(new GridBagLayout());
+    progressPanel.setBorder(null);
+    //progressPanel.setPreferredSize(new Dimension(200, 200));
+    scrollPane.setPreferredSize(new Dimension(150, 50));
+    scrollPane.setViewportView(progressPanel);
+    buttonPanel.add(scrollPane, BorderLayout.CENTER);
 
   }
 
@@ -170,6 +195,35 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
       status.setText((String) evt.getNewValue());
     } else if (evt.getPropertyName().equals("speed")) {
       speedLabel.setText((String) evt.getNewValue());
+    } else if (evt.getPropertyName().equals("indProgress")) {
+      Object[] data = (Object[]) evt.getNewValue();
+      String threadId = (String) data[0];
+      int progress = (Integer) data[1];
+      progressBarMap.get(threadId).setValue(progress);
+    } else if (evt.getPropertyName().equals("addIndProgress")){
+      Object[] data = (Object[]) evt.getNewValue();
+      String threadId = (String) data[0];
+      JProgressBar bar = new JProgressBar();
+      bar.setStringPainted(true);
+      bar.setString((String) data[1]);
+      progressBarMap.put(threadId, bar);
+      drawProgessBars();
+    } else if (evt.getPropertyName().equals("removeIndProgress")){
+      String threadId = (String) evt.getNewValue();
+      progressBarMap.remove(threadId);
+      drawProgessBars();
     }
   }
+  
+  void drawProgessBars() {
+    GridBagConstraints c = new GridBagConstraints();
+    c.gridy = 0;
+    c.fill = GridBagConstraints.HORIZONTAL;
+    progressPanel.removeAll();
+    for (JProgressBar progressBar : progressBarMap.values()) {
+      c.gridy++;
+      progressPanel.add(progressBar, c);
+    }
+  }
+  
 }
