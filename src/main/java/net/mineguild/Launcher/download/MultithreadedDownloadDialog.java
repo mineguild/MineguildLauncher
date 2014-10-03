@@ -224,6 +224,8 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
       c.gridy++;
       progressPanel.add(progressBar, c);
     }
+    revalidate();
+    repaint();
   }
   
 }
