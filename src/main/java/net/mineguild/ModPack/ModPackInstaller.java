@@ -31,8 +31,8 @@ public class ModPackInstaller {
    * 
    * @param installDirectory The directory as {@link File} to check.
    * @param pack The {@link net.mineguild.ModPack.ModPack} to check against.
-   * @param side The {@link net.mineguild.ModPack.Side} that should be installed, should be SERVER or
-   *        CLIENT
+   * @param side The {@link net.mineguild.ModPack.Side} that should be installed, should be SERVER
+   *        or CLIENT
    * @return A List of needed {@link net.mineguild.Launcher.download.DownloadInfo}
    * @throws Exception
    */
@@ -48,7 +48,8 @@ public class ModPackInstaller {
               public DownloadInfo apply(Map.Entry<String, ModPackFile> entry) {
                 String path = entry.getKey();
                 ModPackFile packFile = entry.getValue();
-                if (side == Side.BOTH || packFile.getSide() == side || packFile.getSide() == Side.UNIVERSAL) {
+                if (side == Side.BOTH || packFile.getSide() == side
+                    || packFile.getSide() == Side.UNIVERSAL) {
                   File localFile = new File(installDirectory, path);
                   if (localFile.exists()) {
                     try {

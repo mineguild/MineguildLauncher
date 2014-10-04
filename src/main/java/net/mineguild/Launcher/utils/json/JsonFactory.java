@@ -44,17 +44,17 @@ public class JsonFactory {
     FileReader reader = new FileReader(json);
     return GSON.fromJson(reader, ModPack.class);
   }
-  
+
   public static MCVersionIndex loadVersionIndex(File f) throws IOException {
     FileReader reader = new FileReader(f);
     return GSON.fromJson(reader, MCVersionIndex.class);
   }
-  
+
   public static BuilderSettings loadBuilderSettings(File json) {
-    try{
+    try {
       FileReader reader = new FileReader(json);
       return GSON.fromJson(reader, BuilderSettings.class);
-    } catch (IOException e){
+    } catch (IOException e) {
       return new BuilderSettings();
     }
   }

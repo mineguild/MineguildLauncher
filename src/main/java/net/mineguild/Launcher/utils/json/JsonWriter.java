@@ -29,7 +29,7 @@ public class JsonWriter {
   public static void saveSettings(Settings set, File json) throws IOException {
     FileUtils.write(json, GSON.toJson(set, Settings.class));
   }
-  
+
   public static void saveBuilderSettings(BuilderSettings set, File json) throws IOException {
     FileUtils.write(json, GSON.toJson(set, BuilderSettings.class));
   }

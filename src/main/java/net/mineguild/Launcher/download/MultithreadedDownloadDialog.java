@@ -162,13 +162,13 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     getContentPane().add(buttonPanel, "cell 0 1,grow");
     buttonCancel = new JButton("Cancel");
     buttonPanel.add(buttonCancel, BorderLayout.CENTER);
-    
+
     scrollPane = new JScrollPane();
     scrollPane.setViewportBorder(null);
     scrollPane.setAutoscrolls(true);
     progressPanel = new JPanel(new GridBagLayout());
     progressPanel.setBorder(null);
-    //progressPanel.setPreferredSize(new Dimension(200, 200));
+    // progressPanel.setPreferredSize(new Dimension(200, 200));
     scrollPane.setPreferredSize(new Dimension(150, 50));
     scrollPane.setViewportView(progressPanel);
     buttonPanel.add(scrollPane, BorderLayout.CENTER);
@@ -179,7 +179,7 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
   public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getPropertyName().equals("overall")) {
       int progress = (Integer) evt.getNewValue();
-      if(overall.isIndeterminate()){
+      if (overall.isIndeterminate()) {
         overall.setIndeterminate(false);
         overall.setStringPainted(true);
       }
@@ -198,25 +198,25 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
       String threadId = (String) data[0];
       int progress = (Integer) data[1];
       progressBarMap.get(threadId).setValue(progress);
-    } else if (evt.getPropertyName().equals("addIndProgress")){
+    } else if (evt.getPropertyName().equals("addIndProgress")) {
       Object[] data = (Object[]) evt.getNewValue();
       String threadId = (String) data[0];
       String[] splitName = ((String) data[1]).split("/");
       JProgressBar bar = new JProgressBar();
       bar.setStringPainted(true);
-      bar.setString(splitName[splitName.length-1]);
+      bar.setString(splitName[splitName.length - 1]);
       progressBarMap.put(threadId, bar);
       drawProgessBars();
-    } else if (evt.getPropertyName().equals("removeIndProgress")){
+    } else if (evt.getPropertyName().equals("removeIndProgress")) {
       String threadId = (String) evt.getNewValue();
       progressBarMap.remove(threadId);
       drawProgessBars();
-    } else if (evt.getPropertyName().equals("overallIndeterminate")){
+    } else if (evt.getPropertyName().equals("overallIndeterminate")) {
       overall.setIndeterminate(true);
       overall.setStringPainted(false);
     }
   }
-  
+
   void drawProgessBars() {
     GridBagConstraints c = new GridBagConstraints();
     c.gridy = 0;
@@ -229,5 +229,5 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     revalidate();
     repaint();
   }
-  
+
 }

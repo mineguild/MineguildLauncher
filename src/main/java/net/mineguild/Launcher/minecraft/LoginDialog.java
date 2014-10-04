@@ -132,7 +132,7 @@ public class LoginDialog extends JDialog {
         MineguildLauncher.settings.setModpackPath(MineguildLauncher.getInstallPath(getRootPane()));
       }
     });
-    
+
     chckbxLaunchModpackbuilder = new JCheckBox("Launch ModPackBuilder");
     chckbxLaunchModpackbuilder.setHorizontalAlignment(SwingConstants.CENTER);
     panel.add(chckbxLaunchModpackbuilder);

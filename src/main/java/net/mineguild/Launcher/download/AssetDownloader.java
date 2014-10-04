@@ -67,8 +67,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     start = System.nanoTime();
     if (multithread) {
       ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores() * 2);
-      if(totalSize == 0){
-        setTotalIndeterminate(); 
+      if (totalSize == 0) {
+        setTotalIndeterminate();
         DownloadUtils.setTotalSize(downloads, this);
       }
       for (DownloadInfo download : downloads) {
@@ -172,8 +172,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     totalProgress = newProgress;
     firePropertyChange("overall", oldProgress, totalProgress);
   }
-  
-  public synchronized void setTotalIndeterminate(){
+
+  public synchronized void setTotalIndeterminate() {
     firePropertyChange("overallIndeterminate", null, true);
   }
 
@@ -515,9 +515,10 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
       }
       instance.currentFile++;
       instance.updateStatus();
-      /*if (instance.totalSize == 0) {
-        instance.setTotalProgress(instance.calculateTotalProgress(0, 0));
-      }*/
+      /*
+       * if (instance.totalSize == 0) { instance.setTotalProgress(instance.calculateTotalProgress(0,
+       * 0)); }
+       */
     }
 
   }

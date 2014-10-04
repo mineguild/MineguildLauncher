@@ -8,12 +8,12 @@ import lombok.Setter;
 import com.google.gson.annotations.Expose;
 
 public class BuilderSettings {
-  
+
   private @Expose @Getter @Setter String lastPath;
-  
-  public BuilderSettings(){
+
+  public BuilderSettings() {
     lastPath = new File("").getAbsolutePath();
   }
-  
+
 
 }

@@ -247,10 +247,8 @@ public class ModpackBuilder extends JFrame {
         }
       }
     });
-
     setVisible(true);
     setDefaultCloseOperation(EXIT_ON_CLOSE);
-
   }
 
   public void createUpdatedPack(final JFrame parent) {
@@ -261,7 +259,7 @@ public class ModpackBuilder extends JFrame {
     modPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
     dialog.start(modPack);
-    //compareAndSetOptions(newestPack, modPack);
+    // compareAndSetOptions(newestPack, modPack);
     final JDialog showFilesDialog = new JDialog(parent);
     final ModpackTableModel mTableModel = new ModpackTableModel(modPack);
     final JTable table = new JTable(mTableModel);
