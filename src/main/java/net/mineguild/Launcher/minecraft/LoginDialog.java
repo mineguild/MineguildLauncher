@@ -43,6 +43,7 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import javax.swing.SwingConstants;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 
 @SuppressWarnings("serial")
 public class LoginDialog extends JDialog {
@@ -62,11 +63,13 @@ public class LoginDialog extends JDialog {
   public int accountLevel;
   public boolean successfull = false;
   public boolean forceUpdate = false;
+  public boolean launchBuilder = false;
   private JLabel lblUsernameemail;
   private JCheckBox chckbxForceUpdate;
   private JPanel panel;
   private JButton btnChangeInstallLocation;
   private JPanel panel_1;
+  private JCheckBox chckbxLaunchModpackbuilder;
 
   public LoginDialog(Frame parent) {
     super(parent);
@@ -117,11 +120,11 @@ public class LoginDialog extends JDialog {
 
     panel = new JPanel();
     checkBoxPanel.add(panel, BorderLayout.SOUTH);
-    panel.setLayout(new BorderLayout(0, 0));
+    panel.setLayout(new GridLayout(0, 1, 0, 0));
 
     chckbxForceUpdate = new JCheckBox("Force Update");
     chckbxForceUpdate.setHorizontalAlignment(SwingConstants.CENTER);
-    panel.add(chckbxForceUpdate, BorderLayout.NORTH);
+    panel.add(chckbxForceUpdate);
 
     btnChangeInstallLocation = new JButton("Change install location");
     btnChangeInstallLocation.addActionListener(new ActionListener() {
@@ -129,6 +132,10 @@ public class LoginDialog extends JDialog {
         MineguildLauncher.settings.setModpackPath(MineguildLauncher.getInstallPath(getRootPane()));
       }
     });
+    
+    chckbxLaunchModpackbuilder = new JCheckBox("Launch ModPackBuilder");
+    chckbxLaunchModpackbuilder.setHorizontalAlignment(SwingConstants.CENTER);
+    panel.add(chckbxLaunchModpackbuilder);
     panel.add(btnChangeInstallLocation);
 
     panel_1 = new JPanel();
@@ -303,7 +310,7 @@ public class LoginDialog extends JDialog {
       } else {
         MineguildLauncher.settings.setProfile(null);
       }
-
+      launchBuilder = chckbxLaunchModpackbuilder.isSelected();
       forceUpdate = chckbxForceUpdate.isSelected();
       successfull = true;
       dispose();
