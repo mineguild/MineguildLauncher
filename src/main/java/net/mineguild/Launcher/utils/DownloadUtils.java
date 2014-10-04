@@ -19,6 +19,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import net.mineguild.Launcher.Constants;
+import net.mineguild.Launcher.download.AssetDownloader;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.log.Logger;
 
@@ -118,6 +119,16 @@ public class DownloadUtils {
       Logger.logError("Couldn't execute parallel task.", e);
       return 0l;
     }
+  }
+
+  public static void setTotalSize(final List<DownloadInfo> downloads, final AssetDownloader instance) {
+    Thread t = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        instance.setTotalSize(getTotalSize(downloads));
+      }
+    });
+    t.start();
   }
 
 

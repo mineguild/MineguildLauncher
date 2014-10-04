@@ -23,7 +23,6 @@ import net.mineguild.Launcher.log.LogLevel;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.log.StreamLogger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
-import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
@@ -77,8 +76,7 @@ public class MCInstaller {
     if (libraries.size() > 0) {
       long startTime = System.currentTimeMillis();
       dlDialog =
-          new MultithreadedDownloadDialog(MineguildLauncher.con, libraries, "Downloading Libraries",
-              DownloadUtils.getTotalSize(libraries));
+          new MultithreadedDownloadDialog(MineguildLauncher.con, libraries, "Downloading Libraries");
       dlDialog.setVisible(true);
       if (!dlDialog.run()) {
         dlDialog.dispose();

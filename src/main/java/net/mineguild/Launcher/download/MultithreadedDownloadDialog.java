@@ -179,6 +179,10 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
   public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getPropertyName().equals("overall")) {
       int progress = (Integer) evt.getNewValue();
+      if(overall.isIndeterminate()){
+        overall.setIndeterminate(false);
+        overall.setStringPainted(true);
+      }
       overall.setValue(progress);
     } else if (evt.getPropertyName().equals("info")) {
       @SuppressWarnings("unchecked")
@@ -207,6 +211,9 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
       String threadId = (String) evt.getNewValue();
       progressBarMap.remove(threadId);
       drawProgessBars();
+    } else if (evt.getPropertyName().equals("overallIndeterminate")){
+      overall.setIndeterminate(true);
+      overall.setStringPainted(false);
     }
   }
   
