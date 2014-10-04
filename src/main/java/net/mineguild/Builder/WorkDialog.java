@@ -26,7 +26,6 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
 
   public WorkDialog(JFrame owner) {
     super(owner, ModalityType.APPLICATION_MODAL);
-    setUndecorated(true);
     instance = this;
     JLabel label = new JLabel("Adding files...");
     bar = new JProgressBar();
