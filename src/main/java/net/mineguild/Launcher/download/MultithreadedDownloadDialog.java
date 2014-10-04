@@ -2,11 +2,9 @@ package net.mineguild.Launcher.download;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -27,14 +25,10 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 
-import com.google.common.collect.Maps;
-
+import net.miginfocom.swing.MigLayout;
 import net.mineguild.Launcher.log.Logger;
 
-import javax.swing.JList;
-import net.miginfocom.swing.MigLayout;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.BevelBorder;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("serial")
 public class MultithreadedDownloadDialog extends JDialog implements PropertyChangeListener {
@@ -203,9 +197,10 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     } else if (evt.getPropertyName().equals("addIndProgress")){
       Object[] data = (Object[]) evt.getNewValue();
       String threadId = (String) data[0];
+      String[] splitName = ((String) data[1]).split("/");
       JProgressBar bar = new JProgressBar();
       bar.setStringPainted(true);
-      bar.setString((String) data[1]);
+      bar.setString(splitName[splitName.length-1]);
       progressBarMap.put(threadId, bar);
       drawProgessBars();
     } else if (evt.getPropertyName().equals("removeIndProgress")){

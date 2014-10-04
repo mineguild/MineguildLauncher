@@ -5,18 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingWorker;
-
-import org.apache.commons.io.FileUtils;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +20,8 @@ import net.mineguild.Launcher.download.DownloadInfo.DLType;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
+
+import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -42,6 +39,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   private String speedLabel = "";
   private long totalBytesRead = 0;
   private double start;
+
+  final static int BYTESPERMB = 1000000;
 
   @Getter
   @Setter
@@ -103,21 +102,21 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     status = newStatus;
     firePropertyChange("note", oldStatus, status);
   }
-  
-  public synchronized void updateIndividualProgress(String threadId, int progress){
+
+  public void updateIndividualProgress(String threadId, int progress) {
     Object[] data = {threadId, progress};
     firePropertyChange("indProgress", null, data);
   }
-  
-  public synchronized void addIndividualProgress(String threadId, String fName){
+
+  public void addIndividualProgress(String threadId, String fName) {
     Object[] data = {threadId, fName};
     firePropertyChange("addIndProgress", null, data);
   }
-  
-  public synchronized void removeIndividualProgress(String threadId){
+
+  public void removeIndividualProgress(String threadId) {
     firePropertyChange("removeIndProgress", null, threadId);
   }
-  
+
 
   public synchronized void updateStatus(String filename) {
     HashMap<String, Object> data = Maps.newHashMap();
@@ -137,7 +136,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   public synchronized void setSpeed(long newSpeed) {
     speed = newSpeed;
     String oldSpeedLabel = speedLabel;
-    speedLabel = FileUtils.byteCountToDisplaySize(speed)+"/s";
+    speedLabel = FileUtils.byteCountToDisplaySize(speed) + "/s";
     firePropertyChange("speed", oldSpeedLabel, speedLabel);
   }
 
@@ -283,11 +282,9 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             prog = 0;
           }
           if (totalSize == 0) {
-            setSpeed((long)(NANOS_PER_SECOND / 1 * currentSize
-                / (System.nanoTime() - start + 1)));
+            setSpeed((long) (NANOS_PER_SECOND / 1 * currentSize / (System.nanoTime() - start + 1)));
           } else {
-            setSpeed((long)(NANOS_PER_SECOND / 1 * totalBytesRead
-                / (System.nanoTime() - start + 1)));
+            setSpeed((long) (NANOS_PER_SECOND / 1 * totalBytesRead / (System.nanoTime() - start + 1)));
           }
 
           setProgress(prog);
@@ -360,7 +357,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
       final String threadId = Thread.currentThread().getName();
       System.out.println(threadId);
       System.out.println(Thread.currentThread().getId());
-      
+
       final int attempts = 5;
       while (!downloadSuccess && (attempt < attempts)) {
         try {
@@ -444,16 +441,21 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           int readLen;
           long currentSize = 0;
           final double NANOS_PER_SECOND = 1000000000.0;
+          boolean showIndProgress = (remoteSize / BYTESPERMB) >= 1; // Make sure only files worth
+                                                                    // showing are shown.
           InputStream input = con.getInputStream();
           FileOutputStream output = new FileOutputStream(asset.local);
-          
-          instance.addIndividualProgress(threadId, asset.name);
+          if (showIndProgress) {
+            instance.addIndividualProgress(threadId, asset.name);
+          }
           while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {
             if (AssetDownloader.instance.isCancelled()) {
               input.close();
               output.close();
               asset.local.delete();
-              instance.removeIndividualProgress(threadId);
+              if (showIndProgress) {
+                instance.removeIndividualProgress(threadId);
+              }
               return;
             }
             output.write(buffer, 0, readLen);
@@ -467,22 +469,23 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             if (prog < 0) {
               prog = 0;
             }
-            instance.updateIndividualProgress(threadId, prog);
+            if (showIndProgress) {
+              instance.updateIndividualProgress(threadId, prog);
+            }
 
-            instance.setSpeed((long) (NANOS_PER_SECOND / 1 * instance.totalBytesRead
-                / (System.nanoTime() - instance.start + 1)));
+            instance.setSpeed((long) (NANOS_PER_SECOND / 1 * instance.totalBytesRead / (System
+                .nanoTime() - instance.start + 1)));
 
             if (instance.totalSize > 0) {
               instance.setTotalProgress(instance.calculateTotalProgress(currentSize, remoteSize));
             }
 
           }
-
-          instance.removeIndividualProgress(threadId);
+          if (showIndProgress) {
+            instance.removeIndividualProgress(threadId);
+          }
           input.close();
           output.close();
-
-          // setIndeterminate();
 
           // file downloaded check size
           if (!(con instanceof HttpURLConnection && currentSize > 0 && currentSize == remoteSize)) {
