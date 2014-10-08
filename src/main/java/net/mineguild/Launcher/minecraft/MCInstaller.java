@@ -286,6 +286,7 @@ public class MCInstaller {
       for (Library lib : base.getLibraries()) {
         classpath.add(new File(libDir, lib.getPath()));
       }
+      
 
 
       Process minecraftProcess =

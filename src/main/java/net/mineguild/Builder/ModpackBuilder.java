@@ -321,6 +321,7 @@ public class ModpackBuilder extends JFrame {
     }
     UploadFileUtils.placeUploadFiles(ModpackBuilder.modpackDirectory.getAbsolutePath(),
         modPack.getFiles());
+    showFilesDialog.dispose();
     System.exit(0);
   }
 
