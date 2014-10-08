@@ -24,6 +24,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.mineguild.Launcher.MineguildLauncher;
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.LoginDialog;
 import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.utils.OSUtils;
@@ -35,6 +36,8 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 @SuppressWarnings("serial")
 public class MCLaunchFrame extends JFrame {
@@ -68,10 +71,16 @@ public class MCLaunchFrame extends JFrame {
    * Create the frame.
    */
   public MCLaunchFrame() {
+    addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosed(WindowEvent e) {
+        saveSettings();
+      }
+    });
     instance = this;
     setTitle("Launch MC");
     setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     
     contentPane = new JPanel();
     contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -223,8 +232,12 @@ public class MCLaunchFrame extends JFrame {
     btnSaveAndLaunch.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         saveSettings();
-        launchMC();
-
+        if(MineguildLauncher.res != null){
+          launchMC();
+        } else {
+          Logger.logInfo("The response we want to use is null!");
+          refreshLogin();
+        }
       }
     });
     contentPane.add(btnSaveAndLaunch, "4, 16");
@@ -248,7 +261,7 @@ public class MCLaunchFrame extends JFrame {
       launchPathField.setText(ModpackBuilder.settings.getLaunchPath());
     }
     if (ModpackBuilder.settings.getGameDir() != null) {
-      getGameDirField().setText(ModpackBuilder.settings.getLaunchPath());
+      getGameDirField().setText(ModpackBuilder.settings.getGameDir());
     }
     if (ModpackBuilder.settings.getMem() >= 512) {
       memSlider.setValue((int) ModpackBuilder.settings.getMem() / 512);
@@ -261,6 +274,9 @@ public class MCLaunchFrame extends JFrame {
     } else {
       autoDetectJava();
     }
+    if(ModpackBuilder.settings.getLastSize() != null) {
+      setSize(ModpackBuilder.settings.getLastSize());
+    }
   }
 
   public void saveSettings() {
@@ -269,6 +285,7 @@ public class MCLaunchFrame extends JFrame {
     ModpackBuilder.settings.setPermGen((String) permGenComboBox.getSelectedItem());
     ModpackBuilder.settings.setJavaPath(getJavaPathField().getText());
     ModpackBuilder.settings.setGameDir(getGameDirField().getText());
+    ModpackBuilder.settings.setLastSize(getSize());
   }
 
   public void launchMC() {

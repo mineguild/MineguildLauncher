@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -261,19 +262,21 @@ public class ModpackBuilder extends JFrame {
   public void createUpdatedPack(final JFrame parent) {
     workPack = new ModPack();
     workPack.setMinecraftVersion((String) mcVersionBox.getSelectedItem());
-    workPack.setForgeVersion(workPack.getMinecraftVersion()+"-"+(String) forgeVersionBox.getSelectedItem());
+    workPack.setForgeVersion(workPack.getMinecraftVersion() + "-"
+        + (String) forgeVersionBox.getSelectedItem());
     workPack.setVersion(ModpackBuilder.instance.versionField.getText());
     workPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
     dialog.start(workPack);
     // compareAndSetOptions(newestPack, modPack);
-    final JDialog showFilesDialog = new JDialog(parent);
+    final JFrame showFilesDialog = new JFrame("Edit your file-selection");
+    showFilesDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
     final ModpackTableModel mTableModel = new ModpackTableModel(workPack);
     final JTable table = new JTable(mTableModel);
     table.setLayout(new BorderLayout());
     JScrollPane tableView = new JScrollPane(table);
     JButton removeButton = new JButton("Remove selected entry/entries");
-    JButton doneButton = new JButton("Done");
+    JButton testButton = new JButton("Test(Launch MC)");
     JButton refreshButton = new JButton("Refresh");
     JButton clientSide = new JButton("Toggle clientside");
     clientSide.addActionListener(new ActionListener() {
@@ -292,7 +295,7 @@ public class ModpackBuilder extends JFrame {
         mTableModel.fireTableDataChanged();
       }
     });
-    doneButton.addActionListener(new ActionListener() {
+    testButton.addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -300,7 +303,7 @@ public class ModpackBuilder extends JFrame {
         frame.loadSettings();
         frame.setVisible(true);
         launch = frame;
-        
+
       }
     });
     removeButton.addActionListener(new ActionListener() {
@@ -312,62 +315,32 @@ public class ModpackBuilder extends JFrame {
     });
     Font font = new Font("Monospaced", Font.PLAIN, 12);
     table.setFont(font);
-    JPanel bottomButtonPanel = new JPanel(new BorderLayout());
-    bottomButtonPanel.add(removeButton, BorderLayout.NORTH);
-    bottomButtonPanel.add(clientSide, BorderLayout.CENTER);
-    bottomButtonPanel.add(doneButton, BorderLayout.SOUTH);
-    showFilesDialog.add(refreshButton, BorderLayout.NORTH);
+
+    JPanel bottomButtonPanel = new JPanel(new GridLayout(0, 1));
+    JButton doneButton = new JButton("Done! Finish up!");
+    doneButton.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        finishPack();
+        showFilesDialog.dispose();
+      }
+    });
+    bottomButtonPanel.add(refreshButton);
+    bottomButtonPanel.add(removeButton);
+    bottomButtonPanel.add(clientSide);
+    bottomButtonPanel.add(testButton);
+    bottomButtonPanel.add(doneButton);
     showFilesDialog.add(bottomButtonPanel, BorderLayout.SOUTH);
     showFilesDialog.add(tableView, BorderLayout.CENTER);
     showFilesDialog.pack();
     showFilesDialog.setMinimumSize(new Dimension(700, getHeight()));
     showFilesDialog.setLocationRelativeTo(null);
     showFilesDialog.setVisible(true);
-    showFilesDialog.addWindowListener(new WindowListener() {
-      
-      @Override
-      public void windowOpened(WindowEvent e) {
-        // TODO Auto-generated method stub
-        
-      }
-      
-      @Override
-      public void windowIconified(WindowEvent e) {
-        // TODO Auto-generated method stub
-        
-      }
-      
-      @Override
-      public void windowDeiconified(WindowEvent e) {
-        // TODO Auto-generated method stub
-        
-      }
-      
-      @Override
-      public void windowDeactivated(WindowEvent e) {
-        // TODO Auto-generated method stub
-        
-      }
-      
-      @Override
-      public void windowClosing(WindowEvent e) {
-        
-      }
-      
-      @Override
-      public void windowClosed(WindowEvent e) {
-        finishPack();
-      }
-      
-      @Override
-      public void windowActivated(WindowEvent e) {
-        // TODO Auto-generated method stub
-        
-      }
-    });
+
   }
-  
-  public static void finishPack(){
+
+  public static void finishPack() {
     try {
       JsonWriter.saveModpack(workPack, new File("modpack.json"));
     } catch (IOException e1) {
