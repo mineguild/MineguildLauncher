@@ -135,7 +135,7 @@ public class ModPackInstaller {
               }
             } else {
               for (ModPackFile packFile : files.values()) {
-                if (packFile.getSide() == Side.UNIVERSAL || packFile.getSide() == Side.BOTH
+                if (packFile.getSide() == Side.UNIVERSAL || side == Side.BOTH
                     || packFile.getSide() == side) {
                   Logger.logDebug(String.format("Leaving %s in there - side matches", f.getName()));
                 } else {
