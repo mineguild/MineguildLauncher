@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -11,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -19,32 +19,36 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.minecraft.MCLauncher;
 
 @SuppressWarnings("serial")
 public class Console extends JFrame implements ILogListener {
-  private final JEditorPane displayArea;
-  private final HTMLEditorKit kit;
-  private HTMLDocument doc;
+  private final JTextPane displayArea;
+  private final Document displayAreaDoc;
   private final JComboBox<LogType> logTypeComboBox;
   private LogType logType = LogType.MINIMAL;
   private final JComboBox<LogSource> logSourceComboBox;
   private LogSource logSource = LogSource.ALL;
   private LogLevel logLevel = LogLevel.INFO;
   private JButton killMCButton;
+  private final Font FONT = new Font("Monospaced", 0, 12);
+  private SimpleAttributeSet RED = new SimpleAttributeSet();
+  private SimpleAttributeSet YELLOW = new SimpleAttributeSet();
+  private SimpleAttributeSet WHITE = new SimpleAttributeSet();
 
   public Console() {
     setTitle("Mineguild Launcher Console");
@@ -52,6 +56,9 @@ public class Console extends JFrame implements ILogListener {
     setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
     getContentPane().setLayout(new BorderLayout(0, 0));
 
+    StyleConstants.setForeground(RED, Color.RED);
+    StyleConstants.setForeground(YELLOW, Color.YELLOW);
+    StyleConstants.setForeground(WHITE, Color.WHITE);
     JPanel panel = new JPanel();
 
     getContentPane().add(panel, BorderLayout.SOUTH);
@@ -100,7 +107,7 @@ public class Console extends JFrame implements ILogListener {
         }
         if (result == 0) {
           StringSelection stringSelection =
-              new StringSelection("FTB Launcher logs:\n" + Logger.getLogs() + "["
+              new StringSelection("MG Launcher logs:\n" + Logger.getLogs() + "["
                   + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "]"
                   + " Logs copied to clipboard");
           Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -162,23 +169,36 @@ public class Console extends JFrame implements ILogListener {
       }
     });
     panel.add(killMCButton);
+    
+    
+    
+    
 
-    displayArea = new JEditorPane("text/html", "");
+    displayArea = new JTextPane() {
+      @Override
+      public boolean getScrollableTracksViewportWidth() {
+        return true;
+      }
+    };
+    
     UIDefaults defaults = new UIDefaults();
-    defaults.put("EditorPane[Enabled].backgroundPainter", Color.BLACK);
+    defaults.put("TextPane[Enabled].backgroundPainter", Color.BLACK);
+    defaults.put("TextPane[Disabled].backgroundPainter", Color.BLACK);
     displayArea.putClientProperty("Nimbus.Overrides", defaults);
     displayArea.putClientProperty("Nimbus.Overrides.InheritDefaults", true);
     displayArea.setBackground(Color.BLACK);
-    displayArea.setEditable(false);
-    kit = new HTMLEditorKit();
-    displayArea.setEditorKit(kit);
+    displayArea.setFont(FONT);
+    displayArea.setMargin(null);
+    displayAreaDoc = displayArea.getDocument();
 
     DefaultCaret caret = (DefaultCaret) displayArea.getCaret();
     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
     JScrollPane scrollPane = new JScrollPane(displayArea);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
+    new SmartScroller(scrollPane);
     getContentPane().add(scrollPane);
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     pack();
@@ -199,45 +219,27 @@ public class Console extends JFrame implements ILogListener {
   }
 
   synchronized private void refreshLogs() {
-    doc = new HTMLDocument();
-    displayArea.setDocument(doc);
-    List<LogEntry> entries = Logger.getBufferedEntries();
-    StringBuilder logHTML = new StringBuilder();
+    try {
+      displayAreaDoc.remove(0, displayAreaDoc.getLength());
+    } catch (Exception ignored) {
+    }
+
+    List<LogEntry> entries = Logger.getLogEntries();
     for (LogEntry entry : entries) {
-      // select only messages we want
       if ((logSource == LogSource.ALL || entry.source == logSource)
           && (logLevel == LogLevel.DEBUG || logLevel.includes(entry.level))) {
-        logHTML.append(getMessage(entry));
+        addEntry(entry, displayAreaDoc);
       }
     }
-    addHTML(logHTML.toString());
   }
 
-  private void addHTML(String html) {
-    synchronized (kit) {
-      try {
-        kit.insertHTML(doc, doc.getLength(), html, 0, 0, null);
-      } catch (BadLocationException ignored) {
-        Logger.logError(ignored.getMessage(), ignored);
-      } catch (IOException ignored) {
-        Logger.logError(ignored.getMessage(), ignored);
-      }
-      displayArea.setCaretPosition(displayArea.getDocument().getLength());
-    }
-  }
-
-  public void scrollToBottom() {
-    displayArea.setCaretPosition(displayArea.getDocument().getLength());
-  }
-
-  private String getMessage(LogEntry entry) {
-    String color = "white";
+  synchronized private void addEntry(LogEntry entry, Document doc) {
+    SimpleAttributeSet col = WHITE;
     switch (entry.level) {
       case ERROR:
-        color = "#FF7070";
-        break;
+        col = RED;
       case WARN:
-        color = "yellow";
+        col = YELLOW;
       case INFO:
         break;
       case DEBUG:
@@ -247,11 +249,16 @@ public class Console extends JFrame implements ILogListener {
       default:
         break;
     }
-    return "<font color=\""
-        + color
-        + "\">"
-        + (entry.toString(logType).replace("<", "&lt;").replace(">", "&gt;").trim()
-            .replace("\r\n", "\n").replace("\n", "<br/>")) + "</font><br/>";
+
+    try {
+      doc.insertString(doc.getLength(), entry.toString(logType) + "\n", col);
+    } catch (BadLocationException ingored) {
+    }
+
+  }
+
+  public void scrollToBottom() {
+    displayArea.setCaretPosition(displayArea.getDocument().getLength());
   }
 
   public void minecraftStarted() {
@@ -271,7 +278,7 @@ public class Console extends JFrame implements ILogListener {
       final LogEntry entry_ = entry;
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          addHTML(getMessage(entry_));
+          addEntry(entry_, displayAreaDoc);
         }
       });
     }
