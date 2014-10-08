@@ -118,7 +118,8 @@ public class ModPackInstaller {
         public Void apply(File f) {
           try {
             String hash = ChecksumUtil.getMD5(f);
-            if (pack.getFilesByHashAndSide(hash, side).isEmpty()) {
+            Map<String, ModPackFile> files = pack.getFilesByHash(hash);
+            if (files.isEmpty()) {
               if (doBackup) {
                 Logger.logInfo(String.format("Moving file %s to backup folder - not in pack!",
                     f.getName()));
@@ -131,6 +132,29 @@ public class ModPackInstaller {
               } else {
                 Logger.logInfo(String.format("Deleting file %s - not in pack!", f.getName()));
                 f.delete();
+              }
+            } else {
+              for (ModPackFile packFile : files.values()) {
+                if (packFile.getSide() == Side.UNIVERSAL || packFile.getSide() == Side.BOTH
+                    || packFile.getSide() == side) {
+                  Logger.logDebug(String.format("Leaving %s in there - side matches"));
+                } else {
+                  if (doBackup) {
+                    Logger.logInfo(String.format(
+                        "Moving file %s to backup folder - side doesn't match!", f.getName()));
+                    try {
+                      FileUtils.moveFileToDirectory(f, new File(backupDirectory, f.getParent()),
+                          true);
+                    } catch (FileExistsException e2) {
+                      Logger.logInfo(String.format("Not moving file %s!", f.getName()), e2);
+                      f.delete();
+                    }
+                  } else {
+                    Logger.logInfo(String.format("Deleting file %s - side doesn't match!",
+                        f.getName()));
+                    f.delete();
+                  }
+                }
               }
             }
           } catch (IOException e1) {
