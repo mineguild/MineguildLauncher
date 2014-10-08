@@ -1,6 +1,7 @@
 package net.mineguild.Builder;
 
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -27,6 +28,7 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
   public WorkDialog(JFrame owner) {
     super(owner, ModalityType.APPLICATION_MODAL);
     instance = this;
+    setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
     JLabel label = new JLabel("Adding files...");
     bar = new JProgressBar();
     bar.setStringPainted(true);
@@ -59,8 +61,6 @@ public class WorkDialog extends JDialog implements PropertyChangeListener {
       try {
         targetModpack.setFiles(worker.get());
       } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
       }
       dispose();
     }

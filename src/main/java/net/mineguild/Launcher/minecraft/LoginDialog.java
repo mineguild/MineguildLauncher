@@ -2,6 +2,7 @@ package net.mineguild.Launcher.minecraft;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -26,6 +27,7 @@ import javax.swing.event.DocumentListener;
 
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
+import net.mineguild.Launcher.log.Logger;
 
 import org.apache.commons.io.IOUtils;
 
@@ -41,7 +43,9 @@ import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.exceptions.UserMigratedException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
+
 import javax.swing.SwingConstants;
+
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 
@@ -83,6 +87,7 @@ public class LoginDialog extends JDialog {
     });
     setAlwaysOnTop(true);
     setTitle("Login with MC-Account");
+    setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
     JPanel bottomPanel = new JPanel();
     getContentPane().add(bottomPanel, BorderLayout.PAGE_END);
     bottomPanel.setLayout(new BorderLayout(0, 0));
@@ -247,39 +252,51 @@ public class LoginDialog extends JDialog {
     String user = userField.getText();
     String pass = new String(passwordField.getPassword());
     boolean mojangData = false;
+    boolean hasPassword = false;
     authentication.setUsername(user);
     if (pass != null && pass.length() > 0) {
       authentication.setPassword(pass);
+      hasPassword = true;
     }
     if (m != null) {
       authentication.loadFromStorage(m);
       mojangData = true;
     } else {
       authentication.setUsername(user);
-      authentication.setPassword(pass);
     }
+
+    boolean loginSuccess = false;
+
     try {
       authentication.logIn();
+      loginSuccess = true;
     } catch (UserMigratedException e) {
       JOptionPane.showMessageDialog(this, "User migrated! Use E-Mail to sign in!");
-      return;
     } catch (InvalidCredentialsException e) {
       if (mojangData) {
-        loginButton.setText("Login");
-        MineguildLauncher.settings.setProfile(null);
-        JOptionPane.showMessageDialog(this,
-            "MCToken is probably invalid! Please retry auth with password.");
-        passwordField.setEnabled(true);
-        return;
+        if (hasPassword) {
+          Logger.logInfo("Unable to login with MCToken, trying stored password.");
+          MineguildLauncher.settings.setProfile(null);
+          login();
+        } else {
+          loginButton.setText("Login");
+          MineguildLauncher.settings.setProfile(null);
+          JOptionPane.showMessageDialog(this,
+              "MCToken is probably invalid! Please retry auth with password.");
+          passwordField.setEnabled(true);
+        }
+      } else {
+        JOptionPane.showMessageDialog(this, "Invalid username and/or password");
       }
-      JOptionPane.showMessageDialog(this, "Invalid username and/or password");
-      return;
+
     } catch (AuthenticationUnavailableException e) {
       JOptionPane.showMessageDialog(this,
           "Couldn't authenticate with mojang. Either them or you are offline.");
-      return;
     } catch (AuthenticationException e) {
       JOptionPane.showMessageDialog(this, "Other error occurred: " + e.getLocalizedMessage());
+    }
+
+    if (!loginSuccess) {
       return;
     }
 

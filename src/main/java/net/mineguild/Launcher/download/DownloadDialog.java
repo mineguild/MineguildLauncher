@@ -6,9 +6,9 @@ import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -18,7 +18,6 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -30,7 +29,6 @@ import javax.swing.plaf.basic.BasicLabelUI;
 @SuppressWarnings("serial")
 public class DownloadDialog extends JDialog implements PropertyChangeListener {
 
-  private static Image icon = null;
   public JLabel status;
   public JLabel fileName;
   public JLabel speedLabel;
@@ -54,12 +52,7 @@ public class DownloadDialog extends JDialog implements PropertyChangeListener {
   public DownloadDialog(Frame parent, List<DownloadInfo> info, String title) {
     super(parent);
     this.setTitle(title);
-    try {
-      icon = ImageIO.read(getClass().getResourceAsStream("/icon.png"));
-      setIconImage(icon);
-    } catch (Exception ignored) {
-      ignored.printStackTrace();
-    }
+    setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
     this.info = info;
     pack();
     setMinimumSize(new Dimension(300, getHeight()));

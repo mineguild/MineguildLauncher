@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -110,6 +111,7 @@ public class ModpackBuilder extends JFrame {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public ModpackBuilder() throws MalformedURLException, IOException {
+    setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
     instance = this;
     File newestFile = new File(OSUtils.getLocalDir(), "newest.json");
     FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"), newestFile);
