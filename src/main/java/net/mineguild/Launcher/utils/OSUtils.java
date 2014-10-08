@@ -13,6 +13,7 @@ import java.util.Enumeration;
 
 import lombok.Getter;
 import net.mineguild.Launcher.MineguildLauncher;
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.winreg.RuntimeStreamer;
 
 import org.apache.commons.io.FileUtils;
@@ -56,7 +57,7 @@ public class OSUtils {
         byte[] mac = network.getHardwareAddress();
         if (mac != null && mac.length > 0 && !network.isLoopback() && !network.isVirtual()
             && !network.isPointToPoint()) {
-          // Logger.logDebug("Interface: " + network.getDisplayName() + " : " + network.getName());
+          Logger.logDebug("Interface: " + network.getDisplayName() + " : " + network.getName());
           cachedMacAddress = new byte[mac.length * 10];
           for (int i = 0; i < cachedMacAddress.length; i++) {
             cachedMacAddress[i] = mac[i - (Math.round(i / mac.length) * mac.length)];
@@ -65,10 +66,10 @@ public class OSUtils {
         }
       }
     } catch (SocketException e) {
-      // Logger.logWarn("Exception getting MAC address", e);
+      Logger.logWarn("Exception getting MAC address", e);
     }
 
-    // Logger.logWarn("Failed to get MAC address, using default logindata key");
+    Logger.logWarn("Failed to get MAC address, using default logindata key");
     return new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
   }
 
@@ -138,7 +139,7 @@ public class OSUtils {
         result += (line + "\n");
       }
     } catch (Exception e) {
-      // Logger.logError("Posix bitness check failed", e);
+      Logger.logError("Posix bitness check failed", e);
     }
     // 32-bit Intel Linuxes, it returns i[3-6]86. For 64-bit Intel, it says x86_64
     return result.contains("_64");
@@ -163,7 +164,7 @@ public class OSUtils {
         result += (line + "\n");
       }
     } catch (Exception e) {
-      // Logger.logError("OS X bitness check failed", e);
+      Logger.logError("OS X bitness check failed", e);
     }
     return result.equals("1");
   }
@@ -180,11 +181,11 @@ public class OSUtils {
       if (value != null) {
         ram = Long.valueOf(value.toString()) / 1024 / 1024;
       } else {
-        // Logger.logWarn(warning);
+        Logger.logWarn(warning);
         ram = 1024;
       }
     } catch (Exception e) {
-      // Logger.logError("Error while getting OS memory info", e);
+      Logger.logError("Error while getting OS memory info", e);
     }
 
     return ram;
@@ -200,7 +201,7 @@ public class OSUtils {
       try {
         line = FileUtils.readFileToString(new File("/etc/machine-id"));
       } catch (Exception e) {
-        // Logger.logDebug("failed", e);
+        Logger.logDebug("failed", e);
         return new byte[] {};
       }
       return line.getBytes();
@@ -222,7 +223,7 @@ public class OSUtils {
       }
       return new byte[] {};
     } catch (Exception e) {
-      // Logger.logDebug("failed", e);
+      Logger.logDebug("failed", e);
       return new byte[] {};
     }
   }
@@ -246,7 +247,7 @@ public class OSUtils {
         return line.trim().getBytes();
       }
     } catch (Exception e) {
-      // Logger.logDebug("failed", e);
+      Logger.logDebug("failed", e);
       return new byte[] {};
     }
   }

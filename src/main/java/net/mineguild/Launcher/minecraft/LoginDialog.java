@@ -68,6 +68,7 @@ public class LoginDialog extends JDialog {
   public boolean successfull = false;
   public boolean forceUpdate = false;
   public boolean launchBuilder = false;
+  public boolean isRelogin = false;
   private JLabel lblUsernameemail;
   private JCheckBox chckbxForceUpdate;
   private JPanel panel;
@@ -81,7 +82,11 @@ public class LoginDialog extends JDialog {
       @Override
       public void windowClosed(WindowEvent e) {
         if (successfull == false || response == null) {
-          System.exit(0);
+          if(!isRelogin){
+            System.exit(0);
+          } else {
+            dispose();
+          }
         }
       }
     });
@@ -113,7 +118,11 @@ public class LoginDialog extends JDialog {
     cancelButton = new JButton("Cancel");
     cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        System.exit(0);
+        if(!isRelogin){
+          System.exit(0);
+        } else {
+          dispose();
+        }
       }
     });
 
@@ -301,16 +310,18 @@ public class LoginDialog extends JDialog {
     }
 
     if (authentication.isLoggedIn() && authentication.canPlayOnline()) {
-      try {
-        int result = mg_login(authentication.getSelectedProfile().getId().toString());
-        if (result < 1) {
-          throw new Exception("Not whitelisted!");
+      if(!isRelogin){
+        try {
+          int result = mg_login(authentication.getSelectedProfile().getId().toString());
+          if (result < 1) {
+            throw new Exception("Not whitelisted!");
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+          JOptionPane
+              .showMessageDialog(this, "Can't authenticate with Mineguild!\n" + e.getMessage());
+          return;
         }
-      } catch (Exception e) {
-        e.printStackTrace();
-        JOptionPane
-            .showMessageDialog(this, "Can't authenticate with Mineguild!\n" + e.getMessage());
-        return;
       }
       response =
           new LoginResponse(Integer.toString(authentication.getAgent().getVersion()), "token",
@@ -342,6 +353,13 @@ public class LoginDialog extends JDialog {
       return Integer.parseInt(split[0].split("=")[1]);
     }
     return 0;
+  }
+  
+  public void setReLogin(){
+    panel.setVisible(false);
+    setMinimumSize(null);
+    pack();
+    setMinimumSize(getSize());
   }
 
 

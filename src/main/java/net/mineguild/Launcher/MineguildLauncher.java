@@ -47,6 +47,7 @@ public class MineguildLauncher {
   public static Console con;
   public static long totalDownloadTime = 0;
   public static Settings settings;
+  public static LoginResponse res;
 
   public static void main(String[] args) throws Exception {
     DownloadUtils.ssl_hack();
@@ -104,15 +105,12 @@ public class MineguildLauncher {
     }
     JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
     addSaveHook();
+    res = dialog.response;
     if (dialog.launchBuilder) {
       ModpackBuilder.main(args);
     } else {
-
-      LoginResponse res = dialog.response;
       baseDirectory = settings.getModpackPath();
       baseDirectory.mkdirs();
-
-
       boolean updated = true;
       FileUtils
           .copyURLToFile(
@@ -167,7 +165,7 @@ public class MineguildLauncher {
         boolean success = true;
         try {
           Logger.logInfo("Preparing MC for launch.");
-          MCInstaller.setup(localPack);
+          MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"));
           Logger.logInfo("Downloaded for " + totalDownloadTime / 1000 + " seconds.");
         } catch (Exception e) {
           Logger.logError("Couldn't prepare MC for launch.", e);
@@ -182,7 +180,7 @@ public class MineguildLauncher {
           if (result == JOptionPane.OK_OPTION) {
             Logger.logInfo(String.format("Launching Local: %s [Released: %s] [Hash: %s]",
                 localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
-            MCInstaller.launchMinecraft(localPack, res);
+            MCInstaller.launchMinecraft(localPack, res, "2048", "256m");
           } else {
             Logger.logInfo("Not launching Minecraft.");
           }

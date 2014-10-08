@@ -7,6 +7,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -73,6 +75,8 @@ public class ModpackBuilder extends JFrame {
   JComboBox mcVersionBox;
   @SuppressWarnings("rawtypes")
   JComboBox forgeVersionBox;
+  public static ModPack workPack;
+  public static MCLaunchFrame launch;
   public static String forgeVersionIndex;
   public static ModpackBuilder instance;
   public static BuilderSettings settings;
@@ -163,7 +167,7 @@ public class ModpackBuilder extends JFrame {
     mcVersionBox.setSelectedItem(newestPack.getMinecraftVersion());
     forgeVersionBox =
         new JComboBox(getForgeForMC((String) mcVersionBox.getSelectedItem()).toArray());
-    forgeVersionBox.setSelectedItem(newestPack.getForgeVersion());
+    forgeVersionBox.setSelectedItem(newestPack.getForgeVersion().split("-", 2)[1]);
     startButton = new JButton("Start!");
     FormLayout layout = new FormLayout("right:pref, 3dlu, pref, 3dlu, right:pref", // columns
         "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu"); // rows
@@ -222,6 +226,7 @@ public class ModpackBuilder extends JFrame {
           if (new File(file, "mods").exists() && new File(file, "config").exists()) {
             if (versionField.getText().length() > 0) {
               modpackDirectory = new File(pathField.getText());
+              setVisible(false);
               createUpdatedPack(ModpackBuilder.instance);
             } else {
               JOptionPane.showMessageDialog(ModpackBuilder.instance,
@@ -254,16 +259,16 @@ public class ModpackBuilder extends JFrame {
   }
 
   public void createUpdatedPack(final JFrame parent) {
-    ModPack modPack = new ModPack();
-    modPack.setMinecraftVersion((String) mcVersionBox.getSelectedItem());
-    modPack.setForgeVersion(modPack.getMinecraftVersion()+"-"+(String) forgeVersionBox.getSelectedItem());
-    modPack.setVersion(ModpackBuilder.instance.versionField.getText());
-    modPack.setReleaseTime(System.currentTimeMillis());
+    workPack = new ModPack();
+    workPack.setMinecraftVersion((String) mcVersionBox.getSelectedItem());
+    workPack.setForgeVersion(workPack.getMinecraftVersion()+"-"+(String) forgeVersionBox.getSelectedItem());
+    workPack.setVersion(ModpackBuilder.instance.versionField.getText());
+    workPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
-    dialog.start(modPack);
+    dialog.start(workPack);
     // compareAndSetOptions(newestPack, modPack);
     final JDialog showFilesDialog = new JDialog(parent);
-    final ModpackTableModel mTableModel = new ModpackTableModel(modPack);
+    final ModpackTableModel mTableModel = new ModpackTableModel(workPack);
     final JTable table = new JTable(mTableModel);
     table.setLayout(new BorderLayout());
     JScrollPane tableView = new JScrollPane(table);
@@ -291,7 +296,11 @@ public class ModpackBuilder extends JFrame {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        showFilesDialog.dispose();
+        MCLaunchFrame frame = new MCLaunchFrame();
+        frame.loadSettings();
+        frame.setVisible(true);
+        launch = frame;
+        
       }
     });
     removeButton.addActionListener(new ActionListener() {
@@ -313,18 +322,60 @@ public class ModpackBuilder extends JFrame {
     showFilesDialog.pack();
     showFilesDialog.setMinimumSize(new Dimension(700, getHeight()));
     showFilesDialog.setLocationRelativeTo(null);
-    showFilesDialog.setModal(true);
     showFilesDialog.setVisible(true);
+    showFilesDialog.addWindowListener(new WindowListener() {
+      
+      @Override
+      public void windowOpened(WindowEvent e) {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void windowIconified(WindowEvent e) {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void windowDeiconified(WindowEvent e) {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void windowDeactivated(WindowEvent e) {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void windowClosing(WindowEvent e) {
+        
+      }
+      
+      @Override
+      public void windowClosed(WindowEvent e) {
+        finishPack();
+      }
+      
+      @Override
+      public void windowActivated(WindowEvent e) {
+        // TODO Auto-generated method stub
+        
+      }
+    });
+  }
+  
+  public static void finishPack(){
     try {
-      JsonWriter.saveModpack(modPack, new File("modpack.json"));
+      JsonWriter.saveModpack(workPack, new File("modpack.json"));
     } catch (IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     UploadFileUtils.placeUploadFiles(ModpackBuilder.modpackDirectory.getAbsolutePath(),
-        modPack.getFiles());
-    showFilesDialog.dispose();
-    System.exit(0);
+        workPack.getFiles());
   }
 
   public static void compareAndSetOptions(ModPack compareTo, ModPack setOptionsFor) {

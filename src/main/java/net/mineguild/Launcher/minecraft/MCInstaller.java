@@ -14,6 +14,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
+import net.mineguild.Builder.ModpackBuilder;
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.download.DownloadInfo;
@@ -43,11 +44,15 @@ public class MCInstaller {
 
   private static String packmcversion = new String();
   private static String packbasejson = new String();
+  private static File launchPath;
+  private static File gameDirectory;
   private static long totalAssetSize = 0;
 
-  public static void setup(final ModPack pack) throws Exception {
+  public static void setup(final ModPack pack, File launchPath, File gameDirectory) throws Exception {
     List<DownloadInfo> libraries = null;
     List<DownloadInfo> assets = null;
+    MCInstaller.launchPath = launchPath;
+    MCInstaller.gameDirectory = gameDirectory;
     packmcversion = pack.getMinecraftVersion();
     try {
       libraries = getLibraries(pack);
@@ -93,12 +98,12 @@ public class MCInstaller {
 
   private static List<DownloadInfo> getLibraries(ModPack pack) throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
-    File forgeJson = new File(MineguildLauncher.baseDirectory, "pack.json");
+    File forgeJson = new File(launchPath, "pack.json");
     FileUtils.copyURLToFile(new URL(Constants.MG_FORGE + pack.getForgeVersion() + "/version.json"),
         forgeJson);
 
     File local;
-    File libDir = new File(MineguildLauncher.baseDirectory, "libraries");
+    File libDir = new File(launchPath, "libraries");
 
     Version forgeVersion = JsonFactory.loadVersion(forgeJson);
     if (forgeVersion.jar != null && !forgeVersion.jar.isEmpty())
@@ -130,7 +135,7 @@ public class MCInstaller {
         new URL(Constants.MC_DL
             + "versions/{MC_VER}/{MC_VER}.json".replace("{MC_VER}", packbasejson));
     File json =
-        new File(MineguildLauncher.baseDirectory, "versions/{MC_VER}/{MC_VER}.json".replace(
+        new File(launchPath, "versions/{MC_VER}/{MC_VER}.json".replace(
             "{MC_VER}", packbasejson));
     FileUtils.copyURLToFile(url, json);
 
@@ -151,7 +156,7 @@ public class MCInstaller {
       }
     }
     local =
-        new File(MineguildLauncher.baseDirectory
+        new File(launchPath
             + "/versions/{MC_VER}/{MC_VER}.jar".replace("{MC_VER}", packbasejson));
     if (!local.exists()) {
       list.add(new DownloadInfo(new URL(Constants.MC_DL
@@ -163,11 +168,11 @@ public class MCInstaller {
 
   private static List<DownloadInfo> getAssets() throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
-    File forgeJson = new File(MineguildLauncher.baseDirectory, "pack.json");
+    File forgeJson = new File(launchPath, "pack.json");
     Version version = JsonFactory.loadVersion(forgeJson);
 
     File json =
-        new File(MineguildLauncher.baseDirectory, "assets/indexes/{MC_VER}.json".replace(
+        new File(launchPath, "assets/indexes/{MC_VER}.json".replace(
             "{MC_VER}", packbasejson));
     FileUtils.copyURLToFile(
         new URL("https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(
@@ -189,7 +194,7 @@ public class MCInstaller {
                   AssetIndex.Asset asset = e.getValue();
                   String path = asset.hash.substring(0, 2) + "/" + asset.hash;
                   final File local =
-                      new File(MineguildLauncher.baseDirectory, "assets/objects/" + path);
+                      new File(launchPath, "assets/objects/" + path);
                   if (local.exists() && !asset.hash.equals(ChecksumUtil.getSHA(local))) {
                     local.delete();
                   }
@@ -215,18 +220,17 @@ public class MCInstaller {
     return list;
   }
 
-  public static void launchMinecraft(ModPack pack, LoginResponse resp) {
+  public static void launchMinecraft(ModPack pack, LoginResponse resp, String mem, String permGen) {
     try {
-      File packDir = MineguildLauncher.baseDirectory;
-      File gameDir = new File(packDir, "minecraft");
-      String gameFolder = gameDir.getAbsolutePath();
+      File packDir = launchPath;
+      String gameFolder = gameDirectory.getAbsolutePath();
       File assetDir = new File(packDir, "assets");
       File libDir = new File(packDir, "libraries");
       File natDir = new File(packDir, "natives");
       // Logger.logInfo("Setting up native libraries for " + pack.getName() + " v " + packVer +
       // " MC " + packmcversion);
-      if (!gameDir.exists())
-        gameDir.mkdirs();
+      if (!gameDirectory.exists())
+        gameDirectory.mkdirs();
 
       if (natDir.exists()) {
         natDir.delete();
@@ -294,7 +298,7 @@ public class MCInstaller {
               packjson.mainClass != null ? packjson.mainClass : base.mainClass,
               packjson.minecraftArguments != null ? packjson.minecraftArguments
                   : base.minecraftArguments,
-              packjson.assets != null ? packjson.assets : base.getAssets(), "2048", "256m", pack
+              packjson.assets != null ? packjson.assets : base.getAssets(), mem, permGen, pack
                   .getMinecraftVersion(), resp.getAuth(), false);
 
       MineguildLauncher.MCRunning = true;
@@ -326,6 +330,8 @@ public class MCInstaller {
           public void run() {
             if (MineguildLauncher.con != null)
               MineguildLauncher.con.minecraftStopped();
+            if (ModpackBuilder.launch != null)
+              ModpackBuilder.launch.mcStopped();
             // LaunchFrame launchFrame = LaunchFrame.getInstance(); launchFrame.setVisible(true);
             /*
              * Main.getEventBus().post(new EnableObjectsEvent()); try {
