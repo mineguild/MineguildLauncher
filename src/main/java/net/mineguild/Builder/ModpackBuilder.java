@@ -268,7 +268,7 @@ public class ModpackBuilder extends JFrame {
     workPack.setReleaseTime(System.currentTimeMillis());
     WorkDialog dialog = new WorkDialog(parent);
     dialog.start(workPack);
-    // compareAndSetOptions(newestPack, modPack);
+    compareAndSetOptions(newestPack, workPack);
     final JFrame showFilesDialog = new JFrame("Edit your file-selection");
     showFilesDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
     final ModpackTableModel mTableModel = new ModpackTableModel(workPack);

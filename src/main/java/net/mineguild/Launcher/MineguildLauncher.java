@@ -112,11 +112,8 @@ public class MineguildLauncher {
       baseDirectory = settings.getModpackPath();
       baseDirectory.mkdirs();
       boolean updated = true;
-      FileUtils
-          .copyURLToFile(
-              new URL(
-                  "https://code.mineguild.net/Mineguild/Launcher/rawfile/d2716fa573ed5b9027ceb4ea9507764d9d3610cd/new_format.json"),
-              new File(OSUtils.getLocalDir(), "newest.json"));
+      FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"),
+          new File(OSUtils.getLocalDir(), "newest.json"));
       ModPack remotePack = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
       boolean needsUpdate = false;
 
