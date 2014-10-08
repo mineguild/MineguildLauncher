@@ -67,4 +67,16 @@ public class ModPack {
     return ret;
   }
 
+  public Map<String, ModPackFile> getFilesByHashAndSide(String hash, Side side) {
+    Map<String, ModPackFile> ret = Maps.newTreeMap();
+    for (Map.Entry<String, ModPackFile> entry : files.entrySet()) {
+      if (entry.getValue().getHash().equals(hash)) {
+        if (entry.getValue().getSide() == Side.UNIVERSAL || entry.getValue().getSide() == side) {
+          ret.put(entry.getKey(), entry.getValue());
+        }
+      }
+    }
+    return ret;
+  }
+
 }

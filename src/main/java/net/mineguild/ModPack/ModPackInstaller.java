@@ -92,7 +92,7 @@ public class ModPackInstaller {
    * @throws NullPointerException if pack or target <code>null</code>.
    */
   public static synchronized void clearFolder(final File target, final ModPack pack,
-      final File backupDirectory) {
+      final Side side, final File backupDirectory) {
     checkNotNull(target);
     checkNotNull(pack);
     boolean temp = false;
@@ -118,7 +118,7 @@ public class ModPackInstaller {
         public Void apply(File f) {
           try {
             String hash = ChecksumUtil.getMD5(f);
-            if (pack.getFilesByHash(hash).isEmpty()) {
+            if (pack.getFilesByHashAndSide(hash, side).isEmpty()) {
               if (doBackup) {
                 Logger.logInfo(String.format("Moving file %s to backup folder - not in pack!",
                     f.getName()));

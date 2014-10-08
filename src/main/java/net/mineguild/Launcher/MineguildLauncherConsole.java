@@ -92,7 +92,7 @@ public class MineguildLauncherConsole {
     modsBackup.mkdirs();
     FileUtils.cleanDirectory(modsBackup);
 
-    ModPackInstaller.clearFolder(new File(baseDir, "mods"), newPack, modsBackup);
+    ModPackInstaller.clearFolder(new File(baseDir, "mods"), newPack, side, modsBackup);
     List<DownloadInfo> downloads = ModPackInstaller.checkNeededFiles(baseDir, newPack, side);
     amountOfFiles = downloads.size();
     start = System.nanoTime();
