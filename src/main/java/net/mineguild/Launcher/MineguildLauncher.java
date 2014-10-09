@@ -137,9 +137,8 @@ public class MineguildLauncher {
         Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]",
             remotePack.getVersion(), remotePack.getReleaseDate(), remotePack.getHash()));
         Logger.logInfo("Updating to Remote");
-        if (forceUpdate) {
-          ModPackInstaller.clearFolder(OSUtils.getGameDir(), remotePack, Side.CLIENT, null);
-        }
+        ModPackInstaller.clearFolder(new File(OSUtils.getGameDir()+"mods"), remotePack, Side.CLIENT, null);
+        
         List<DownloadInfo> dlinfo =
             ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), remotePack,
                 Side.CLIENT);
