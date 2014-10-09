@@ -36,6 +36,7 @@ import javax.swing.text.JTextComponent;
 
 import lombok.Getter;
 import net.mineguild.Launcher.Constants;
+import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.log.StdOutLogger;
 import net.mineguild.Launcher.utils.DownloadUtils;
@@ -321,6 +322,10 @@ public class ModpackBuilder extends JFrame {
       public void actionPerformed(ActionEvent e) {
         finishPack();
         showFilesDialog.dispose();
+        if(MineguildLauncher.con != null){
+          MineguildLauncher.con.dispose();
+        }
+        System.exit(0);
       }
     });
     bottomButtonPanel.add(refreshButton);
