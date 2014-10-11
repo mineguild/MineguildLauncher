@@ -86,7 +86,7 @@ public class ModPack {
     for(String path : files.values()) {
       String directory = path.split("/")[0];
       if(!ret.contains(directory)) {
-        ret.add(split);
+        ret.add(directory);
       }
     }
   }
