@@ -57,7 +57,7 @@ public class ModPackInstaller {
                         localFile.delete();
                       }
                     } catch (IOException e) {
-                      Logger.logError("Error ocurred during ModPackFile Hash-Checking", e);
+                      Logger.logError("Error occurred during ModPackFile Hash-Checking", e);
                     }
                   }
                   try {
@@ -92,9 +92,14 @@ public class ModPackInstaller {
    * @throws NullPointerException if pack or target <code>null</code>.
    */
   public static synchronized void clearFolder(final File target, final ModPack pack,
-      final Side side, final File backupDirectory) {
+      final Side side, final File backupDirectory) throws Exception {
     checkNotNull(target);
     checkNotNull(pack);
+	if(!target.exists()){
+		throw new Exception("'target' doesn't exist!");
+	} else if (!target.isDirectory()){
+		throw new Exception("'target' is no valid directory!");
+	}
     boolean temp = false;
     try {
       temp = !backupDirectory.equals(null);
