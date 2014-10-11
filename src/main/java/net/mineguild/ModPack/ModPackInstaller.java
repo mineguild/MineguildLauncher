@@ -95,11 +95,12 @@ public class ModPackInstaller {
       final Side side, final File backupDirectory) throws Exception {
     checkNotNull(target);
     checkNotNull(pack);
-	if(!target.exists()){
-		throw new Exception("'target' doesn't exist!");
-	} else if (!target.isDirectory()){
-		throw new Exception("'target' is no valid directory!");
-	}
+    if(!target.exists()) {
+      throw new Exception(String.format("'%s' doesn't exist!", target.getAbsolutePath()));
+    }
+    if (!target.isDirectory()) {
+      throw new Exception(String.format("'%s' is no valid directory!", target.getAbsolutePath()));
+    }
     boolean temp = false;
     try {
       temp = !backupDirectory.equals(null);
