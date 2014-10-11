@@ -3,12 +3,14 @@ package net.mineguild.ModPack;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
 
 public class ModPack {
@@ -77,6 +79,16 @@ public class ModPack {
       }
     }
     return ret;
+  }
+  
+  public List<String> getTopLevelDirectories() {
+	List<String> ret = Lists.newArrayList();
+    for(String path : files.values()) {
+      String directory = path.split("/")[0];
+      if(!ret.contains(directory)) {
+        ret.add(split);
+      }
+    }
   }
 
 }
