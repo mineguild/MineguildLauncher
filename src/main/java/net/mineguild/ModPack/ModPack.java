@@ -83,7 +83,7 @@ public class ModPack {
   
   public List<String> getTopLevelDirectories() {
 	List<String> ret = Lists.newArrayList();
-    for(String path : files.keys()) {
+    for(String path : files.keySet()) {
       String directory = path.split("/")[0];
       if(!ret.contains(directory)) {
         ret.add(directory);
