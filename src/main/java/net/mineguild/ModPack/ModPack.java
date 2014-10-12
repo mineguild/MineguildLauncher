@@ -96,7 +96,6 @@ public class ModPack {
 
   public Map<String, ModPackFile> getFilesMatching(String regex) {
     Map<String, ModPackFile> ret = Maps.newTreeMap();
-    System.out.println(regex);
     Pattern p = Pattern.compile(regex);
     for (Map.Entry<String, ModPackFile> entry : files.entrySet()) {
       Matcher m = p.matcher(entry.getKey());

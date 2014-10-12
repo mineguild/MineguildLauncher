@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.InputVerifier;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -31,7 +30,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
 import lombok.Getter;
@@ -261,12 +263,29 @@ public class ModpackBuilder extends JFrame {
     JButton refreshButton = new JButton("Refresh");
     JButton clientSide = new JButton("Toggle clientside");
     JTextField filterField = new JTextField();
-    filterField.addActionListener(new ActionListener() {
+    filterField.getDocument().addDocumentListener(new DocumentListener() {
 
       @Override
-      public void actionPerformed(ActionEvent e) {
-        JTextField source = (JTextField) e.getSource();
-        mTableModel.applyFilter(convertGlobToRegEx(source.getText()));
+      public void removeUpdate(DocumentEvent e) {
+        update(e);
+      }
+
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        update(e);
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        update(e);
+      }
+
+      public void update(DocumentEvent e) {
+        try {
+          mTableModel.applyFilter(convertGlobToRegEx(e.getDocument().getText(0, e.getDocument().getLength())));
+        } catch (BadLocationException e1) {
+          Logger.logInfo("Couldn't update!", e1);
+        }
       }
     });
     filterField.setToolTipText("Filter");
@@ -340,7 +359,6 @@ public class ModpackBuilder extends JFrame {
     try {
       JsonWriter.saveModpack(workPack, new File("modpack.json"));
     } catch (IOException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     UploadFileUtils.placeUploadFiles(ModpackBuilder.modpackDirectory.getAbsolutePath(),
