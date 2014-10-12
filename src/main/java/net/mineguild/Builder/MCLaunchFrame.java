@@ -81,7 +81,7 @@ public class MCLaunchFrame extends JFrame {
     });
     instance = this;
     setTitle("Launch MC");
-    setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/cross.png")));
+    setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
     contentPane = new JPanel();
