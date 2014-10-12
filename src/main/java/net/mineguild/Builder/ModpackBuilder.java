@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.InputVerifier;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -36,6 +37,7 @@ import javax.swing.text.JTextComponent;
 import lombok.Getter;
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.BuilderSettings;
 import net.mineguild.Launcher.utils.json.JsonFactory;
@@ -84,7 +86,7 @@ public class ModpackBuilder extends JFrame {
       FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/index.html"), forgeIndex);
     }
     forgeVersionIndex = FileUtils.readFileToString(forgeIndex);
-    
+
     if (!mcIndex.exists()) {
       FileUtils.copyURLToFile(new URL(
           "https://s3.amazonaws.com/Minecraft.Download/versions/versions.json"), mcIndex);
@@ -250,12 +252,24 @@ public class ModpackBuilder extends JFrame {
     showFilesDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
     final ModpackTableModel mTableModel = new ModpackTableModel(workPack);
     final JTable table = new JTable(mTableModel);
+    table.getColumnModel().getColumn(2).setMaxWidth(40);
+    table.getColumnModel().getColumn(1).setMaxWidth(100);
     table.setLayout(new BorderLayout());
     JScrollPane tableView = new JScrollPane(table);
     JButton removeButton = new JButton("Remove selected entry/entries");
     JButton testButton = new JButton("Test(Launch MC)");
     JButton refreshButton = new JButton("Refresh");
     JButton clientSide = new JButton("Toggle clientside");
+    JTextField filterField = new JTextField();
+    filterField.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JTextField source = (JTextField) e.getSource();
+        mTableModel.applyFilter(convertGlobToRegEx(source.getText()));
+      }
+    });
+    filterField.setToolTipText("Filter");
     clientSide.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -307,6 +321,7 @@ public class ModpackBuilder extends JFrame {
         System.exit(0);
       }
     });
+    bottomButtonPanel.add(filterField);
     bottomButtonPanel.add(refreshButton);
     bottomButtonPanel.add(removeButton);
     bottomButtonPanel.add(clientSide);
@@ -349,6 +364,8 @@ public class ModpackBuilder extends JFrame {
     @Getter
     ModPack pack;
 
+    String filter = "";
+
     public ModpackTableModel(ModPack pack) {
       this.pack = pack;
     }
@@ -356,7 +373,12 @@ public class ModpackBuilder extends JFrame {
 
     @Override
     public int getColumnCount() {
-      return 4;
+      return 3;
+    }
+
+    public void applyFilter(String filter) {
+      this.filter = filter;
+      fireTableDataChanged();
     }
 
 
@@ -369,8 +391,6 @@ public class ModpackBuilder extends JFrame {
           return "Side";
         case 2:
           return "Optional";
-        case 3:
-          return "MD5-Hash";
         default:
           return "Unkown";
       }
@@ -379,7 +399,7 @@ public class ModpackBuilder extends JFrame {
     public void toggleClientSide(int[] rows) {
       ArrayList<String> names = Lists.newArrayList();
       for (int row : rows) {
-        names.add((String) pack.getFiles().keySet().toArray()[row]);
+        names.add((String) pack.getFilesMatching(filter).keySet().toArray()[row]);
       }
       for (String name : names) {
         ModPackFile packFile = pack.getFileByPath(name);
@@ -400,12 +420,29 @@ public class ModpackBuilder extends JFrame {
     }
 
     @Override
+    public Class<?> getColumnClass(int colNum) {
+      switch (colNum) {
+        case (0):
+          return String.class;
+        case (1):
+          return Side.class;
+        case (2):
+          return ImageIcon.class;
+        case (3):
+          return String.class;
+        default:
+          return String.class;
+      }
+    }
+
+    @Override
     public int getRowCount() {
-      return pack.getFiles().size();
+      return pack.getFilesMatching(filter).size();
+
     }
 
     public void removeFile(int row) {
-      removeFile((String) pack.getFiles().keySet().toArray()[row]);
+      removeFile((String) pack.getFilesMatching(filter).keySet().toArray()[row]);
     }
 
     public void removeFiles(int[] rows) {
@@ -425,16 +462,15 @@ public class ModpackBuilder extends JFrame {
 
     @Override
     public Object getValueAt(int row, int column) {
+      String path = (String) pack.getFilesMatching(filter).keySet().toArray()[row];
       switch (column) {
         case 0:
-          return pack.getFiles().keySet().toArray()[row];
+          return path;
         case 1:
-          return ((ModPackFile) pack.getFiles().values().toArray()[row]).getSide();
+          return pack.getFileByPath(path).getSide();
         case 2:
-          return ((ModPackFile) pack.getFiles().values().toArray()[row]).isOptional() ? createImageIcon(
-              "/tick.png", "TICK") : createImageIcon("/cross.png", "CROSS");
-        case 3:
-          return ((ModPackFile) pack.getFiles().values().toArray()[row]).getHash();
+          return pack.getFileByPath(path).isOptional() ? createImageIcon("/tick.png", "TICK")
+              : createImageIcon("/cross.png", "CROSS");
         default:
           return null;
       }
@@ -512,6 +548,93 @@ public class ModpackBuilder extends JFrame {
       System.err.println("Couldn't find file: " + path);
       return null;
     }
+  }
+
+  private String convertGlobToRegEx(String line) {
+    Logger.logDebug("got line [" + line + "]");
+    line = line.trim();
+    int strLen = line.length();
+    StringBuilder sb = new StringBuilder(strLen);
+    // Remove beginning and ending * globs because they're useless
+    if (line.startsWith("*")) {
+      line = line.substring(1);
+      strLen--;
+    }
+    if (line.endsWith("*")) {
+      line = line.substring(0, strLen - 1);
+      strLen--;
+    }
+    boolean escaping = false;
+    int inCurlies = 0;
+    for (char currentChar : line.toCharArray()) {
+      switch (currentChar) {
+        case '*':
+          if (escaping)
+            sb.append("\\*");
+          else
+            sb.append(".*");
+          escaping = false;
+          break;
+        case '?':
+          if (escaping)
+            sb.append("\\?");
+          else
+            sb.append('.');
+          escaping = false;
+          break;
+        case '.':
+        case '(':
+        case ')':
+        case '+':
+        case '|':
+        case '^':
+        case '$':
+        case '@':
+        case '%':
+          sb.append('\\');
+          sb.append(currentChar);
+          escaping = false;
+          break;
+        case '\\':
+          if (escaping) {
+            sb.append("\\\\");
+            escaping = false;
+          } else
+            escaping = true;
+          break;
+        case '{':
+          if (escaping) {
+            sb.append("\\{");
+          } else {
+            sb.append('(');
+            inCurlies++;
+          }
+          escaping = false;
+          break;
+        case '}':
+          if (inCurlies > 0 && !escaping) {
+            sb.append(')');
+            inCurlies--;
+          } else if (escaping)
+            sb.append("\\}");
+          else
+            sb.append("}");
+          escaping = false;
+          break;
+        case ',':
+          if (inCurlies > 0 && !escaping) {
+            sb.append('|');
+          } else if (escaping)
+            sb.append("\\,");
+          else
+            sb.append(",");
+          break;
+        default:
+          escaping = false;
+          sb.append(currentChar);
+      }
+    }
+    return sb.toString();
   }
 
 
