@@ -16,6 +16,7 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.OldPropertyMapSerializer;
+import net.mineguild.Launcher.utils.json.Settings.JavaSettings;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex.Asset;
 
@@ -39,8 +40,8 @@ public class MCLauncher {
 
   public static Process launchMinecraft(String javaPath, String gameFolder, File assetDir,
       File nativesDir, List<File> classpath, String mainClass, String args, String assetIndex,
-      String rmax, String maxPermSize, String version, UserAuthentication authentication,
-      boolean legacy) throws IOException {
+      String version, UserAuthentication authentication, boolean legacy, JavaSettings settings)
+      throws IOException {
 
     cpb = new StringBuilder("");
     isLegacy = legacy;
@@ -54,33 +55,33 @@ public class MCLauncher {
 
     List<String> arguments = Lists.newArrayList();
 
-    // Logger.logInfo("Java Path: " + javaPath);
-    // Logger.logInfo("Pack: " + ModPack.getSelectedPack().getName() + " " + version);
+    Logger.logInfo("Java Path: " + javaPath);
+    Logger.logInfo("MMP Version: " + version);
     arguments.add(javaPath);
 
-    setMemory(arguments, rmax);
+    setMemory(arguments, settings);
 
     if (OSUtils.getCurrentOS().equals(OSUtils.OS.WINDOWS)) {
       if (!OSUtils.is64BitWindows()) {
-        if (maxPermSize == null || maxPermSize.isEmpty()) {
+        if (settings.getPermGen() == null || settings.getPermGen().isEmpty()) {
           if (OSUtils.getOSTotalMemory() > 2046) {
-            maxPermSize = "192m";
-            // Logger.logInfo("Defaulting PermSize to 192m");
+            settings.setPermGen("192m");
+            Logger.logInfo("Defaulting PermSize to 192m");
           } else {
-            maxPermSize = "128m";
-            // Logger.logInfo("Defaulting PermSize to 128m");
+            settings.setPermGen("192m");
+            Logger.logInfo("Defaulting PermSize to 128m");
           }
         }
       }
     }
 
-    if (maxPermSize == null || maxPermSize.isEmpty()) {
+    if (settings.getPermGen() == null || settings.getPermGen().isEmpty()) {
       // 64-bit or Non-Windows
-      maxPermSize = "256m";
-      // Logger.logInfo("Defaulting PermSize to 256m");
+      settings.setPermGen("256m");
+      Logger.logInfo("Defaulting PermSize to 256m");
     }
 
-    arguments.add("-XX:PermSize=" + maxPermSize);
+    arguments.add("-XX:PermSize=" + settings.getPermGen());
     arguments.add("-Djava.library.path=" + nativesDir.getAbsolutePath());
     arguments.add("-Dorg.lwjgl.librarypath=" + nativesDir.getAbsolutePath());
     arguments.add("-Dnet.java.games.input.librarypath=" + nativesDir.getAbsolutePath());
@@ -106,8 +107,8 @@ public class MCLauncher {
      * "FTB Does not support jarmodding in MC 1.6+ "); } else { arguments.add(s); } } }
      */
     // if (Settings.getSettings().getOptJavaArgs()) {
-    if (true) {
-      // Logger.logInfo("Adding Optimization Arguments");
+    if (settings.isOptimizationArgumentsUsed()) {
+      Logger.logInfo("Adding Optimization Arguments");
       Collections.addAll(arguments,
           "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CICompilerCountPerCPU -XX:+TieredCompilation"
               .split("\\s+"));
@@ -116,12 +117,12 @@ public class MCLauncher {
     // Undocumented environment variable to control JVM
     String additionalEnvVar = System.getenv("_JAVA_OPTIONS");
     if (additionalEnvVar != null && !additionalEnvVar.isEmpty()) {
-      // Logger.logInfo("_JAVA_OPTIONS defined: " + additionalEnvVar);
+      Logger.logInfo("_JAVA_OPTIONS defined: " + additionalEnvVar);
     }
     // Documented environment variable to control JVM
     additionalEnvVar = System.getenv("JAVA_TOOL_OPTIONS");
     if (additionalEnvVar != null && !additionalEnvVar.isEmpty()) {
-      // Logger.logInfo("JAVA_TOOL_OPTIONS defined: " + additionalEnvVar);
+      Logger.logInfo("JAVA_TOOL_OPTIONS defined: " + additionalEnvVar);
     }
 
     arguments.add(mainClass);
@@ -210,31 +211,32 @@ public class MCLauncher {
     return builder.start();
   }
 
-  private static void setMemory(List<String> arguments, String rmax) {
+  private static void setMemory(List<String> arguments, JavaSettings settings) {
     boolean memorySet = false;
     try {
       int min = 256;
-      if (rmax != null && Integer.parseInt(rmax) > 0) {
+      if (settings.getMaxMemory() > 0) {
         arguments.add("-Xms" + min + "M");
-        // Logger.logInfo("Setting MinMemory to " + min);
-        arguments.add("-Xmx" + rmax + "M");
-        // Logger.logInfo("Setting MaxMemory to " + rmax);
+        Logger.logInfo("Setting MinMemory to " + min);
+        arguments.add("-Xmx" + settings.getMaxMemory() + "M");
+        Logger.logInfo("Setting MaxMemory to " + settings.getMaxMemory());
         memorySet = true;
       }
     } catch (Exception e) {
-      // Logger.logError("Error parsing memory settings", e);
+      Logger.logError("Error parsing memory settings", e);
     }
     if (!memorySet) {
       arguments.add("-Xms" + 256 + "M");
-      // Logger.logInfo("Defaulting MinMemory to " + 256);
+      Logger.logInfo("Defaulting MinMemory to " + 256);
       arguments.add("-Xmx" + 1024 + "M");
-      // Logger.logInfo("Defaulting MaxMemory to " + 1024);
+      Logger.logInfo("Defaulting MaxMemory to " + 1024);
+      settings.setMaxMemory(1024);
     }
   }
 
   private static File syncAssets(File assetDir, String indexName) throws JsonSyntaxException,
       JsonIOException, IOException {
-    // Logger.logInfo("Syncing Assets:");
+    Logger.logInfo("Syncing Assets:");
     final File objects = new File(assetDir, "objects");
     AssetIndex index =
         JsonFactory.loadAssetIndex(new File(assetDir, "indexes/{INDEX}.json".replace("{INDEX}",
@@ -264,14 +266,14 @@ public class MCLauncher {
 
                 try {
                   if (local.exists() && !ChecksumUtil.getSHA(local).equals(asset.hash)) {
-                    // Logger.logInfo("  Changed: " + e.getKey());
+                    Logger.logInfo("  Changed: " + e.getKey());
                     FileUtils.copyFile(object, local);
                   } else if (!local.exists()) {
-                    // Logger.logInfo("  Added: " + e.getKey());
+                    Logger.logInfo("  Added: " + e.getKey());
                     FileUtils.copyFile(object, local);
                   }
                 } catch (Exception ex) {
-                  // Logger.logError("Asset checking failed: ", ex);
+                  Logger.logError("Asset checking failed: ", ex);
                 }
                 return null;
               }
@@ -280,7 +282,7 @@ public class MCLauncher {
       th.shutdown();
       th.wait(60, TimeUnit.SECONDS);
     } catch (Exception ex) {
-      // Logger.logError("Asset checking failed: ", ex);
+      Logger.logError("Asset checking failed: ", ex);
     }
     // Benchmark.logBenchAs("threading", "parallel asset(virtual) check");
 

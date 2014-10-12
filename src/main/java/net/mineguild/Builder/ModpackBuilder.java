@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.ImageIcon;
 import javax.swing.InputVerifier;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -29,17 +30,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
 
 import lombok.Getter;
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
-import net.mineguild.Launcher.log.Logger;
-import net.mineguild.Launcher.log.StdOutLogger;
-import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.BuilderSettings;
 import net.mineguild.Launcher.utils.json.JsonFactory;
@@ -83,45 +79,29 @@ public class ModpackBuilder extends JFrame {
   public static File mcIndex = new File(OSUtils.getLocalDir(), "mcVersions.json");
   public static MCVersionIndex mcVersionIndex;
 
-
-  public static void main(String[] args) throws Exception {
-    DownloadUtils.ssl_hack();
-    try {
-      for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-        if ("Nimbus".equals(info.getName())) {
-          UIManager.setLookAndFeel(info.getClassName());
-          break;
-        }
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    Logger.addListener(new StdOutLogger());
-
+  public static void launch(BuilderSettings settings) throws Exception {
     if (!forgeIndex.exists()) {
       FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/index.html"), forgeIndex);
     }
     forgeVersionIndex = FileUtils.readFileToString(forgeIndex);
-
+    
     if (!mcIndex.exists()) {
       FileUtils.copyURLToFile(new URL(
           "https://s3.amazonaws.com/Minecraft.Download/versions/versions.json"), mcIndex);
     }
+    ModpackBuilder.settings = settings;
     mcVersionIndex = JsonFactory.loadVersionIndex(mcIndex);
-    new ModpackBuilder();
+    instance = new ModpackBuilder();
+    instance.setVisible(true);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public ModpackBuilder() throws MalformedURLException, IOException {
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
     setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
-    instance = this;
     File newestFile = new File(OSUtils.getLocalDir(), "newest.json");
     FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"), newestFile);
     newestPack = JsonFactory.loadModpack(newestFile);
-    ModpackBuilder.settings =
-        JsonFactory.loadBuilderSettings(new File(OSUtils.getLocalDir(), "builder.settings"));
-    addSaveHook();
     setTitle("Mineguild ModpackBuilder");
     versionField = new JTextField();
     new GhostText(versionField, newestPack.getVersion());
@@ -162,6 +142,7 @@ public class ModpackBuilder extends JFrame {
         }
       }
     });
+
     mcVersionBox = new JComboBox(getMCVersions().toArray());
     mcVersionBox.setSelectedItem(newestPack.getMinecraftVersion());
     forgeVersionBox =
@@ -253,8 +234,6 @@ public class ModpackBuilder extends JFrame {
         }
       }
     });
-    setVisible(true);
-    setDefaultCloseOperation(EXIT_ON_CLOSE);
   }
 
   public void createUpdatedPack(final JFrame parent) {
@@ -322,7 +301,7 @@ public class ModpackBuilder extends JFrame {
       public void actionPerformed(ActionEvent e) {
         finishPack();
         showFilesDialog.dispose();
-        if(MineguildLauncher.con != null){
+        if (MineguildLauncher.con != null) {
           MineguildLauncher.con.dispose();
         }
         System.exit(0);
@@ -377,7 +356,7 @@ public class ModpackBuilder extends JFrame {
 
     @Override
     public int getColumnCount() {
-      return 3;
+      return 4;
     }
 
 
@@ -389,6 +368,8 @@ public class ModpackBuilder extends JFrame {
         case 1:
           return "Side";
         case 2:
+          return "Optional";
+        case 3:
           return "MD5-Hash";
         default:
           return "Unkown";
@@ -450,6 +431,9 @@ public class ModpackBuilder extends JFrame {
         case 1:
           return ((ModPackFile) pack.getFiles().values().toArray()[row]).getSide();
         case 2:
+          return ((ModPackFile) pack.getFiles().values().toArray()[row]).isOptional() ? createImageIcon(
+              "/tick.png", "TICK") : createImageIcon("/cross.png", "CROSS");
+        case 3:
           return ((ModPackFile) pack.getFiles().values().toArray()[row]).getHash();
         default:
           return null;
@@ -485,19 +469,6 @@ public class ModpackBuilder extends JFrame {
     return false;
   }
 
-  public static void addSaveHook() {
-    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          JsonWriter.saveBuilderSettings(ModpackBuilder.settings, new File(OSUtils.getLocalDir(),
-              "builder.settings"));
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }));
-  }
 
   public static List<String> getMCVersions() {
     List<String> versions = Lists.newArrayList();
@@ -531,6 +502,16 @@ public class ModpackBuilder extends JFrame {
       }
     }
     return versions;
+  }
+
+  public static ImageIcon createImageIcon(String path, String description) {
+    java.net.URL imgURL = ModpackBuilder.class.getResource(path);
+    if (imgURL != null) {
+      return new ImageIcon(imgURL, description);
+    } else {
+      System.err.println("Couldn't find file: " + path);
+      return null;
+    }
   }
 
 

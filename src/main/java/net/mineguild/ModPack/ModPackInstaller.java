@@ -3,6 +3,7 @@ package net.mineguild.ModPack;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -95,11 +96,12 @@ public class ModPackInstaller {
       final Side side, final File backupDirectory) throws Exception {
     checkNotNull(target);
     checkNotNull(pack);
-    if(!target.exists()) {
-      throw new Exception(String.format("'%s' doesn't exist!", target.getAbsolutePath()));
+    if (!target.exists()) {
+      throw new FileNotFoundException(
+          String.format("'%s' doesn't exist!", target.getAbsolutePath()));
     }
     if (!target.isDirectory()) {
-      throw new Exception(String.format("'%s' is no valid directory!", target.getAbsolutePath()));
+      throw new IOException(String.format("'%s' is no valid directory!", target.getAbsolutePath()));
     }
     boolean temp = false;
     try {

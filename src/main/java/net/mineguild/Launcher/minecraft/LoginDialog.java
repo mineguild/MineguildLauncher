@@ -28,6 +28,7 @@ import javax.swing.event.DocumentListener;
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.log.Logger;
+import net.mineguild.Launcher.utils.json.Settings;
 
 import org.apache.commons.io.IOUtils;
 
@@ -75,14 +76,17 @@ public class LoginDialog extends JDialog {
   private JButton btnChangeInstallLocation;
   private JPanel panel_1;
   private JCheckBox chckbxLaunchModpackbuilder;
+  private JCheckBox chckbxAutologin;
+  private Settings settings;
 
   public LoginDialog(Frame parent) {
     super(parent);
+    settings = MineguildLauncher.getSettings();
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosed(WindowEvent e) {
         if (successfull == false || response == null) {
-          if(!isRelogin){
+          if (!isRelogin) {
             System.exit(0);
           } else {
             dispose();
@@ -118,7 +122,7 @@ public class LoginDialog extends JDialog {
     cancelButton = new JButton("Cancel");
     cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if(!isRelogin){
+        if (!isRelogin) {
           System.exit(0);
         } else {
           dispose();
@@ -136,6 +140,10 @@ public class LoginDialog extends JDialog {
     checkBoxPanel.add(panel, BorderLayout.SOUTH);
     panel.setLayout(new GridLayout(0, 1, 0, 0));
 
+    chckbxAutologin = new JCheckBox("Auto-Login");
+    chckbxAutologin.setHorizontalAlignment(SwingConstants.CENTER);
+    panel.add(chckbxAutologin);
+
     chckbxForceUpdate = new JCheckBox("Force Update");
     chckbxForceUpdate.setHorizontalAlignment(SwingConstants.CENTER);
     panel.add(chckbxForceUpdate);
@@ -143,7 +151,7 @@ public class LoginDialog extends JDialog {
     btnChangeInstallLocation = new JButton("Change install location");
     btnChangeInstallLocation.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        MineguildLauncher.settings.setModpackPath(MineguildLauncher.getInstallPath(getRootPane()));
+        settings.setModpackPath(MineguildLauncher.getInstallPath(getRootPane()));
       }
     });
 
@@ -196,11 +204,10 @@ public class LoginDialog extends JDialog {
       }
 
       private void resetStuff() {
-        if (MineguildLauncher.settings.getProfile() != null) {
-          if (!((String) MineguildLauncher.settings.getProfile().get("username")).equals(userField
-              .getText())) {
+        if (settings.getProfile() != null) {
+          if (!((String) settings.getProfile().get("username")).equals(userField.getText())) {
             saveTokenBox.setSelected(false);
-            MineguildLauncher.settings.setProfile(null);
+            settings.setProfile(null);
             loginButton.setText("Login");
             passwordField.setEnabled(true);
           }
@@ -217,27 +224,27 @@ public class LoginDialog extends JDialog {
 
     boolean token = false;
 
-    if (MineguildLauncher.settings.getProfile() != null) {
+    if (settings.getProfile() != null) {
       saveTokenBox.setSelected(true);
       token = true;
       loginButton.setText("Login(MCToken)");
       passwordField.setEnabled(false);
     }
 
-    if (MineguildLauncher.settings.getMCUser().length() > 0) {
-      userField.setText(MineguildLauncher.settings.getMCUser());
+    if (settings.getMCUser().length() > 0) {
+      userField.setText(settings.getMCUser());
       if (token) {
-        if (MineguildLauncher.settings.getMCPassword().length() > 0) {
-          passwordField.setText(MineguildLauncher.settings.getMCPassword());
+        if (settings.getMCPassword().length() > 0) {
+          passwordField.setText(settings.getMCPassword());
           passwordField.setEnabled(true);
           savePasswordBox.setSelected(true);
         }
-      } else if (MineguildLauncher.settings.getMCPassword().length() > 0) {
-        passwordField.setText(MineguildLauncher.settings.getMCPassword());
+      } else if (settings.getMCPassword().length() > 0) {
+        passwordField.setText(settings.getMCPassword());
         savePasswordBox.setSelected(true);
       }
     } else {
-      MineguildLauncher.settings.setMCPassword("");
+      settings.setMCPassword("");
     }
 
 
@@ -256,8 +263,8 @@ public class LoginDialog extends JDialog {
   private void login() {
     YggdrasilUserAuthentication authentication =
         (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(Proxy.NO_PROXY,
-            MineguildLauncher.settings.getClientToken()).createUserAuthentication(Agent.MINECRAFT);
-    Map<String, Object> m = MineguildLauncher.settings.getProfile();
+            settings.getClientToken()).createUserAuthentication(Agent.MINECRAFT);
+    Map<String, Object> m = settings.getProfile();
     String user = userField.getText();
     String pass = new String(passwordField.getPassword());
     boolean mojangData = false;
@@ -285,11 +292,11 @@ public class LoginDialog extends JDialog {
       if (mojangData) {
         if (hasPassword) {
           Logger.logInfo("Unable to login with MCToken, trying stored password.");
-          MineguildLauncher.settings.setProfile(null);
+          settings.setProfile(null);
           login();
         } else {
           loginButton.setText("Login");
-          MineguildLauncher.settings.setProfile(null);
+          settings.setProfile(null);
           JOptionPane.showMessageDialog(this,
               "MCToken is probably invalid! Please retry auth with password.");
           passwordField.setEnabled(true);
@@ -310,7 +317,7 @@ public class LoginDialog extends JDialog {
     }
 
     if (authentication.isLoggedIn() && authentication.canPlayOnline()) {
-      if(!isRelogin){
+      if (!isRelogin) {
         try {
           int result = mg_login(authentication.getSelectedProfile().getId().toString());
           if (result < 1) {
@@ -318,8 +325,8 @@ public class LoginDialog extends JDialog {
           }
         } catch (Exception e) {
           e.printStackTrace();
-          JOptionPane
-              .showMessageDialog(this, "Can't authenticate with Mineguild!\n" + e.getMessage());
+          JOptionPane.showMessageDialog(this,
+              "Can't authenticate with Mineguild!\n" + e.getMessage());
           return;
         }
       }
@@ -327,16 +334,16 @@ public class LoginDialog extends JDialog {
           new LoginResponse(Integer.toString(authentication.getAgent().getVersion()), "token",
               authentication.getSelectedProfile().getName(), null, authentication
                   .getSelectedProfile().getId().toString(), authentication);
-      MineguildLauncher.settings.setMCUser(user);
+      settings.setMCUser(user);
       if (savePasswordBox.isSelected()) {
-        MineguildLauncher.settings.setMCPassword(pass);
+        settings.setMCPassword(pass);
       } else {
-        MineguildLauncher.settings.clearPassword();
+        settings.clearPassword();
       }
       if (saveTokenBox.isSelected()) {
-        MineguildLauncher.settings.setProfile(authentication.saveForStorage());
+        settings.setProfile(authentication.saveForStorage());
       } else {
-        MineguildLauncher.settings.setProfile(null);
+        settings.setProfile(null);
       }
       launchBuilder = chckbxLaunchModpackbuilder.isSelected();
       forceUpdate = chckbxForceUpdate.isSelected();
@@ -354,8 +361,8 @@ public class LoginDialog extends JDialog {
     }
     return 0;
   }
-  
-  public void setReLogin(){
+
+  public void setReLogin() {
     panel.setVisible(false);
     setMinimumSize(null);
     pack();

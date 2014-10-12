@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import lombok.Getter;
 import net.mineguild.Builder.ModpackBuilder;
 import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.MultithreadedDownloadDialog;
@@ -46,7 +47,7 @@ public class MineguildLauncher {
   public static ProcessMonitor procmon;
   public static Console con;
   public static long totalDownloadTime = 0;
-  public static Settings settings;
+  private static @Getter Settings settings;
   public static LoginResponse res;
 
   public static void main(String[] args) throws Exception {
@@ -107,7 +108,7 @@ public class MineguildLauncher {
     addSaveHook();
     res = dialog.response;
     if (dialog.launchBuilder) {
-      ModpackBuilder.main(args);
+      ModpackBuilder.launch(settings.getBuilderSettings());
     } else {
       baseDirectory = settings.getModpackPath();
       baseDirectory.mkdirs();
@@ -138,9 +139,12 @@ public class MineguildLauncher {
             remotePack.getVersion(), remotePack.getReleaseDate(), remotePack.getHash()));
         Logger.logInfo("Updating to Remote");
         File modsDir = new File(new File(baseDirectory, "minecraft"), "mods");
-        ModPackInstaller.clearFolder(new File(new File(baseDirectory, "minecraft"), "mods"), remotePack, Side.CLIENT, null);
-        
-        
+        try {
+          ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, null);
+        } catch (IOException e) {
+          Logger.logError("Couldn't clear folder!", e);
+        }
+
         List<DownloadInfo> dlinfo =
             ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), remotePack,
                 Side.CLIENT);
@@ -163,7 +167,8 @@ public class MineguildLauncher {
         boolean success = true;
         try {
           Logger.logInfo("Preparing MC for launch.");
-          MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"));
+          MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"),
+              settings.getJavaSettings(), res, false);
           Logger.logInfo("Downloaded for " + totalDownloadTime / 1000 + " seconds.");
         } catch (Exception e) {
           Logger.logError("Couldn't prepare MC for launch.", e);
@@ -178,7 +183,8 @@ public class MineguildLauncher {
           if (result == JOptionPane.OK_OPTION) {
             Logger.logInfo(String.format("Launching Local: %s [Released: %s] [Hash: %s]",
                 localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
-            MCInstaller.launchMinecraft(localPack, res, "2048", "256m");
+            MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"),
+                settings.getJavaSettings(), res, true);
           } else {
             Logger.logInfo("Not launching Minecraft.");
           }
@@ -191,7 +197,6 @@ public class MineguildLauncher {
       }
     }
   }
-
 
   public static File getInstallPath(Component par) {
     Component parent = (par == null) ? con : par;

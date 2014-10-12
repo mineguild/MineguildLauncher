@@ -28,6 +28,7 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.Parallel;
 import net.mineguild.Launcher.utils.json.JsonFactory;
+import net.mineguild.Launcher.utils.json.Settings.JavaSettings;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex.Asset;
 import net.mineguild.Launcher.utils.json.versions.Library;
@@ -48,7 +49,8 @@ public class MCInstaller {
   private static File gameDirectory;
   private static long totalAssetSize = 0;
 
-  public static void setup(final ModPack pack, File launchPath, File gameDirectory) throws Exception {
+  public static void setup(final ModPack pack, File launchPath, File gameDirectory,
+      JavaSettings javaSettings, LoginResponse resp, boolean doLaunch) throws Exception {
     List<DownloadInfo> libraries = null;
     List<DownloadInfo> assets = null;
     MCInstaller.launchPath = launchPath;
@@ -94,6 +96,9 @@ public class MCInstaller {
       JOptionPane.showMessageDialog(null, libraries.size() + assets.size()
           + " file(s) successfully downloaded!");
     }
+    if (doLaunch) {
+      launchMinecraft(pack, resp, javaSettings);
+    }
   }
 
   private static List<DownloadInfo> getLibraries(ModPack pack) throws Exception {
@@ -135,8 +140,7 @@ public class MCInstaller {
         new URL(Constants.MC_DL
             + "versions/{MC_VER}/{MC_VER}.json".replace("{MC_VER}", packbasejson));
     File json =
-        new File(launchPath, "versions/{MC_VER}/{MC_VER}.json".replace(
-            "{MC_VER}", packbasejson));
+        new File(launchPath, "versions/{MC_VER}/{MC_VER}.json".replace("{MC_VER}", packbasejson));
     FileUtils.copyURLToFile(url, json);
 
     Version mcJson = JsonFactory.loadVersion(json);
@@ -156,8 +160,7 @@ public class MCInstaller {
       }
     }
     local =
-        new File(launchPath
-            + "/versions/{MC_VER}/{MC_VER}.jar".replace("{MC_VER}", packbasejson));
+        new File(launchPath + "/versions/{MC_VER}/{MC_VER}.jar".replace("{MC_VER}", packbasejson));
     if (!local.exists()) {
       list.add(new DownloadInfo(new URL(Constants.MC_DL
           + "versions/{MC_VER}/{MC_VER}.jar".replace("{MC_VER}", packbasejson)), local, local
@@ -172,8 +175,7 @@ public class MCInstaller {
     Version version = JsonFactory.loadVersion(forgeJson);
 
     File json =
-        new File(launchPath, "assets/indexes/{MC_VER}.json".replace(
-            "{MC_VER}", packbasejson));
+        new File(launchPath, "assets/indexes/{MC_VER}.json".replace("{MC_VER}", packbasejson));
     FileUtils.copyURLToFile(
         new URL("https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(
             "${version}", version.getAssets())), json);
@@ -193,8 +195,7 @@ public class MCInstaller {
                   String name = e.getKey();
                   AssetIndex.Asset asset = e.getValue();
                   String path = asset.hash.substring(0, 2) + "/" + asset.hash;
-                  final File local =
-                      new File(launchPath, "assets/objects/" + path);
+                  final File local = new File(launchPath, "assets/objects/" + path);
                   if (local.exists() && !asset.hash.equals(ChecksumUtil.getSHA(local))) {
                     local.delete();
                   }
@@ -220,7 +221,7 @@ public class MCInstaller {
     return list;
   }
 
-  public static void launchMinecraft(ModPack pack, LoginResponse resp, String mem, String permGen) {
+  private static void launchMinecraft(ModPack pack, LoginResponse resp, JavaSettings set) {
     try {
       File packDir = launchPath;
       String gameFolder = gameDirectory.getAbsolutePath();
@@ -290,7 +291,7 @@ public class MCInstaller {
       for (Library lib : base.getLibraries()) {
         classpath.add(new File(libDir, lib.getPath()));
       }
-      
+
 
 
       Process minecraftProcess =
@@ -298,8 +299,8 @@ public class MCInstaller {
               packjson.mainClass != null ? packjson.mainClass : base.mainClass,
               packjson.minecraftArguments != null ? packjson.minecraftArguments
                   : base.minecraftArguments,
-              packjson.assets != null ? packjson.assets : base.getAssets(), mem, permGen, pack
-                  .getMinecraftVersion(), resp.getAuth(), false);
+              packjson.assets != null ? packjson.assets : base.getAssets(), pack
+                  .getMinecraftVersion(), resp.getAuth(), false, set);
 
       MineguildLauncher.MCRunning = true;
       MineguildLauncher.con.minecraftStarted();
@@ -307,7 +308,7 @@ public class MCInstaller {
       StreamLogger.prepare(minecraftProcess.getInputStream(),
           new LogEntry().level(LogLevel.UNKNOWN));
 
-      String[] ignore = {"Session ID is token", "Thingy Name:", "Material Name:"};
+      String[] ignore = {"Session ID is token"};
       StreamLogger.setIgnore(ignore);
       StreamLogger.doStart();
       // String curVersion =

@@ -9,6 +9,7 @@ import com.google.gson.annotations.Expose;
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.log.Logger;
+import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.utils.CryptoUtils;
 
 public class Settings {
@@ -18,16 +19,20 @@ public class Settings {
   private @Expose @Getter @Setter String MCUser;
   private @Expose String MCPassword;
   private @Expose @Getter @Setter String modpack_hash;
-  private @Getter @Setter String additional_java_args;
   private @Expose @Getter @Setter File modpackPath;
+  private @Expose @Getter @Setter boolean autoLogin;
+  private @Expose @Getter @Setter BuilderSettings builderSettings;
+  private @Expose @Getter @Setter JavaSettings javaSettings;
 
   public Settings(File modpackPath) {
     this.modpackPath = modpackPath;
-    MCUser = "";
-    MCPassword = "";
-    modpack_hash = "";
-    additional_java_args = "";
     clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
+    builderSettings = new BuilderSettings();
+    javaSettings = new JavaSettings();
+  }
+
+  public Settings() {
+    this(new File("."));
   }
 
   public String getClientToken() {
@@ -56,4 +61,15 @@ public class Settings {
   public void clearPassword() {
     MCPassword = "";
   }
+
+  public static class JavaSettings {
+    private @Expose @Getter @Setter String javaPath = MCInstaller.getDefaultJavaPath();
+    private @Expose @Getter @Setter String additionalArguments = ""; 
+    private @Expose @Getter @Setter boolean optimizationArgumentsUsed = true;
+    private @Expose @Getter @Setter int maxMemory = 2048;
+    private @Expose @Getter @Setter String permGen = "";
+    public JavaSettings() { }
+
+  }
+
 }
