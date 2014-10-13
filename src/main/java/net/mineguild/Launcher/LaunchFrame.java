@@ -66,7 +66,7 @@ public class LaunchFrame extends JFrame {
 
     JPanel mainPanel = new JPanel();
     tabbedPane.addTab("Update/Launch", null, mainPanel, null);
-    mainPanel.setLayout(new MigLayout("", "[fill][grow][center]", "[][][][][][][]"));
+    mainPanel.setLayout(new MigLayout("", "[fill][grow][center]", "[][][][][][grow][]"));
 
     JLabel lblInstalledVersion = new JLabel("Installed Version:");
     lblInstalledVersion.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -102,16 +102,28 @@ public class LaunchFrame extends JFrame {
 
     JPanel settingsPanel = new JPanel();
     tabbedPane.addTab("Settings", null, settingsPanel, null);
-    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("right:default"), FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,}, new RowSpec[] {FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,}));
+    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {
+        FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("right:default"),
+        FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,},
+      new RowSpec[] {
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,}));
 
     JLabel lblGeneralSettings =
         DefaultComponentFactory.getInstance().createTitle("General Settings");
