@@ -51,20 +51,20 @@ public class MCInstaller {
 
   public static void setup(final ModPack pack, File launchPath, File gameDirectory,
       JavaSettings javaSettings, LoginResponse resp, boolean doLaunch) throws Exception {
-    List<DownloadInfo> libraries = null;
-    List<DownloadInfo> assets = null;
+    List<DownloadInfo> libraries = Lists.newArrayList();
+    List<DownloadInfo> assets = Lists.newArrayList();
     MCInstaller.launchPath = launchPath;
     MCInstaller.gameDirectory = gameDirectory;
     packmcversion = pack.getMinecraftVersion();
     try {
       libraries = getLibraries(pack);
     } catch (Exception e) {
-      e.printStackTrace();
+      Logger.logError("Error getting libs", e);
     }
     try {
       assets = getAssets();
     } catch (Exception e) {
-      e.printStackTrace();
+      Logger.logError("Error getting assets", e);
     }
     MultithreadedDownloadDialog dlDialog;
     if (assets.size() > 0) {
@@ -172,7 +172,7 @@ public class MCInstaller {
 
   private static List<DownloadInfo> getAssets() throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
-    File forgeJson = new File(launchPath, "pack.json");
+    File forgeJson = new File(gameDirectory, "pack.json");
     Version version = JsonFactory.loadVersion(forgeJson);
 
     File json =
