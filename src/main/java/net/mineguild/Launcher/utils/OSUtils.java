@@ -277,18 +277,6 @@ public class OSUtils {
       default:
         return new File(System.getProperty("user.home") + "/.mmp");
     }
-
-
-  }
-
-  public static File getGameDir() throws IOException {
-    File gameDir = new File(MineguildLauncher.baseDirectory, "minecraft");
-    if (!gameDir.exists()) {
-      if (!gameDir.mkdirs()) {
-        throw new IOException("Unable to create game directory!");
-      }
-    }
-    return new File(MineguildLauncher.baseDirectory, "minecraft");
   }
 
 }

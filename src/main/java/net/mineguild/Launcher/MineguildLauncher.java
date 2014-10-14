@@ -1,11 +1,10 @@
 package net.mineguild.Launcher;
 
 import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
-import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -13,29 +12,20 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import lombok.Getter;
-import net.mineguild.Builder.ModpackBuilder;
-import net.mineguild.Launcher.download.DownloadInfo;
-import net.mineguild.Launcher.download.MultithreadedDownloadDialog;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.log.StdOutLogger;
-import net.mineguild.Launcher.minecraft.LoginDialog;
 import net.mineguild.Launcher.minecraft.LoginResponse;
-import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
-import net.mineguild.Launcher.utils.AuthWorkDialog;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
 import net.mineguild.ModPack.ModPack;
-import net.mineguild.ModPack.ModPackInstaller;
 import net.mineguild.ModPack.Side;
-
-import org.apache.commons.io.FileUtils;
 
 
 public class MineguildLauncher {
@@ -46,6 +36,8 @@ public class MineguildLauncher {
   public static boolean forceUpdate;
   public static ProcessMonitor procmon;
   public static Console con;
+  private static @Getter LaunchFrame lFrame;
+  private static @Getter Frame parent;
   public static long totalDownloadTime = 0;
   private static @Getter Settings settings;
   public static LoginResponse res;
@@ -67,7 +59,7 @@ public class MineguildLauncher {
       System.exit(0);
     }
     Logger.addListener(new StdOutLogger());
-
+    Logger.addListener(new LogWriter(new File("launcher.log"), LogSource.LAUNCHER));
     try {
       for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {
@@ -79,123 +71,79 @@ public class MineguildLauncher {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    Logger.addListener(new LogWriter(new File("launcher.log"), LogSource.LAUNCHER));
-    con = new Console();
-    con.setVisible(true);
-    Logger.addListener(con);
-
-    try {
-      settings = JsonFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
-    } catch (IOException e) {
-      OSUtils.getLocalDir().mkdirs();
-      settings = new Settings(getInstallPath(null));
-      JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
-    }
-    if (settings.getModpackPath() == null) {
-      settings.setModpackPath(getInstallPath(null));
-    }
-    AuthWorkDialog dl = new AuthWorkDialog(con);
-    dl.start();
-    LoginDialog dialog = new LoginDialog(con);
-    dialog.run();
-    if (!dialog.successfull) {
-      Logger.logError("Login not successful... Exiting");
-      Thread.sleep(1000);
-      System.exit(0);
-    }
-    JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
-    addSaveHook();
-    res = dialog.response;
-    if (dialog.launchBuilder) {
-      ModpackBuilder.launch(settings.getBuilderSettings());
-    } else {
-      baseDirectory = settings.getModpackPath();
-      baseDirectory.mkdirs();
-      boolean updated = true;
-      FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"),
-          new File(OSUtils.getLocalDir(), "newest.json"));
-      ModPack remotePack = JsonFactory.loadModpack(new File(OSUtils.getLocalDir(), "newest.json"));
-      boolean needsUpdate = false;
-
-      Logger.logInfo(String.format("Newest pack version: %s released on %s",
-          remotePack.getVersion(), new Date(remotePack.getReleaseTime()).toString()));
-      File localPackFile = new File(baseDirectory, "currentPack.json");
-      ModPack localPack = null;
-      try {
-        localPack = JsonFactory.loadModpack(localPackFile);
-      } catch (Exception e) {
-        localPackFile.delete();
-        Logger.logError("Unable to load current ModPack! Fresh-Install!", e);
-      }
-      forceUpdate = !localPackFile.exists() || dialog.forceUpdate;
-      needsUpdate = forceUpdate || needsUpdate(localPack, remotePack, true);
-      if (needsUpdate) {
-        if (!(localPack == null)) {
-          Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]",
-              localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
-        }
-        Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]",
-            remotePack.getVersion(), remotePack.getReleaseDate(), remotePack.getHash()));
-        Logger.logInfo("Updating to Remote");
-        File modsDir = new File(new File(baseDirectory, "minecraft"), "mods");
+    EventQueue.invokeLater(new Runnable() {
+      public void run() {
         try {
-          ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, null);
-        } catch (IOException e) {
-          Logger.logError("Couldn't clear folder!", e);
-        }
-
-        List<DownloadInfo> dlinfo =
-            ModPackInstaller.checkNeededFiles(new File(baseDirectory, "minecraft"), remotePack,
-                Side.CLIENT);
-        MultithreadedDownloadDialog dlDialog =
-            new MultithreadedDownloadDialog(dlinfo, "Updating ModPack", con);
-        dlDialog.setVisible(true);
-        if (!dlDialog.run()) {
-          Logger.logError("No success downloading!");
-          updated = false;
-          JOptionPane.showMessageDialog(con, "Updating didn't finish!", "Update error!",
-              JOptionPane.ERROR_MESSAGE);
-        } else {
-          localPack = remotePack;
-        }
-      }
-
-      if (updated) {
-        Logger.logInfo("Successfully updated/installed modpack.");
-        JsonWriter.saveModpack(localPack, new File(baseDirectory, "currentPack.json"));
-        boolean success = true;
-        try {
-          Logger.logInfo("Preparing MC for launch.");
-          MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"),
-              settings.getJavaSettings(), res, false);
-          Logger.logInfo("Downloaded for " + totalDownloadTime / 1000 + " seconds.");
+          lFrame = new LaunchFrame();
+          lFrame.doVersionCheck();
+          lFrame.loadSettings();
+          lFrame.setVisible(true);
+          parent = lFrame;
         } catch (Exception e) {
-          Logger.logError("Couldn't prepare MC for launch.", e);
-          success = false;
+          e.printStackTrace();
         }
-
-        if (success) {
-          int result =
-              JOptionPane.showConfirmDialog(con,
-                  "Minecraft (MMP) is ready to launch, do you want to launch it?", "Launch MC?",
-                  JOptionPane.YES_NO_OPTION);
-          if (result == JOptionPane.OK_OPTION) {
-            Logger.logInfo(String.format("Launching Local: %s [Released: %s] [Hash: %s]",
-                localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
-            MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"),
-                settings.getJavaSettings(), res, true);
-          } else {
-            Logger.logInfo("Not launching Minecraft.");
-          }
-        } else {
-          JOptionPane
-              .showMessageDialog(con, "Something went wrong! Modpack can't be launched now!");
-        }
-      } else {
-        Logger.logInfo("No success installing/updating modpack.");
       }
-    }
+    });
+
+    /*
+     * con = new Console(); con.setVisible(true); Logger.addListener(con);
+     * 
+     * try { settings = JsonFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
+     * } catch (IOException e) { OSUtils.getLocalDir().mkdirs(); settings = new
+     * Settings(getInstallPath(null)); JsonWriter.saveSettings(settings, new
+     * File(OSUtils.getLocalDir(), "settings.json")); } if (settings.getModpackPath() == null) {
+     * settings.setModpackPath(getInstallPath(null)); } AuthWorkDialog dl = new AuthWorkDialog(con);
+     * dl.start(); LoginDialog dialog = new LoginDialog(con); dialog.run(); if (!dialog.successfull)
+     * { Logger.logError("Login not successful... Exiting"); Thread.sleep(1000); System.exit(0); }
+     * JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+     * addSaveHook(); res = dialog.response; if (dialog.launchBuilder) {
+     * ModpackBuilder.launch(settings.getBuilderSettings()); } else { baseDirectory =
+     * settings.getModpackPath(); baseDirectory.mkdirs(); boolean updated = true;
+     * FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"), new
+     * File(OSUtils.getLocalDir(), "newest.json")); ModPack remotePack = JsonFactory.loadModpack(new
+     * File(OSUtils.getLocalDir(), "newest.json")); boolean needsUpdate = false;
+     * 
+     * Logger.logInfo(String.format("Newest pack version: %s released on %s",
+     * remotePack.getVersion(), new Date(remotePack.getReleaseTime()).toString())); File
+     * localPackFile = new File(baseDirectory, "currentPack.json"); ModPack localPack = null; try {
+     * localPack = JsonFactory.loadModpack(localPackFile); } catch (Exception e) {
+     * localPackFile.delete(); Logger.logError("Unable to load current ModPack! Fresh-Install!", e);
+     * } forceUpdate = !localPackFile.exists() || dialog.forceUpdate; needsUpdate = forceUpdate ||
+     * needsUpdate(localPack, remotePack, true); if (needsUpdate) { if (!(localPack == null)) {
+     * Logger.logInfo(String.format("Local: %s [Released: %s] [Hash: %s]", localPack.getVersion(),
+     * localPack.getReleaseDate(), localPack.getHash())); }
+     * Logger.logInfo(String.format("Remote: %s [Released: %s] [Hash: %s]", remotePack.getVersion(),
+     * remotePack.getReleaseDate(), remotePack.getHash())); Logger.logInfo("Updating to Remote");
+     * File modsDir = new File(new File(baseDirectory, "minecraft"), "mods"); try {
+     * ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, null); } catch (IOException e)
+     * { Logger.logError("Couldn't clear folder!", e); }
+     * 
+     * List<DownloadInfo> dlinfo = ModPackInstaller.checkNeededFiles(new File(baseDirectory,
+     * "minecraft"), remotePack, Side.CLIENT); MultithreadedDownloadDialog dlDialog = new
+     * MultithreadedDownloadDialog(dlinfo, "Updating ModPack", con); dlDialog.setVisible(true); if
+     * (!dlDialog.run()) { Logger.logError("No success downloading!"); updated = false;
+     * JOptionPane.showMessageDialog(con, "Updating didn't finish!", "Update error!",
+     * JOptionPane.ERROR_MESSAGE); } else { localPack = remotePack; } }
+     * 
+     * if (updated) { Logger.logInfo("Successfully updated/installed modpack.");
+     * JsonWriter.saveModpack(localPack, new File(baseDirectory, "currentPack.json")); boolean
+     * success = true; try { Logger.logInfo("Preparing MC for launch.");
+     * MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"),
+     * settings.getJavaSettings(), res, false); Logger.logInfo("Downloaded for " + totalDownloadTime
+     * / 1000 + " seconds."); } catch (Exception e) {
+     * Logger.logError("Couldn't prepare MC for launch.", e); success = false; }
+     * 
+     * if (success) { int result = JOptionPane.showConfirmDialog(con,
+     * "Minecraft (MMP) is ready to launch, do you want to launch it?", "Launch MC?",
+     * JOptionPane.YES_NO_OPTION); if (result == JOptionPane.OK_OPTION) {
+     * Logger.logInfo(String.format("Launching Local: %s [Released: %s] [Hash: %s]",
+     * localPack.getVersion(), localPack.getReleaseDate(), localPack.getHash()));
+     * MCInstaller.setup(localPack, baseDirectory, new File(baseDirectory, "minecraft"),
+     * settings.getJavaSettings(), res, true); } else { Logger.logInfo("Not launching Minecraft.");
+     * } } else { JOptionPane .showMessageDialog(con,
+     * "Something went wrong! Modpack can't be launched now!"); } } else {
+     * Logger.logInfo("No success installing/updating modpack."); } }
+     */
   }
 
   public static File getInstallPath(Component par) {
@@ -203,8 +151,8 @@ public class MineguildLauncher {
     File folder;
     try {
       folder =
-          MineguildLauncher.settings.getModpackPath() == null ? new File("modpack")
-              : MineguildLauncher.settings.getModpackPath();
+          MineguildLauncher.settings.getLaunchPath() == null ? new File("modpack")
+              : MineguildLauncher.settings.getLaunchPath();
     } catch (NullPointerException e) {
       folder = new File("modpack");
     }
@@ -283,5 +231,26 @@ public class MineguildLauncher {
     }));
   }
 
+  public static void loadSettings() {
+    try {
+      settings = JsonFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
+    } catch (IOException e) {
+      OSUtils.getLocalDir().mkdirs();
+      settings = new Settings();
+      try {
+        JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+      } catch (IOException e1) {
+        Logger.logError("Unable to write new settings!", e1);
+      }
+    }
+  }
+
+  public static void saveSettingsSilent() {
+    try {
+      JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+    } catch (IOException e) {
+      Logger.logError("Unable to save settings!", e);
+    }
+  }
 
 }

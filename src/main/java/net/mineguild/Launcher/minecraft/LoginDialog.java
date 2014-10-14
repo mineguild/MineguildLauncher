@@ -1,12 +1,17 @@
 package net.mineguild.Launcher.minecraft;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
@@ -20,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
@@ -45,11 +51,6 @@ import com.mojang.authlib.exceptions.UserMigratedException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 
-import javax.swing.SwingConstants;
-
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-
 @SuppressWarnings("serial")
 public class LoginDialog extends JDialog {
 
@@ -73,7 +74,6 @@ public class LoginDialog extends JDialog {
   private JLabel lblUsernameemail;
   private JCheckBox chckbxForceUpdate;
   private JPanel panel;
-  private JButton btnChangeInstallLocation;
   private JPanel panel_1;
   private JCheckBox chckbxLaunchModpackbuilder;
   private JCheckBox chckbxAutologin;
@@ -148,17 +148,10 @@ public class LoginDialog extends JDialog {
     chckbxForceUpdate.setHorizontalAlignment(SwingConstants.CENTER);
     panel.add(chckbxForceUpdate);
 
-    btnChangeInstallLocation = new JButton("Change install location");
-    btnChangeInstallLocation.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        settings.setModpackPath(MineguildLauncher.getInstallPath(getRootPane()));
-      }
-    });
 
     chckbxLaunchModpackbuilder = new JCheckBox("Launch ModPackBuilder");
     chckbxLaunchModpackbuilder.setHorizontalAlignment(SwingConstants.CENTER);
     panel.add(chckbxLaunchModpackbuilder);
-    panel.add(btnChangeInstallLocation);
 
     panel_1 = new JPanel();
     checkBoxPanel.add(panel_1, BorderLayout.NORTH);
@@ -260,13 +253,13 @@ public class LoginDialog extends JDialog {
     setVisible(true);
   }
 
-  private void login() {
+  private LoginWorker login() {
     YggdrasilUserAuthentication authentication =
         (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(Proxy.NO_PROXY,
             settings.getClientToken()).createUserAuthentication(Agent.MINECRAFT);
     Map<String, Object> m = settings.getProfile();
-    String user = userField.getText();
-    String pass = new String(passwordField.getPassword());
+    final String user = userField.getText();
+    final String pass = new String(passwordField.getPassword());
     boolean mojangData = false;
     boolean hasPassword = false;
     authentication.setUsername(user);
@@ -281,79 +274,100 @@ public class LoginDialog extends JDialog {
       authentication.setUsername(user);
     }
 
-    boolean loginSuccess = false;
+    loginButton.setText("Logging in...");
+    LoginWorker w = new LoginWorker(authentication);
+    final boolean mJ_ = mojangData;
+    final boolean hP_ = hasPassword;
+    w.addPropertyChangeListener(new PropertyChangeListener() {
 
-    try {
-      authentication.logIn();
-      loginSuccess = true;
-    } catch (UserMigratedException e) {
-      JOptionPane.showMessageDialog(this, "User migrated! Use E-Mail to sign in!");
-    } catch (InvalidCredentialsException e) {
-      if (mojangData) {
-        if (hasPassword) {
-          Logger.logInfo("Unable to login with MCToken, trying stored password.");
-          settings.setProfile(null);
-          login();
-        } else {
-          loginButton.setText("Login");
-          settings.setProfile(null);
-          JOptionPane.showMessageDialog(this,
-              "MCToken is probably invalid! Please retry auth with password.");
-          passwordField.setEnabled(true);
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("done")) {
+          LoginWorker w = (LoginWorker) evt.getSource();
+          loggedIn(w, mJ_, hP_, user, pass);
         }
-      } else {
-        JOptionPane.showMessageDialog(this, "Invalid username and/or password");
       }
+    });
+    loginButton.setEnabled(false);
+    cancelButton.setEnabled(false);
+    passwordField.setEnabled(false);
+    userField.setEnabled(false);
+    savePasswordBox.setEnabled(false);
+    saveTokenBox.setEnabled(false);
+    w.execute();
+    return w;
+  }
 
-    } catch (AuthenticationUnavailableException e) {
-      JOptionPane.showMessageDialog(this,
-          "Couldn't authenticate with mojang. Either them or you are offline.");
-    } catch (AuthenticationException e) {
-      JOptionPane.showMessageDialog(this, "Other error occurred: " + e.getLocalizedMessage());
+  public void loggedIn(LoginWorker w, boolean mojangData, boolean hasPassword, String user,
+      String pass) {
+    boolean loginSuccess = w.success;
+    loginButton.setEnabled(true);
+    cancelButton.setEnabled(true);
+    passwordField.setEnabled(true);
+    userField.setEnabled(true);
+    savePasswordBox.setEnabled(true);
+    saveTokenBox.setEnabled(true);
+    try {
+      response = w.get();
+      if (!loginSuccess) {
+        throw w.t;
+      }
+    } catch (Exception e) {
+      if (e instanceof InvalidCredentialsException) {
+        if (mojangData) {
+          if (hasPassword) {
+            Logger.logInfo("Unable to login with MCToken, trying stored password.");
+            settings.setProfile(null);
+            login();
+          } else {
+            loginButton.setText("Login");
+            settings.setProfile(null);
+            JOptionPane.showMessageDialog(this,
+                "MCToken is probably invalid! Please retry auth with password.");
+            passwordField.setEnabled(true);
+          }
+        } else {
+          JOptionPane.showMessageDialog(this, "Invalid username and/or password");
+        }
+      } else if (e instanceof UserMigratedException) {
+        JOptionPane.showMessageDialog(this, "User migrated! Use E-Mail to sign in!");
+      } else if (e instanceof AuthenticationUnavailableException) {
+        JOptionPane.showMessageDialog(this,
+            "Couldn't authenticate with mojang. Either them or you are offline.");
+      } else if (e instanceof AuthenticationException) {
+        JOptionPane.showMessageDialog(this, "Other error occurred: " + e.getLocalizedMessage());
+      } else if (e instanceof MGAuthException) {
+        JOptionPane
+            .showMessageDialog(this, "Can't authenticate with Mineguild!\n" + e.getMessage());
+      } else {
+        Logger.logError("Other exception!", e);
+      }
     }
 
     if (!loginSuccess) {
+      loginButton.setText("Login");
       return;
     }
 
-    if (authentication.isLoggedIn() && authentication.canPlayOnline()) {
-      if (!isRelogin) {
-        try {
-          int result = mg_login(authentication.getSelectedProfile().getId().toString());
-          if (result < 1) {
-            throw new Exception("Not whitelisted!");
-          }
-        } catch (Exception e) {
-          e.printStackTrace();
-          JOptionPane.showMessageDialog(this,
-              "Can't authenticate with Mineguild!\n" + e.getMessage());
-          return;
-        }
-      }
-      response =
-          new LoginResponse(Integer.toString(authentication.getAgent().getVersion()), "token",
-              authentication.getSelectedProfile().getName(), null, authentication
-                  .getSelectedProfile().getId().toString(), authentication);
-      settings.setMCUser(user);
-      if (savePasswordBox.isSelected()) {
-        settings.setMCPassword(pass);
-      } else {
-        settings.clearPassword();
-      }
-      if (saveTokenBox.isSelected()) {
-        settings.setProfile(authentication.saveForStorage());
-      } else {
-        settings.setProfile(null);
-      }
-      launchBuilder = chckbxLaunchModpackbuilder.isSelected();
-      forceUpdate = chckbxForceUpdate.isSelected();
-      successfull = true;
-      dispose();
+    settings.setMCUser(user);
+    if (savePasswordBox.isSelected()) {
+      settings.setMCPassword(pass);
+    } else {
+      settings.clearPassword();
+    }
+    if (saveTokenBox.isSelected()) {
+      settings.setProfile(w.auth.saveForStorage());
+    } else {
+      settings.setProfile(null);
     }
 
+    launchBuilder = chckbxLaunchModpackbuilder.isSelected();
+    forceUpdate = chckbxForceUpdate.isSelected();
+    successfull = true;
+    dispose();
   }
 
-  private int mg_login(String uuid) throws IOException {
+  public static int mg_login(String uuid) throws IOException {
     String out = IOUtils.toString(new URL(Constants.MG_LOGIN_SCRIPT + "?uuid=" + uuid));
     String[] split = out.split("\n");
     if (split.length == 2) {
@@ -368,6 +382,16 @@ public class LoginDialog extends JDialog {
     pack();
     setMinimumSize(getSize());
   }
+
+  public void trySilentLogin() {
+    setReLogin();
+    if (!userField.getText().isEmpty()
+        && (passwordField.getPassword().length > 0 || saveTokenBox.isSelected())) {
+      login();
+    }
+    setVisible(true);
+  }
+
 
 
 }

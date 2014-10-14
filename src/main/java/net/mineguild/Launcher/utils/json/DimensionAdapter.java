@@ -12,10 +12,17 @@ public class DimensionAdapter extends TypeAdapter<Dimension> {
 
   @Override
   public void write(JsonWriter out, Dimension value) throws IOException {
-    out.beginArray();
-    out.value(value.getWidth());
-    out.value(value.getHeight());
-    out.endArray();
+    if(value != null){
+      out.beginArray();
+      out.value(value.getWidth());
+      out.value(value.getHeight());
+      out.endArray();
+    } else {
+      out.beginArray();
+      out.value(0);
+      out.value(0);
+      out.endArray();
+    }
   }
 
   @Override

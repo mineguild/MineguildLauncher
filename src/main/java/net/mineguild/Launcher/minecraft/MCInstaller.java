@@ -70,8 +70,8 @@ public class MCInstaller {
     if (assets.size() > 0) {
       long startTime = System.currentTimeMillis();
       dlDialog =
-          new MultithreadedDownloadDialog(MineguildLauncher.con, assets, "Downloading Assets",
-              totalAssetSize);
+          new MultithreadedDownloadDialog(MineguildLauncher.getParent(), assets,
+              "Downloading Assets", totalAssetSize);
       dlDialog.setVisible(true);
       if (!dlDialog.run()) {
         dlDialog.dispose();
@@ -83,7 +83,8 @@ public class MCInstaller {
     if (libraries.size() > 0) {
       long startTime = System.currentTimeMillis();
       dlDialog =
-          new MultithreadedDownloadDialog(MineguildLauncher.con, libraries, "Downloading Libraries");
+          new MultithreadedDownloadDialog(MineguildLauncher.getParent(), libraries,
+              "Downloading Libraries");
       dlDialog.setVisible(true);
       if (!dlDialog.run()) {
         dlDialog.dispose();
@@ -93,7 +94,7 @@ public class MCInstaller {
       MineguildLauncher.totalDownloadTime += System.currentTimeMillis() - startTime;
     }
     if (libraries.size() + assets.size() > 0) {
-      JOptionPane.showMessageDialog(null, libraries.size() + assets.size()
+      JOptionPane.showMessageDialog(MineguildLauncher.getParent(), libraries.size() + assets.size()
           + " file(s) successfully downloaded!");
     }
     if (doLaunch) {
@@ -103,7 +104,7 @@ public class MCInstaller {
 
   private static List<DownloadInfo> getLibraries(ModPack pack) throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
-    File forgeJson = new File(launchPath, "pack.json");
+    File forgeJson = new File(gameDirectory, "pack.json");
     FileUtils.copyURLToFile(new URL(Constants.MG_FORGE + pack.getForgeVersion() + "/version.json"),
         forgeJson);
 
@@ -333,6 +334,9 @@ public class MCInstaller {
               MineguildLauncher.con.minecraftStopped();
             if (ModpackBuilder.launch != null)
               ModpackBuilder.launch.mcStopped();
+            if (MineguildLauncher.getLFrame() != null) {
+              MineguildLauncher.getLFrame().mcStopped();
+            }
             // LaunchFrame launchFrame = LaunchFrame.getInstance(); launchFrame.setVisible(true);
             /*
              * Main.getEventBus().post(new EnableObjectsEvent()); try {

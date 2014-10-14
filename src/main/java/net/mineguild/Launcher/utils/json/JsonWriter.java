@@ -1,6 +1,7 @@
 package net.mineguild.Launcher.utils.json;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -22,6 +23,7 @@ public class JsonWriter {
     builder.registerTypeAdapter(Date.class, new DateAdapter());
     builder.registerTypeAdapter(File.class, new FileAdapter());
     builder.registerTypeAdapter(Dimension.class, new DimensionAdapter());
+    builder.registerTypeAdapter(Point.class, new PointAdapter());
     builder.enableComplexMapKeySerialization();
     builder.setPrettyPrinting();
     builder.excludeFieldsWithoutExposeAnnotation();

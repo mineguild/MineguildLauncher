@@ -500,6 +500,16 @@ public class ModpackBuilder extends JFrame {
     }
 
   }
+  
+  public static ImageIcon createImageIcon(String path, String description) {
+    java.net.URL imgURL = ModpackBuilder.class.getResource(path);
+    if (imgURL != null) {
+      return new ImageIcon(imgURL, description);
+    } else {
+      System.err.println("Couldn't find file: " + path);
+      return null;
+    }
+  }
 
   public static boolean getModpackDirectory(Component parent) {
     JFileChooser fileChooser = new JFileChooser(new File("."));
@@ -558,15 +568,7 @@ public class ModpackBuilder extends JFrame {
     return versions;
   }
 
-  public static ImageIcon createImageIcon(String path, String description) {
-    java.net.URL imgURL = ModpackBuilder.class.getResource(path);
-    if (imgURL != null) {
-      return new ImageIcon(imgURL, description);
-    } else {
-      System.err.println("Couldn't find file: " + path);
-      return null;
-    }
-  }
+  
 
   private String convertGlobToRegEx(String line) {
     Logger.logDebug("got line [" + line + "]");

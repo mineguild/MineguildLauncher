@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.download.DownloadInfo;
@@ -35,10 +36,11 @@ public class ModPackInstaller {
    * @param side The {@link net.mineguild.ModPack.Side} that should be installed, should be SERVER
    *        or CLIENT
    * @return A List of needed {@link net.mineguild.Launcher.download.DownloadInfo}
-   * @throws Exception
+   * @throws ExecutionException
+   * @throws InterruptedException
    */
   public static synchronized List<DownloadInfo> checkNeededFiles(final File installDirectory,
-      ModPack pack, final Side side) throws Exception {
+      ModPack pack, final Side side) throws InterruptedException, ExecutionException {
     checkNotNull(installDirectory);
     List<DownloadInfo> result =
         (List<DownloadInfo>) new Parallel.ForEach<Entry<String, ModPackFile>, DownloadInfo>(pack
@@ -93,7 +95,7 @@ public class ModPackInstaller {
    * @throws NullPointerException if pack or target <code>null</code>.
    */
   public static synchronized void clearFolder(final File target, final ModPack pack,
-      final Side side, final File backupDirectory) throws Exception {
+      final Side side, final File backupDirectory) throws IOException {
     checkNotNull(target);
     checkNotNull(pack);
     if (!target.exists()) {
