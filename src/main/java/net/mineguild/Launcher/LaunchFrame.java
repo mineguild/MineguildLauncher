@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -100,7 +101,7 @@ public class LaunchFrame extends JFrame {
     JPanel mainPanel = new JPanel();
     tabbedPane.addTab("Update/Launch", null, mainPanel, null);
     mainPanel.setLayout(new MigLayout("", "[fill][grow][center]", "[grow][][][][grow][][]"));
-    
+
     JLabel lblLogo = new JLabel("");
     lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
     mainPanel.add(lblLogo, "cell 0 0 3 1,alignx center,aligny center");
@@ -227,6 +228,11 @@ public class LaunchFrame extends JFrame {
     launchPathField.setColumns(10);
 
     JButton browseLaunchPathBtn = new JButton("Browse...");
+    browseLaunchPathBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        launchPathField.setText(selectPath(launchPathField.getText()));
+      }
+    });
     settingsPanel.add(browseLaunchPathBtn, "6, 4");
 
     JLabel lblInstancePath = DefaultComponentFactory.getInstance().createLabel("Instance Path");
@@ -238,6 +244,11 @@ public class LaunchFrame extends JFrame {
     gameDirField.setColumns(10);
 
     JButton browseGameDirBtn = new JButton("Browse...");
+    browseGameDirBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        gameDirField.setText(selectPath(gameDirField.getText()));
+      }
+    });
     settingsPanel.add(browseGameDirBtn, "6, 6");
 
     JLabel lblJavaSettings = DefaultComponentFactory.getInstance().createTitle("Java Settings");
@@ -254,6 +265,11 @@ public class LaunchFrame extends JFrame {
     settingsPanel.add(javaPathField, "4, 10, fill, default");
 
     JButton autoDetectJavaBtn = new JButton("Auto-Detect");
+    autoDetectJavaBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        javaPathField.setText(MCInstaller.getDefaultJavaPath());
+      }
+    });
     settingsPanel.add(autoDetectJavaBtn, "6, 10");
 
     final JLabel lblMemory = DefaultComponentFactory.getInstance().createLabel("Memory");
@@ -495,9 +511,21 @@ public class LaunchFrame extends JFrame {
     return permGenBox;
   }
 
+  public String selectPath(String currentPath) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    int result = chooser.showOpenDialog(this);
+
+    if (result == JFileChooser.APPROVE_OPTION) {
+      return chooser.getSelectedFile().getAbsolutePath();
+    }
+    return currentPath;
+  }
+
   public JCheckBox getOptimizationBox() {
     return optimizationBox;
   }
+
   protected ImageIcon createImageIcon(String path, String description) {
     java.net.URL imgURL = ModpackBuilder.class.getResource(path);
     if (imgURL != null) {

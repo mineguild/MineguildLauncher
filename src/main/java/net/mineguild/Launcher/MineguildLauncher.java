@@ -19,6 +19,7 @@ import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.log.StdOutLogger;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
+import net.mineguild.Launcher.utils.AuthWorkDialog;
 import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
@@ -74,10 +75,12 @@ public class MineguildLauncher {
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         try {
+          AuthWorkDialog dl = new AuthWorkDialog(con);
+          dl.start();
           lFrame = new LaunchFrame();
-          lFrame.doVersionCheck();
           lFrame.loadSettings();
           lFrame.setVisible(true);
+          lFrame.doVersionCheck();
           parent = lFrame;
         } catch (Exception e) {
           e.printStackTrace();
