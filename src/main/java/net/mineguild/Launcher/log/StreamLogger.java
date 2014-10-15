@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import net.mineguild.Launcher.MineguildLauncher;
+
 public class StreamLogger extends Thread {
   private final InputStream is;
   private final LogEntry logInfo;
@@ -42,6 +44,11 @@ public class StreamLogger extends Thread {
               }
             }
             if (!skip) {
+              if(logBuffer.substring(0, newLineIndex).contains("#@!@# Game crashed! Crash report saved to: #@!@#")){
+                if(MineguildLauncher.getLFrame() != null){
+                  MineguildLauncher.getLFrame().setCrashed(true);
+                }
+              }
               Logger.log(new LogEntry().copyInformation(logInfo).message(
                   logBuffer.substring(0, newLineIndex)));
             }

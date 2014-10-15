@@ -30,6 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
 import net.mineguild.Builder.ModpackBuilder;
 import net.mineguild.Launcher.download.DownloadInfo;
@@ -71,6 +72,7 @@ public class LaunchFrame extends JFrame {
   private JButton btnUpdateModpack;
   private JButton btnLaunch;
   private boolean needsUpdate = false;
+  private @Setter boolean crashed = false;
   private JSlider memSlider;
   private JComboBox<String> permGenBox;
   private JCheckBox optimizationBox;
@@ -82,7 +84,7 @@ public class LaunchFrame extends JFrame {
   public LaunchFrame() {
     addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosed(WindowEvent e) {
+      public void windowClosing(WindowEvent e) {
         saveSettings();
       }
     });
@@ -476,6 +478,10 @@ public class LaunchFrame extends JFrame {
 
   public void mcStopped() {
     setVisible(true);
+    if(crashed){
+      JOptionPane.showMessageDialog(this, "It seems like Minecraft crashed!\nMaybe try to up your memory settings (PermGen&Memory) a bit.");
+      crashed = false;
+    }
     doVersionCheck();
   }
 

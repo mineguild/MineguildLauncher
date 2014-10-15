@@ -56,7 +56,7 @@ public class MCLauncher {
     List<String> arguments = Lists.newArrayList();
 
     Logger.logInfo("Java Path: " + javaPath);
-    Logger.logInfo("MMP Version: " + version);
+    Logger.logInfo("MC Version: " + version);
     arguments.add(javaPath);
 
     setMemory(arguments, settings);
