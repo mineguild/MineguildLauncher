@@ -36,6 +36,11 @@ public class AuthlibDLer extends SwingWorker<Boolean, Void> {
     Logger.logDebug("Loading Authlib...");
     if (!binDir.exists())
       binDir.mkdirs();
+    if (new File(binDir + File.separator + "authlib-" + authlibVersion + ".jar").exists()) {
+      setStatus("Adding Authlib to Classpath");
+      Logger.logInfo("Adding Authlib to Classpath");
+      return addToClasspath(binDir + File.separator + "authlib-" + authlibVersion + ".jar");
+    }
     if (!downloadJars()) {
       Logger.logError("Authlib Download Failed");
       if (!new File(binDir + File.separator + "authlib-" + authlibVersion + ".jar").exists())
@@ -68,6 +73,7 @@ public class AuthlibDLer extends SwingWorker<Boolean, Void> {
       }
     } catch (Throwable t) {
       Logger.logError(t.getMessage(), t);
+      f.delete();
       return false;
     }
     return true;
