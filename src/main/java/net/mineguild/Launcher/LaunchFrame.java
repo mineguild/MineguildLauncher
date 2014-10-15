@@ -478,8 +478,10 @@ public class LaunchFrame extends JFrame {
 
   public void mcStopped() {
     setVisible(true);
-    if(crashed){
-      JOptionPane.showMessageDialog(this, "It seems like Minecraft crashed!\nMaybe try to up your memory settings (PermGen&Memory) a bit.");
+    if (crashed) {
+      JOptionPane
+          .showMessageDialog(this,
+              "It seems like Minecraft crashed!\nMaybe try to up your memory settings (PermGen&Memory) a bit.");
       crashed = false;
     }
     doVersionCheck();

@@ -179,7 +179,7 @@ public class JavaFinder {
       for (JavaInfo java : javas) {
         if (java.isJava8()) {
           java8Found = true;
-          Logger.logInfo("Found java 8, skipping");
+          Logger.logDebug("Found java 8, skipping");
           continue;
         }
         if (java.supportedVersion) {
