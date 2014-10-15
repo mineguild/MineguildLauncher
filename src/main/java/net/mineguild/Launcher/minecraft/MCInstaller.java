@@ -224,13 +224,14 @@ public class MCInstaller {
 
   private static void launchMinecraft(ModPack pack, LoginResponse resp, JavaSettings set) {
     try {
-      File packDir = launchPath;
+      File minecraftDir = launchPath;
+      File instancePath = gameDirectory;
       String gameFolder = gameDirectory.getAbsolutePath();
-      File assetDir = new File(packDir, "assets");
-      File libDir = new File(packDir, "libraries");
-      File natDir = new File(packDir, "natives");
-      // Logger.logInfo("Setting up native libraries for " + pack.getName() + " v " + packVer +
-      // " MC " + packmcversion);
+      File assetDir = new File(minecraftDir, "assets");
+      File libDir = new File(minecraftDir, "libraries");
+      File natDir = new File(minecraftDir, "natives");
+      Logger.logInfo("Setting up native libraries for MMP v " + pack.getVersion() + " MC "
+          + packmcversion);
       if (!gameDirectory.exists())
         gameDirectory.mkdirs();
 
@@ -239,8 +240,8 @@ public class MCInstaller {
       }
       natDir.mkdirs();
       Version base =
-          JsonFactory.loadVersion(new File(packDir, "/versions/{MC_VER}/{MC_VER}.json".replace(
-              "{MC_VER}", packbasejson)));
+          JsonFactory.loadVersion(new File(minecraftDir, "/versions/{MC_VER}/{MC_VER}.json"
+              .replace("{MC_VER}", packbasejson)));
       byte[] buf = new byte[1024];
       for (Library lib : base.getLibraries()) {
         if (lib.natives != null) {
@@ -277,26 +278,23 @@ public class MCInstaller {
       }
       List<File> classpath = Lists.newArrayList();
       Version packjson = new Version();
-      if (new File(packDir, "pack.json").exists()) {
-        packjson = JsonFactory.loadVersion(new File(packDir, "pack.json"));
+      if (new File(instancePath, "pack.json").exists()) {
+        packjson = JsonFactory.loadVersion(new File(instancePath, "pack.json"));
         for (Library lib : packjson.getLibraries()) {
           Logger.logError(new File(libDir, lib.getPath()).getAbsolutePath());
           classpath.add(new File(libDir, lib.getPath()));
         }
-        // }
       } else {
         packjson = base;
       }
-      classpath.add(new File(packDir, "/versions/{MC_VER}/{MC_VER}.jar".replace("{MC_VER}",
+      classpath.add(new File(minecraftDir, "/versions/{MC_VER}/{MC_VER}.jar".replace("{MC_VER}",
           packmcversion)));
       for (Library lib : base.getLibraries()) {
         classpath.add(new File(libDir, lib.getPath()));
       }
 
-
-
       Process minecraftProcess =
-          MCLauncher.launchMinecraft(getDefaultJavaPath(), gameFolder, assetDir, natDir, classpath,
+          MCLauncher.launchMinecraft(set.getJavaPath(), gameFolder, assetDir, natDir, classpath,
               packjson.mainClass != null ? packjson.mainClass : base.mainClass,
               packjson.minecraftArguments != null ? packjson.minecraftArguments
                   : base.minecraftArguments,
