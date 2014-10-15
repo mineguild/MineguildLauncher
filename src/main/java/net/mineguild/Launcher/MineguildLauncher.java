@@ -45,7 +45,7 @@ public class MineguildLauncher {
 
   public static void main(String[] args) throws Exception {
     DownloadUtils.ssl_hack();
-    System.setProperty("java.net.preferIPv4Stack", "true");
+    //System.setProperty("java.net.preferIPv4Stack", "true");
     if (args.length >= 1) {
       if (args.length == 2) {
         forceUpdate = args[1].equals("--forceUpdate");
