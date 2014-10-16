@@ -80,6 +80,7 @@ public class LaunchFrame extends JFrame {
 
   /**
    * Create the frame.
+   * BLUB
    */
   public LaunchFrame() {
     addWindowListener(new WindowAdapter() {
