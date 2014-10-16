@@ -17,7 +17,6 @@ import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
 import net.mineguild.Launcher.log.Logger;
-import net.mineguild.Launcher.log.StdOutLogger;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
 import net.mineguild.Launcher.utils.AuthWorkDialog;

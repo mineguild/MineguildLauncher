@@ -56,6 +56,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
@@ -105,7 +106,7 @@ public class LaunchFrame extends JFrame {
 
     JPanel mainPanel = new JPanel();
     tabbedPane.addTab("Update/Launch", null, mainPanel, null);
-    mainPanel.setLayout(new MigLayout("", "[fill][grow][center]", "[grow][][][][grow][][]"));
+    mainPanel.setLayout(new MigLayout("", "[fill][grow][center]", "[grow][][][][][grow][][]"));
 
     JLabel lblLogo = new JLabel("");
     lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
@@ -190,8 +191,21 @@ public class LaunchFrame extends JFrame {
       }
     });
     mainPanel.add(btnRedoVersioncheck, "cell 2 3");
+    
+    JButton btnOpenBuilder = new JButton("Open Builder");
+    btnOpenBuilder.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        try {
+          ModpackBuilder.launch(MineguildLauncher.getSettings().getBuilderSettings());
+        } catch (Exception e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
+      }
+    });
+    mainPanel.add(btnOpenBuilder, "cell 2 4");
     btnUpdateModpack.setEnabled(false);
-    mainPanel.add(btnUpdateModpack, "cell 0 5 3 1");
+    mainPanel.add(btnUpdateModpack, "cell 0 6 3 1");
 
     btnLaunch = new JButton("Launch");
     btnLaunch.addActionListener(new ActionListener() {
@@ -200,7 +214,7 @@ public class LaunchFrame extends JFrame {
         launchMC();
       }
     });
-    mainPanel.add(btnLaunch, "cell 0 6 3 1");
+    mainPanel.add(btnLaunch, "cell 0 7 3 1");
 
     JPanel settingsPanel = new JPanel();
     tabbedPane.addTab("Settings", null, settingsPanel, null);
