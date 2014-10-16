@@ -196,6 +196,7 @@ public class LaunchFrame extends JFrame {
     btnOpenBuilder.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
+          setVisible(false);
           ModpackBuilder.launch(MineguildLauncher.getSettings().getBuilderSettings());
         } catch (Exception e1) {
           // TODO Auto-generated catch block
