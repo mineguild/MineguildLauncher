@@ -30,6 +30,7 @@ public class Settings {
   private @Expose @Getter @Setter boolean autoLogin;
   private @Expose @Getter @Setter BuilderSettings builderSettings;
   private @Expose @Getter @Setter JavaSettings javaSettings;
+  private @Expose @Getter @Setter long consoleBufferSize = 500;
 
   public Settings() {
     launchPath = new File(OSUtils.getLocalDir(), "modpack");
@@ -37,6 +38,7 @@ public class Settings {
     lastLocation = null;
     MCUser = "";
     MCPassword = "";
+    //consoleBufferSize = 500;
     lastSize = null;
     clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
     builderSettings = new BuilderSettings();

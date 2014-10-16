@@ -49,6 +49,8 @@ public class Console extends JFrame implements ILogListener {
   private SimpleAttributeSet RED = new SimpleAttributeSet();
   private SimpleAttributeSet YELLOW = new SimpleAttributeSet();
   private SimpleAttributeSet WHITE = new SimpleAttributeSet();
+  private long linesInserted;
+  private int totalLinesLength;
 
   public Console() {
     setTitle("Mineguild Launcher Console");
@@ -169,10 +171,8 @@ public class Console extends JFrame implements ILogListener {
       }
     });
     panel.add(killMCButton);
-    
-    
-    
-    
+
+
 
     displayArea = new JTextPane() {
       @Override
@@ -180,7 +180,7 @@ public class Console extends JFrame implements ILogListener {
         return true;
       }
     };
-    
+
     UIDefaults defaults = new UIDefaults();
     defaults.put("TextPane[Enabled].backgroundPainter", Color.BLACK);
     defaults.put("TextPane[Disabled].backgroundPainter", Color.BLACK);
@@ -221,6 +221,7 @@ public class Console extends JFrame implements ILogListener {
   synchronized private void refreshLogs() {
     try {
       displayAreaDoc.remove(0, displayAreaDoc.getLength());
+      linesInserted = 0;
     } catch (Exception ignored) {
     }
 
@@ -230,6 +231,11 @@ public class Console extends JFrame implements ILogListener {
           && (logLevel == LogLevel.DEBUG || logLevel.includes(entry.level))) {
         addEntry(entry, displayAreaDoc);
       }
+    }
+    try {
+      displayAreaDoc.remove(0, 1);
+    } catch (Exception e) {
+      // ignore
     }
   }
 
@@ -251,7 +257,16 @@ public class Console extends JFrame implements ILogListener {
     }
 
     try {
-      doc.insertString(doc.getLength(), entry.toString(logType) + "\n", col);
+      long BUFFER_SIZE =
+          MineguildLauncher.getSettings() != null ? MineguildLauncher.getSettings()
+              .getConsoleBufferSize() : 500;
+      if (linesInserted >= BUFFER_SIZE) {
+        doc.remove(0, totalLinesLength);
+        linesInserted--;
+      }
+      linesInserted++;
+      totalLinesLength = ("\n" + entry.toString(logType)).length();
+      doc.insertString(doc.getLength(), "\n" + entry.toString(logType), col);
     } catch (BadLocationException ingored) {
     }
 

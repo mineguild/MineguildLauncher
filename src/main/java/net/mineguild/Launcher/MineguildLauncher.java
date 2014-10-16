@@ -12,6 +12,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
@@ -39,13 +40,14 @@ public class MineguildLauncher {
   public static Console con;
   private static @Getter LaunchFrame lFrame;
   private static @Getter Frame parent;
+  private static @Getter @Setter LogWriter mcLogger = null;
   public static long totalDownloadTime = 0;
   private static @Getter Settings settings;
   public static LoginResponse res;
 
   public static void main(String[] args) throws Exception {
     DownloadUtils.ssl_hack();
-    //System.setProperty("java.net.preferIPv4Stack", "true");
+    // System.setProperty("java.net.preferIPv4Stack", "true");
     if (args.length >= 1) {
       if (args.length == 2) {
         forceUpdate = args[1].equals("--forceUpdate");
@@ -59,8 +61,12 @@ public class MineguildLauncher {
       }
       System.exit(0);
     }
-    Logger.addListener(new StdOutLogger());
-    Logger.addListener(new LogWriter(new File("launcher.log"), LogSource.LAUNCHER));
+    // Logger.addListener(new StdOutLogger());
+    mcLogger = new LogWriter(new File(OSUtils.getLocalDir(), "minecraft.log"), LogSource.EXTERNAL);
+    Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"),
+        LogSource.LAUNCHER));
+    Logger.addListener(mcLogger);
+
     try {
       for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {

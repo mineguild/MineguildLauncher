@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import net.mineguild.Launcher.MineguildLauncher;
+
 public class Logger {
   private static final List<ILogListener> listeners;
-  private static final long BUFFER_SIZE = 1000;
+  private static final long BUFFER_SIZE = 500;
   private static final Vector<LogEntry> logEntries;
   private static LogThread logThread;
 
@@ -22,6 +24,11 @@ public class Logger {
   }
 
   public static void log(LogEntry entry) {
+
+    while (logEntries.size() >= (MineguildLauncher.getSettings() != null ? MineguildLauncher
+        .getSettings().getConsoleBufferSize() : BUFFER_SIZE)) {
+      logEntries.remove(0);
+    }
     logEntries.add(entry);
     logThread.handleLog(entry);
   }
