@@ -330,9 +330,9 @@ public class MCInstaller {
           public void run() {
             if (MineguildLauncher.con != null)
               MineguildLauncher.con.minecraftStopped();
-            if (ModpackBuilder.launch != null)
+            if (ModpackBuilder.launch != null) {
               ModpackBuilder.launch.mcStopped();
-            if (MineguildLauncher.getLFrame() != null) {
+            } else if (MineguildLauncher.getLFrame() != null) {
               MineguildLauncher.getLFrame().mcStopped();
             }
             // LaunchFrame launchFrame = LaunchFrame.getInstance(); launchFrame.setVisible(true);

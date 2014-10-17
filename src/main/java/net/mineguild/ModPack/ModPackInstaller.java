@@ -17,6 +17,7 @@ import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadInfo.DLType;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
+import net.mineguild.Launcher.utils.ChecksumUtil.ModPackEntry;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
 
@@ -25,6 +26,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import com.google.common.collect.Lists;
+import com.sun.webkit.ThemeClient;
 
 public class ModPackInstaller {
 
@@ -174,6 +176,88 @@ public class ModPackInstaller {
           return null;
         }
       }).values();
+    } catch (Exception e) {
+      Logger.logError("Parallel execution exception", e);
+    }
+
+  }
+
+  /**
+   * Clears a folder of all files that are not in the ModPack, or not matching the needed side.
+   * 
+   * @param target Directory to clear.
+   * @param pack The {@link ModPack} to check against.
+   * @param installedPack The currently installed {@link ModPack}.
+   * @param backupDirectory The place to backup the cleared files to. No backup if <code>null</code>
+   * 
+   * @throws NullPointerException if pack or target <code>null</code>.
+   */
+  public static synchronized void clearFolder(final File target, final ModPack installedPack,
+      final ModPack pack, final Side side, final File backupDirectory) throws IOException {
+    checkNotNull(target);
+    checkNotNull(pack);
+    checkNotNull(installedPack);
+    if (!target.exists()) {
+      throw new FileNotFoundException(
+          String.format("'%s' doesn't exist!", target.getAbsolutePath()));
+    }
+    if (!target.isDirectory()) {
+      throw new IOException(String.format("'%s' is no valid directory!", target.getAbsolutePath()));
+    }
+    boolean temp = false;
+    try {
+      temp = !backupDirectory.equals(null);
+    } catch (Exception ignored) {
+    }
+    final boolean doBackup = temp;
+
+    if (doBackup) {
+      if (!backupDirectory.exists() || !backupDirectory.isDirectory()) {
+        backupDirectory.delete();
+        backupDirectory.mkdirs();
+      }
+    }
+    Parallel.ForEach<Entry<String, ModPackFile>, Void> p =
+        new Parallel.ForEach<Entry<String, ModPackFile>, Void>(installedPack.getFiles().entrySet());
+    try {
+      p.withFixedThreads(OSUtils.getNumCores() * 2)
+          .apply(new Parallel.F<Entry<String, ModPackFile>, Void>() {
+
+            @Override
+            public Void apply(Entry<String, ModPackFile> entry) {
+              /*
+               * try {
+                File localFile = new File(target, entry.getKey());
+                
+                /*
+                 * String hash = ChecksumUtil.getMD5(f); Map<String, ModPackFile> files =
+                 * pack.getFilesByHash(hash); if (files.isEmpty()) { if (doBackup) {
+                 * Logger.logInfo(String.format("Moving file %s to backup folder - not in pack!",
+                 * f.getName())); try { FileUtils.moveFileToDirectory(f, new File(backupDirectory,
+                 * f.getParent()), true); } catch (FileExistsException e2) {
+                 * Logger.logInfo(String.format("Not moving file %s!", f.getName()), e2);
+                 * f.delete(); } } else {
+                 * Logger.logInfo(String.format("Deleting file %s - not in pack!", f.getName()));
+                 * f.delete(); } } else { for (ModPackFile packFile : files.values()) { if
+                 * (packFile.getSide() == Side.UNIVERSAL || side == Side.BOTH || packFile.getSide()
+                 * == side) { Logger.logDebug(String.format("Leaving %s in there - side matches",
+                 * f.getName())); } else { if (doBackup) { Logger.logInfo(String.format(
+                 * "Moving file %s to backup folder - side doesn't match!", f.getName())); try {
+                 * FileUtils.moveFileToDirectory(f, new File(backupDirectory, f.getParent()), true);
+                 * } catch (FileExistsException e2) {
+                 * Logger.logInfo(String.format("Not moving file %s!", f.getName()), e2);
+                 * f.delete(); } } else {
+                 * Logger.logInfo(String.format("Deleting file %s - side doesn't match!",
+                 * f.getName())); f.delete(); } } } }
+                 
+              } catch (IOException e1) {
+                //Logger.logError(String.format("Unable to check hash of %s!", f.getName()), e1);
+              }
+              */
+
+              return null;
+            }
+          }).values();
     } catch (Exception e) {
       Logger.logError("Parallel execution exception", e);
     }
