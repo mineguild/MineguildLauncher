@@ -79,6 +79,7 @@ public class LaunchFrame extends JFrame {
   private JComboBox<String> permGenBox;
   private JCheckBox optimizationBox;
   private JSpinner bufferSizeSpinner;
+  private final String[] permGenSizes = new String[] {"192m", "256m", "512m", "1024m"};
 
 
   /**
@@ -100,6 +101,7 @@ public class LaunchFrame extends JFrame {
     setContentPane(contentPane);
 
     JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+    tabbedPane.setFocusable(false);
     tabbedPane.setBorder(null);
     contentPane.add(tabbedPane, BorderLayout.CENTER);
 
@@ -190,7 +192,7 @@ public class LaunchFrame extends JFrame {
       }
     });
     mainPanel.add(btnRedoVersioncheck, "cell 2 3");
-    
+
     JButton btnOpenBuilder = new JButton("Open Builder");
     btnOpenBuilder.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -326,8 +328,7 @@ public class LaunchFrame extends JFrame {
     settingsPanel.add(lblPermgen, "2, 16, right, default");
 
     permGenBox = new JComboBox<String>();
-    permGenBox.setModel(new DefaultComboBoxModel<String>(new String[] {"128m", "192m", "256m",
-        "512m", "1024m"}));
+    permGenBox.setModel(new DefaultComboBoxModel<String>(permGenSizes));
     settingsPanel.add(permGenBox, "4, 16, fill, default");
 
     JLabel lblOptimizationArgs =
@@ -381,7 +382,12 @@ public class LaunchFrame extends JFrame {
     }
 
     // Java settings
-    permGenBox.setSelectedItem(jSet.getPermGen());
+    if (Lists.newArrayList(permGenSizes).contains(jSet.getPermGen())) {
+      permGenBox.setSelectedItem(jSet.getPermGen());
+    } else {
+      jSet.setPermGen((String) permGenBox.getSelectedItem());
+    }
+
     memSlider.setValue(jSet.getMaxMemory() / 512);
     javaPathField.setText(jSet.getJavaPath());
     optimizationBox.setSelected(jSet.isOptimizationArgumentsUsed());
