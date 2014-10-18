@@ -17,7 +17,6 @@ import net.mineguild.Launcher.download.DownloadInfo;
 import net.mineguild.Launcher.download.DownloadInfo.DLType;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
-import net.mineguild.Launcher.utils.ChecksumUtil.ModPackEntry;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
 
@@ -26,7 +25,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import com.google.common.collect.Lists;
-import com.sun.webkit.ThemeClient;
 
 public class ModPackInstaller {
 
