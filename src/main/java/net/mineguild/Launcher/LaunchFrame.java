@@ -450,7 +450,12 @@ public class LaunchFrame extends JFrame {
     Logger.logInfo("Updating to Remote");
     File modsDir = new File(MineguildLauncher.getSettings().getInstancePath(), "mods");
     try {
-      ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, null);
+      if (!MineguildLauncher.forceUpdate) {
+        ModPackInstaller.clearFolder(MineguildLauncher.getSettings().getInstancePath(), localPack,
+            remotePack, Side.CLIENT, null);
+      } else {
+        ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, null);
+      }
     } catch (IOException e) {
       Logger.logError("Couldn't clear folder!", e);
     }

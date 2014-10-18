@@ -223,36 +223,38 @@ public class ModPackInstaller {
 
             @Override
             public Void apply(Entry<String, ModPackFile> entry) {
-              /*
-               * try {
+              try {
+                boolean isInNewPack =
+                    pack.getFileByPath(entry.getKey()) == null ? false : pack
+                        .getFileByPath(entry.getKey()).getHash().equals(entry.getValue().getHash());
+                boolean delete = false;
                 File localFile = new File(target, entry.getKey());
-                
-                /*
-                 * String hash = ChecksumUtil.getMD5(f); Map<String, ModPackFile> files =
-                 * pack.getFilesByHash(hash); if (files.isEmpty()) { if (doBackup) {
-                 * Logger.logInfo(String.format("Moving file %s to backup folder - not in pack!",
-                 * f.getName())); try { FileUtils.moveFileToDirectory(f, new File(backupDirectory,
-                 * f.getParent()), true); } catch (FileExistsException e2) {
-                 * Logger.logInfo(String.format("Not moving file %s!", f.getName()), e2);
-                 * f.delete(); } } else {
-                 * Logger.logInfo(String.format("Deleting file %s - not in pack!", f.getName()));
-                 * f.delete(); } } else { for (ModPackFile packFile : files.values()) { if
-                 * (packFile.getSide() == Side.UNIVERSAL || side == Side.BOTH || packFile.getSide()
-                 * == side) { Logger.logDebug(String.format("Leaving %s in there - side matches",
-                 * f.getName())); } else { if (doBackup) { Logger.logInfo(String.format(
-                 * "Moving file %s to backup folder - side doesn't match!", f.getName())); try {
-                 * FileUtils.moveFileToDirectory(f, new File(backupDirectory, f.getParent()), true);
-                 * } catch (FileExistsException e2) {
-                 * Logger.logInfo(String.format("Not moving file %s!", f.getName()), e2);
-                 * f.delete(); } } else {
-                 * Logger.logInfo(String.format("Deleting file %s - side doesn't match!",
-                 * f.getName())); f.delete(); } } } }
-                 
-              } catch (IOException e1) {
-                //Logger.logError(String.format("Unable to check hash of %s!", f.getName()), e1);
-              }
-              */
 
+                if (localFile.exists() && isInNewPack) {
+                  String hash = ChecksumUtil.getChecksum(localFile);
+                  if (!entry.getValue().getHash().equals(hash)) {
+                    delete = true;
+                  }
+                } else {
+                  delete = true;
+                }
+
+                if (delete) {
+                  if (doBackup) {
+                    try {
+                      FileUtils.moveFileToDirectory(localFile,
+                          new File(backupDirectory, localFile.getParent()), false);
+                    } catch (Exception e) {
+                      localFile.delete();
+                    }
+                  } else {
+                    localFile.delete();
+                  }
+                }
+
+              } catch (IOException e) {
+                Logger.logError("Error during clearFolder", e);
+              }
               return null;
             }
           }).values();
