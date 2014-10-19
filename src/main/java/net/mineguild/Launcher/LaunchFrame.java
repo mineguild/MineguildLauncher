@@ -93,6 +93,7 @@ public class LaunchFrame extends JFrame {
       }
     });
     setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
+    setTitle("Mineguild Launcher");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     contentPane = new JPanel();
