@@ -21,7 +21,7 @@ public class LogWriter implements ILogListener {
 
   @Override
   public void onLogEvent(LogEntry entry) {
-    if (entry.source == source) {
+    if (source == LogSource.ALL || entry.source == source) {
       try {
         logWriter.write(entry.toString(LogType.EXTENDED) + System.getProperty("line.separator"));
         logWriter.flush();

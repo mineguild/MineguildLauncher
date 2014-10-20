@@ -16,6 +16,8 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -66,16 +68,17 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
       @Override
       public void actionPerformed(ActionEvent e) {
         canceled = true;
-        task.cancel(false);
+        task.cancel(true);
         dispose();
       }
     });
     addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosed(WindowEvent e) {
-        super.windowClosed(e);
+      public void windowClosing(WindowEvent e) {
+        // super.windowClosed(e);
         canceled = true;
-        task.cancel(false);
+        System.out.println("Window closed");
+        task.cancel(true);
       }
     });
   }
@@ -102,12 +105,17 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
       boolean success = task.get();
       dispose();
       return success;
-    } catch (Exception e) {
-      Logger.logError("Download didnt work!", e);
-      e.printStackTrace();
+    } catch (CancellationException e) {
+      Logger.logError("Download was cancelled!", e);
+
+    } catch (InterruptedException e) {
+      Logger.logError("Download was interrupted!", e);
+    } catch (ExecutionException e) {
+      Logger.logError("Execution of Download failed!", e);
+    } finally {
       dispose();
-      return false;
     }
+    return false;
   }
 
 
@@ -154,7 +162,7 @@ public class MultithreadedDownloadDialog extends JDialog implements PropertyChan
     buttonPanel.setLayout(new BorderLayout(0, 0));
     getContentPane().add(buttonPanel, "cell 0 1,grow");
     buttonCancel = new JButton("Cancel");
-    buttonPanel.add(buttonCancel, BorderLayout.CENTER);
+    buttonPanel.add(buttonCancel, BorderLayout.SOUTH);
 
     scrollPane = new JScrollPane();
     scrollPane.setViewportBorder(null);

@@ -84,6 +84,55 @@ public class ModPackInstaller {
     return result;
   }
 
+  public static synchronized List<DownloadInfo> checkNeededFiles(final File installDirectory,
+      final ModPack localPack, ModPack remotePack, final Side side) {
+    try {
+      List<DownloadInfo> result =
+          (List<DownloadInfo>) new Parallel.ForEach<Entry<String, ModPackFile>, DownloadInfo>(
+              remotePack.getFiles().entrySet()).withFixedThreads(OSUtils.getNumCores() * 2)
+              .apply(new Parallel.F<Map.Entry<String, ModPackFile>, DownloadInfo>() {
+
+                @Override
+                public DownloadInfo apply(Entry<String, ModPackFile> e) {
+                  // boolean isInInstalled = false;
+                  ModPackFile packFile = e.getValue();
+                  /*
+                   * if (localPack.getFileByPath(e.getKey()) != null) { isInInstalled =
+                   * localPack.getFileByPath(e.getKey()).getHash() .equals(e.getValue().getHash());
+                   * }
+                   */
+                  File localFile = new File(installDirectory, e.getKey());
+                  if (side == Side.BOTH || packFile.getSide() == Side.UNIVERSAL
+                      || side == packFile.getSide()) {
+                    Logger.logDebug(String.format("Keeping %s - side matches", localFile.getName()));
+                  } else {
+                    localFile.delete();
+                  }
+
+                  try {
+                    if (!localFile.exists()) {
+                      String dlPath = packFile.getHash().substring(0, 2) + "/" + packFile.getHash();
+                      DownloadInfo ret =
+                          new DownloadInfo(new URL(Constants.MG_MMP_FILES + dlPath), localFile,
+                              localFile.getName(), Lists.newArrayList(packFile.getHash()), "md5",
+                              DLType.ContentMD5, DLType.NONE);
+                      ret.size = packFile.getSize();
+                      return ret;
+                    }
+                  } catch (MalformedURLException e2) {
+                    Logger.logError("Unable to add url!", e2);
+                  }
+
+                  return null;
+                }
+              }).values();
+      return result;
+    } catch (Exception e) {
+      Logger.logError("Error during multithreaded action!", e);
+    }
+
+    return null;
+  }
 
   /**
    * Clears a folder of all files that are not in the ModPack, or not matching the needed side.
@@ -235,7 +284,7 @@ public class ModPackInstaller {
                   if (!entry.getValue().getHash().equals(hash)) {
                     delete = true;
                   }
-                } else {
+                } else if (localFile.exists()) {
                   delete = true;
                 }
 

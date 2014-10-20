@@ -81,7 +81,15 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
       }
       executor.shutdown();
       try {
-        executor.awaitTermination(10 * downloads.size(), TimeUnit.SECONDS);
+        boolean done = false;
+        while (!isCancelled() && !done) {
+          done = executor.awaitTermination(100, TimeUnit.MILLISECONDS);
+        }
+        if (isCancelled()) {
+          executor.shutdownNow();
+          Thread.currentThread().interrupt();
+        }
+
       } catch (InterruptedException e) {
         executor.shutdownNow();
         Thread.currentThread().interrupt();
@@ -363,8 +371,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
       List<String> remoteHash = asset.hash;
       int attempt = 0;
       final String threadId = Thread.currentThread().getName();
-      System.out.println(threadId);
-      System.out.println(Thread.currentThread().getId());
 
       final int attempts = 5;
       while (!downloadSuccess && (attempt < attempts)) {
@@ -372,7 +378,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           if (remoteHash == null) {
             remoteHash = Lists.newArrayList();
           }
-          if (instance.isCancelled()) {
+          if (Thread.currentThread().isInterrupted()) {
             return;
           }
           if (attempt++ > 0) {
@@ -457,7 +463,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             instance.addIndividualProgress(threadId, asset.name);
           }
           while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {
-            if (AssetDownloader.instance.isCancelled()) {
+            if (Thread.currentThread().isInterrupted()) {
               input.close();
               output.close();
               asset.local.delete();

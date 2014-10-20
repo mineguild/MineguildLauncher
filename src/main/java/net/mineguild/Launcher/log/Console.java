@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -26,14 +27,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import org.apache.commons.io.FileUtils;
+
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.minecraft.MCLauncher;
+import net.mineguild.Launcher.utils.OSUtils;
 
 @SuppressWarnings("serial")
 public class Console extends JFrame implements ILogListener {
@@ -49,8 +56,6 @@ public class Console extends JFrame implements ILogListener {
   private SimpleAttributeSet RED = new SimpleAttributeSet();
   private SimpleAttributeSet YELLOW = new SimpleAttributeSet();
   private SimpleAttributeSet WHITE = new SimpleAttributeSet();
-  private long linesInserted;
-  private int totalLinesLength;
 
   public Console() {
     setTitle("Mineguild Launcher Console");
@@ -95,7 +100,9 @@ public class Console extends JFrame implements ILogListener {
     clipboard.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
-        JOptionPane pane = new JOptionPane("Do you really want to do that?");
+        JOptionPane pane =
+            new JOptionPane(
+                "This will copy the contents of the log to your clipboard! Are you sure you want to do that?");
         Object[] options = new String[] {"Yes", "No"};
         pane.setOptions(options);
         JDialog dialog = pane.createDialog(new JFrame(), "Copy to clipboard");
@@ -108,8 +115,16 @@ public class Console extends JFrame implements ILogListener {
           }
         }
         if (result == 0) {
+          File logFile = new File(OSUtils.getLocalDir(), "combined.log");
+          String log = null;
+          try {
+            log = FileUtils.readFileToString(logFile);
+          } catch (Exception e) {
+            Logger.logError("Unable to read logfile! Using internally stored messages", e);
+            log = Logger.getLogs();
+          }
           StringSelection stringSelection =
-              new StringSelection("MG Launcher logs:\n" + Logger.getLogs() + "["
+              new StringSelection("MG Launcher logs:\n" + log + "["
                   + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "]"
                   + " Logs copied to clipboard");
           Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -188,6 +203,34 @@ public class Console extends JFrame implements ILogListener {
     displayArea.putClientProperty("Nimbus.Overrides.InheritDefaults", true);
     displayArea.setBackground(Color.BLACK);
     displayArea.setFont(FONT);
+    displayArea.getDocument().addDocumentListener(new DocumentListener() {
+
+      @Override
+      public void removeUpdate(DocumentEvent e) {}
+
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            long BUFFER_SIZE =
+                MineguildLauncher.getSettings() != null ? MineguildLauncher.getSettings()
+                    .getConsoleBufferSize() : 500;
+            Document document = displayAreaDoc;
+            Element root = document.getDefaultRootElement();
+            while (root.getElementCount() > BUFFER_SIZE) {
+              try {
+                document.remove(0, root.getElement(0).getEndOffset());
+              } catch (BadLocationException localBadLocationException) {
+              }
+            }
+          }
+        });
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {}
+    });
+    displayArea.setBorder(null);
     displayArea.setMargin(null);
     displayAreaDoc = displayArea.getDocument();
 
@@ -195,6 +238,7 @@ public class Console extends JFrame implements ILogListener {
     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
     JScrollPane scrollPane = new JScrollPane(displayArea);
+    scrollPane.setBorder(null);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -221,7 +265,6 @@ public class Console extends JFrame implements ILogListener {
   synchronized private void refreshLogs() {
     try {
       displayAreaDoc.remove(0, displayAreaDoc.getLength());
-      linesInserted = 0;
     } catch (Exception ignored) {
     }
 
@@ -257,15 +300,6 @@ public class Console extends JFrame implements ILogListener {
     }
 
     try {
-      long BUFFER_SIZE =
-          MineguildLauncher.getSettings() != null ? MineguildLauncher.getSettings()
-              .getConsoleBufferSize() : 500;
-      if (linesInserted >= BUFFER_SIZE) {
-        doc.remove(0, totalLinesLength);
-        linesInserted--;
-      }
-      linesInserted++;
-      totalLinesLength = ("\n" + entry.toString(logType)).length();
       doc.insertString(doc.getLength(), "\n" + entry.toString(logType), col);
     } catch (BadLocationException ingored) {
     }

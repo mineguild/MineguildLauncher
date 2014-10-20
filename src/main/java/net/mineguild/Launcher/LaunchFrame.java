@@ -461,9 +461,13 @@ public class LaunchFrame extends JFrame {
     }
     List<DownloadInfo> dlinfo = Lists.newArrayList();
     try {
-      dlinfo =
+      if(MineguildLauncher.forceUpdate){
+        dlinfo =
           ModPackInstaller.checkNeededFiles(MineguildLauncher.getSettings().getInstancePath(),
               remotePack, Side.CLIENT);
+      } else {
+        dlinfo = ModPackInstaller.checkNeededFiles(MineguildLauncher.getSettings().getInstancePath(), localPack, remotePack, Side.CLIENT);
+      }
     } catch (Exception e) {
       Logger.logError("Error during ModPack hash checking!", e);
     }
@@ -498,6 +502,13 @@ public class LaunchFrame extends JFrame {
         try {
           getBtnLaunch().setEnabled(false);
           getBtnUpdateModpack().setEnabled(false);
+          java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                MineguildLauncher.con.toFront();
+                MineguildLauncher.con.repaint();
+            }
+        });
           MCInstaller.setup(localPack, MineguildLauncher.getSettings().getLaunchPath(),
               MineguildLauncher.getSettings().getInstancePath(), MineguildLauncher.getSettings()
                   .getJavaSettings(), MineguildLauncher.res, true);
@@ -518,6 +529,8 @@ public class LaunchFrame extends JFrame {
 
   public void mcStopped() {
     setVisible(true);
+    toFront();
+    repaint();
     if (crashed) {
       JOptionPane
           .showMessageDialog(this,
