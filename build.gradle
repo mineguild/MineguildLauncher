@@ -12,9 +12,7 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'launch4j'
 apply plugin: 'eclipse'
-apply plugin: 'macAppBundle'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 
@@ -26,16 +24,6 @@ repositories {
     maven { 
     	url "https://libraries.minecraft.net/";
   	}
-}
-
-launch4j {
-    mainClassName = "net.mineguild.Launcher.MineguildLauncher"
-    jar = "lib/MineguildLauncher-" + project.version + ".jar"
-    icon = sourceSets.main.resources.srcDirs[0].getAbsolutePath() + File.separator + "icon.ico"
-}
-
-macAppBundle {
-    mainClassName = "net.mineguild.Launcher.MineguildLauncher"
 }
 
 dependencies {
@@ -64,7 +52,6 @@ shadowJar {
 }
 
 
-
 task fixJars(type: Copy) {
     from("${buildDir}/libs/")
     destinationDir = file("${buildDir}/libs/")
@@ -74,8 +61,6 @@ task fixJars(type: Copy) {
     rename(/(.+)-all(.+)/, '$1$2')
 }
 
-tasks.copyL4jLib.dependsOn.remove(tasks.jar)
-tasks.copyL4jLib.dependsOn tasks.shadowJar
 sourceCompatibility = 1.6
 
 jar {
