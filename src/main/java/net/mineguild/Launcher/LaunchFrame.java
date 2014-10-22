@@ -93,9 +93,8 @@ public class LaunchFrame extends JFrame {
       }
     });
     setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
-    setTitle("Mineguild Launcher");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setTitle("Mineguild Launcher");
+
     contentPane = new JPanel();
     contentPane.setBorder(null);
     contentPane.setLayout(new BorderLayout(0, 0));
@@ -221,41 +220,25 @@ public class LaunchFrame extends JFrame {
 
     JPanel settingsPanel = new JPanel();
     tabbedPane.addTab("Settings", null, settingsPanel, null);
-    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {
-        FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("right:default"),
-        FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,
-        FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,},
-      new RowSpec[] {
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),}));
+    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("right:default"), FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,}, new RowSpec[] {FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"), FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),}));
 
     JLabel lblGeneralSettings =
         DefaultComponentFactory.getInstance().createTitle("General Settings");
     settingsPanel.add(lblGeneralSettings, "2, 2, left, default");
 
     JSeparator separator_1 = new JSeparator();
-    settingsPanel.add(separator_1, "3, 2, 6, 1");
+    settingsPanel.add(separator_1, "3, 2, 4, 1");
 
     JLabel lblMinecraftFilesPath =
         DefaultComponentFactory.getInstance().createLabel("Minecraft Files Path");
@@ -272,10 +255,7 @@ public class LaunchFrame extends JFrame {
         launchPathField.setText(selectPath(launchPathField.getText()));
       }
     });
-    
-    JButton mcFilesOpen = new JButton("Open..");
-    settingsPanel.add(mcFilesOpen, "6, 4");
-    settingsPanel.add(browseLaunchPathBtn, "8, 4");
+    settingsPanel.add(browseLaunchPathBtn, "6, 4");
 
     JLabel lblInstancePath = DefaultComponentFactory.getInstance().createLabel("Instance Path");
     lblInstancePath.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -291,10 +271,7 @@ public class LaunchFrame extends JFrame {
         gameDirField.setText(selectPath(gameDirField.getText()));
       }
     });
-    
-    JButton instancePathOpen = new JButton("Open..");
-    settingsPanel.add(instancePathOpen, "6, 6");
-    settingsPanel.add(browseGameDirBtn, "8, 6");
+    settingsPanel.add(browseGameDirBtn, "6, 6");
 
     JLabel lblConsoleBufferSize =
         DefaultComponentFactory.getInstance().createLabel("Console Buffer Size");
@@ -302,20 +279,20 @@ public class LaunchFrame extends JFrame {
 
     bufferSizeSpinner = new JSpinner();
     bufferSizeSpinner.setModel(new SpinnerNumberModel(new Long(0), new Long(0), null, new Long(1)));
-    settingsPanel.add(bufferSizeSpinner, "4, 8, 3, 1");
+    settingsPanel.add(bufferSizeSpinner, "4, 8");
 
     JLabel lblJavaSettings = DefaultComponentFactory.getInstance().createTitle("Java Settings");
     settingsPanel.add(lblJavaSettings, "2, 10, left, default");
 
     JSeparator separator = new JSeparator();
-    settingsPanel.add(separator, "3, 10, 6, 1");
+    settingsPanel.add(separator, "3, 10, 4, 1");
 
     JLabel lblJavaPath = DefaultComponentFactory.getInstance().createLabel("Java Path");
     settingsPanel.add(lblJavaPath, "2, 12, right, default");
 
     javaPathField = new JTextField();
     javaPathField.setColumns(10);
-    settingsPanel.add(javaPathField, "4, 12, 3, 1, fill, default");
+    settingsPanel.add(javaPathField, "4, 12, fill, default");
 
     JButton autoDetectJavaBtn = new JButton("Auto-Detect");
     autoDetectJavaBtn.addActionListener(new ActionListener() {
@@ -323,7 +300,7 @@ public class LaunchFrame extends JFrame {
         javaPathField.setText(MCInstaller.getDefaultJavaPath());
       }
     });
-    settingsPanel.add(autoDetectJavaBtn, "8, 12");
+    settingsPanel.add(autoDetectJavaBtn, "6, 12");
 
     final JLabel lblMemory = DefaultComponentFactory.getInstance().createLabel("Memory");
     settingsPanel.add(lblMemory, "2, 14");
@@ -345,21 +322,21 @@ public class LaunchFrame extends JFrame {
         lblMemory.setText("Memory(" + ((float) source.getValue() * 512) / 1024.0 + "gb)");
       }
     });
-    settingsPanel.add(memSlider, "4, 14, 3, 1");
+    settingsPanel.add(memSlider, "4, 14");
 
     JLabel lblPermgen = DefaultComponentFactory.getInstance().createLabel("PermGen");
     settingsPanel.add(lblPermgen, "2, 16, right, default");
 
     permGenBox = new JComboBox<String>();
     permGenBox.setModel(new DefaultComboBoxModel<String>(permGenSizes));
-    settingsPanel.add(permGenBox, "4, 16, 3, 1, fill, default");
+    settingsPanel.add(permGenBox, "4, 16, fill, default");
 
     JLabel lblOptimizationArgs =
         DefaultComponentFactory.getInstance().createLabel("Optimization Args");
     settingsPanel.add(lblOptimizationArgs, "2, 18");
 
     optimizationBox = new JCheckBox("Use optimization arguments");
-    settingsPanel.add(optimizationBox, "4, 18, 3, 1");
+    settingsPanel.add(optimizationBox, "4, 18");
     if (MineguildLauncher.getSettings() == null) {
       MineguildLauncher.loadSettings();
       MineguildLauncher.addSaveHook();
