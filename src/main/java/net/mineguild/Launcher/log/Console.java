@@ -41,6 +41,7 @@ import org.apache.commons.io.FileUtils;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.minecraft.MCLauncher;
 import net.mineguild.Launcher.utils.OSUtils;
+import net.mineguild.Launcher.utils.PastebinPoster;
 
 @SuppressWarnings("serial")
 public class Console extends JFrame implements ILogListener {
@@ -89,8 +90,16 @@ public class Console extends JFrame implements ILogListener {
           }
         }
         if (result == 0) {
-          // PastebinPoster thread = new PastebinPoster();
-          // thread.start();
+          File logFile = new File(OSUtils.getLocalDir(), "combined.log");
+          String log = null;
+          try {
+            log = FileUtils.readFileToString(logFile);
+          } catch (Exception e) {
+            Logger.logError("Unable to read logfile! Using internally stored messages", e);
+            log = Logger.getLogs();
+          }
+          PastebinPoster poster = new PastebinPoster(log);
+          poster.execute();
         }
       }
     });

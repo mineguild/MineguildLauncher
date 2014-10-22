@@ -26,6 +26,10 @@ public class Constants {
   public static final String MG_INFO_SCRIPT = MG_MMP + "php/info.php";
   public static final String MG_GET_SCRIPT = MG_MMP + "php/getfile.php";
   public static final String MG_LOGIN_SCRIPT = MG_MMP + "php/checkuser.php";
+  
+  
+  public static final String PASTEBIN_API_KEY = "f06ed5fdcd107f2f7fde5f0f67e7a414";
+  public static final String PASTEBIN_POST_URL = "http://pastebin.com/api/api_post.php";
 
   public static final String AUTHLIB_VERSION = "1.5.16";
 
