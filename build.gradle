@@ -6,7 +6,6 @@ buildscript {
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.0.3'
         classpath group: 'edu.sc.seis.gradle', name: 'launch4j', version: '1.0.6'
-        classpath 'edu.sc.seis.gradle:macappbundle:2.0.0'
     }
 }
 
