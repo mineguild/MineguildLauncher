@@ -10,6 +10,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -65,18 +66,8 @@ public class MineguildLauncher {
     Logger
         .addListener(new LogWriter(new File(OSUtils.getLocalDir(), "combined.log"), LogSource.ALL));
     Logger.addListener(mcLogger);
-
-    try {
-      for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-        if ("Nimbus".equals(info.getName())) {
-          UIManager.setLookAndFeel(info.getClassName());
-          break;
-        }
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    
+    setNimbus();
     EventQueue.invokeLater(new Runnable() {
       public void run() {
         try {
@@ -198,6 +189,39 @@ public class MineguildLauncher {
       JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
     } catch (IOException e) {
       Logger.logError("Unable to save settings!", e);
+    }
+  }
+  
+  public static void setNimbus() {
+    try {
+      for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+        if ("Nimbus".equals(info.getName())) {
+          UIManager.setLookAndFeel(info.getClassName());
+          break;
+        }
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public static void setSystem() {
+    try {
+      UIManager.setLookAndFeel(
+          UIManager.getSystemLookAndFeelClassName());
+    } catch (ClassNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (UnsupportedLookAndFeelException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 
