@@ -13,6 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -86,6 +87,7 @@ public class LaunchFrame extends JFrame {
   private JCheckBox optimizationBox;
   private JSpinner bufferSizeSpinner;
   private final String[] permGenSizes = new String[] {"192m", "256m", "512m", "1024m"};
+  private JLabel localDirLabel;
 
 
   /**
@@ -99,7 +101,6 @@ public class LaunchFrame extends JFrame {
       }
     });
     setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
-    setTitle("Mineguild Launcher");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setTitle("Mineguild Launcher");
     contentPane = new JPanel();
@@ -120,7 +121,20 @@ public class LaunchFrame extends JFrame {
     lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
     mainPanel.add(lblLogo, "cell 0 0 3 1,alignx center,aligny center");
     lblLogo.setIcon(createImageIcon("/Logo.png", "MG LOGO"));
+    lblLogo.setToolTipText("Open Mineguild Homepage");
+    lblLogo.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    lblLogo.addMouseListener(new MouseAdapter() {
 
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        try {
+          Desktop.getDesktop().browse(new URI("https://mineguild.net"));
+        } catch (Exception e1){
+          Logger.logError("Can't open MG Homepage!", e1);
+        }
+      }
+      
+    });
     JLabel lblInstalledVersion = new JLabel("Installed Version:");
     lblInstalledVersion.setHorizontalAlignment(SwingConstants.RIGHT);
     mainPanel.add(lblInstalledVersion, "flowx,cell 0 1");
@@ -184,27 +198,27 @@ public class LaunchFrame extends JFrame {
         doVersionCheck();
       }
     });
-    
-        JLabel lblLocalDirectory = new JLabel("Local Directory:");
-        mainPanel.add(lblLocalDirectory, "cell 0 3");
-    
-        JLabel localDirLabel =
-            new JLabel("<html><FONT color=\"#000099\"><U>" + OSUtils.getLocalDir().getAbsolutePath()
-                + "</U></FONT></html>");
-        localDirLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        localDirLabel.addMouseListener(new MouseAdapter() {
-          @Override
-          public void mouseClicked(MouseEvent e) {
 
-            try {
-              Desktop.getDesktop().open(OSUtils.getLocalDir());
-            } catch (IOException e1) {
-              Logger.logError("Unable to open local dir!", e1);
-            }
+    JLabel lblLocalDirectory = new JLabel("Local Directory:");
+    mainPanel.add(lblLocalDirectory, "cell 0 3");
 
-          }
-        });
-        mainPanel.add(localDirLabel, "cell 1 3");
+    localDirLabel =
+        new JLabel("<html><FONT color=\"#000099\"><U>" + OSUtils.getLocalDir().getAbsolutePath()
+            + "</U></FONT></html>");
+    localDirLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    localDirLabel.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+
+        try {
+          Desktop.getDesktop().open(OSUtils.getLocalDir());
+        } catch (IOException e1) {
+          Logger.logError("Unable to open local dir!", e1);
+        }
+
+      }
+    });
+    mainPanel.add(localDirLabel, "cell 1 3");
     mainPanel.add(btnRedoVersioncheck, "cell 2 3");
 
     JButton btnOpenBuilder = new JButton("Open Builder");
@@ -218,21 +232,21 @@ public class LaunchFrame extends JFrame {
         }
       }
     });
-    
-        chckbxForceUpdate = new JCheckBox("Force Update");
-        chckbxForceUpdate.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            JCheckBox source = (JCheckBox) e.getSource();
-            if (source.isSelected()) {
-              getBtnUpdateModpack().setEnabled(true);
-            } else {
-              if (!needsUpdate) {
-                getBtnUpdateModpack().setEnabled(false);
-              }
-            }
+
+    chckbxForceUpdate = new JCheckBox("Force Update");
+    chckbxForceUpdate.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        JCheckBox source = (JCheckBox) e.getSource();
+        if (source.isSelected()) {
+          getBtnUpdateModpack().setEnabled(true);
+        } else {
+          if (!needsUpdate) {
+            getBtnUpdateModpack().setEnabled(false);
           }
-        });
-        mainPanel.add(chckbxForceUpdate, "cell 0 4");
+        }
+      }
+    });
+    mainPanel.add(chckbxForceUpdate, "cell 0 4");
     mainPanel.add(btnOpenBuilder, "cell 2 4");
     btnUpdateModpack.setEnabled(false);
     mainPanel.add(btnUpdateModpack, "cell 0 5 3 1,growx");
@@ -674,9 +688,8 @@ public class LaunchFrame extends JFrame {
     }
   }
 
-
-
   public JSpinner getBufferSizeSpinner() {
     return bufferSizeSpinner;
   }
+
 }
