@@ -146,6 +146,7 @@ public class LaunchFrame extends JFrame {
         LoginDialog d = new LoginDialog(MineguildLauncher.getLFrame());
         d.setReLogin();
         d.setVisible(true);
+        MineguildLauncher.res = d.response;
         saveSettings();
       }
     });
