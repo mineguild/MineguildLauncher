@@ -1,10 +1,14 @@
 package net.mineguild.Launcher;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -202,7 +206,6 @@ public class LaunchFrame extends JFrame {
           setVisible(false);
           ModpackBuilder.launch(MineguildLauncher.getSettings().getBuilderSettings());
         } catch (Exception e1) {
-          // TODO Auto-generated catch block
           e1.printStackTrace();
         }
       }
@@ -222,34 +225,20 @@ public class LaunchFrame extends JFrame {
 
     JPanel settingsPanel = new JPanel();
     tabbedPane.addTab("Settings", null, settingsPanel, null);
-    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {
-        FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("right:default"),
-        FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,
-        FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,},
-      new RowSpec[] {
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),}));
+    settingsPanel.setLayout(new FormLayout(
+        new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("right:default"),
+            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,}, new RowSpec[] {
+            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),}));
 
     JLabel lblGeneralSettings =
         DefaultComponentFactory.getInstance().createTitle("General Settings");
@@ -273,7 +262,7 @@ public class LaunchFrame extends JFrame {
         launchPathField.setText(selectPath(launchPathField.getText()));
       }
     });
-    
+
     JButton mcFilesOpen = new JButton("Open..");
     settingsPanel.add(mcFilesOpen, "6, 4");
     settingsPanel.add(browseLaunchPathBtn, "8, 4");
@@ -292,7 +281,7 @@ public class LaunchFrame extends JFrame {
         gameDirField.setText(selectPath(gameDirField.getText()));
       }
     });
-    
+
     JButton instancePathOpen = new JButton("Open..");
     settingsPanel.add(instancePathOpen, "6, 6");
     settingsPanel.add(browseGameDirBtn, "8, 6");
@@ -473,24 +462,36 @@ public class LaunchFrame extends JFrame {
         remotePack.getReleaseDate(), remotePack.getHash()));
     Logger.logInfo("Updating to Remote");
     File modsDir = new File(MineguildLauncher.getSettings().getInstancePath(), "mods");
+    File backupDirectory = null;
     try {
+      int result =
+          JOptionPane.showConfirmDialog(this, "Do you want to backup your locally modified files?",
+              "Create backup?", JOptionPane.YES_NO_OPTION);
+      if (result == JOptionPane.YES_OPTION) {
+        backupDirectory = new File(MineguildLauncher.getSettings().getInstancePath(), "backup");
+        if(backupDirectory.exists() && backupDirectory.isDirectory()){
+          FileUtils.cleanDirectory(backupDirectory);
+        }
+      }
       if (!MineguildLauncher.forceUpdate) {
         ModPackInstaller.clearFolder(MineguildLauncher.getSettings().getInstancePath(), localPack,
-            remotePack, Side.CLIENT, null);
+            remotePack, Side.CLIENT, backupDirectory);
       } else {
-        ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, null);
+        ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, backupDirectory);
       }
     } catch (IOException e) {
       Logger.logError("Couldn't clear folder!", e);
     }
     List<DownloadInfo> dlinfo = Lists.newArrayList();
     try {
-      if(MineguildLauncher.forceUpdate){
+      if (MineguildLauncher.forceUpdate) {
         dlinfo =
-          ModPackInstaller.checkNeededFiles(MineguildLauncher.getSettings().getInstancePath(),
-              remotePack, Side.CLIENT);
+            ModPackInstaller.checkNeededFiles(MineguildLauncher.getSettings().getInstancePath(),
+                remotePack, Side.CLIENT);
       } else {
-        dlinfo = ModPackInstaller.checkNeededFiles(MineguildLauncher.getSettings().getInstancePath(), localPack, remotePack, Side.CLIENT);
+        dlinfo =
+            ModPackInstaller.checkNeededFiles(MineguildLauncher.getSettings().getInstancePath(),
+                localPack, remotePack, Side.CLIENT);
       }
     } catch (Exception e) {
       Logger.logError("Error during ModPack hash checking!", e);
@@ -513,6 +514,27 @@ public class LaunchFrame extends JFrame {
       }
     }
     if (updated) {
+      if (backupDirectory != null) {
+        JLabel component = new JLabel();
+        final File _bkDir = backupDirectory;
+        component.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        component.setText("<HTML>Backup was created in:<br><FONT color=\"#000099\"><U>" + backupDirectory.getAbsolutePath()
+            + "</U></FONT></HTML>");
+        component.addMouseListener(new MouseAdapter() {
+
+          @Override
+          public void mouseClicked(MouseEvent e) {
+            try {
+              Desktop.getDesktop().open(_bkDir);
+            } catch (IOException e1) {
+              Logger.logError("Unable to open backupDirectory!", e1);
+            }
+          }
+
+        });
+        JOptionPane.showMessageDialog(this, component, "Backup created.",
+            JOptionPane.INFORMATION_MESSAGE);
+      }
       getChckbxForceUpdate().setSelected(false);
       doVersionCheck();
     }
@@ -529,10 +551,10 @@ public class LaunchFrame extends JFrame {
           java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MineguildLauncher.con.toFront();
-                MineguildLauncher.con.repaint();
+              MineguildLauncher.con.toFront();
+              MineguildLauncher.con.repaint();
             }
-        });
+          });
           MCInstaller.setup(localPack, MineguildLauncher.getSettings().getLaunchPath(),
               MineguildLauncher.getSettings().getInstancePath(), MineguildLauncher.getSettings()
                   .getJavaSettings(), MineguildLauncher.res, true);

@@ -19,6 +19,7 @@ import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
+import net.mineguild.Launcher.utils.RelativePath;
 
 import org.apache.commons.io.FileExistsException;
 import org.apache.commons.io.FileUtils;
@@ -183,7 +184,10 @@ public class ModPackInstaller {
                 Logger.logInfo(String.format("Moving file %s to backup folder - not in pack!",
                     f.getName()));
                 try {
-                  FileUtils.moveFileToDirectory(f, new File(backupDirectory, f.getParent()), true);
+                  FileUtils.moveFileToDirectory(
+                      f,
+                      new File(backupDirectory, RelativePath.getRelativePath(target,
+                          new File(f.getParent()))), true);
                 } catch (FileExistsException e2) {
                   Logger.logInfo(String.format("Not moving file %s!", f.getName()), e2);
                   f.delete();
@@ -291,8 +295,9 @@ public class ModPackInstaller {
                 if (delete) {
                   if (doBackup) {
                     try {
-                      FileUtils.moveFileToDirectory(localFile,
-                          new File(backupDirectory, localFile.getParent()), false);
+                      FileUtils.moveFileToDirectory(localFile, new File(backupDirectory,
+                          RelativePath.getRelativePath(target, new File(localFile.getParent()))),
+                          true);
                     } catch (Exception e) {
                       localFile.delete();
                     }
@@ -312,5 +317,4 @@ public class ModPackInstaller {
     }
 
   }
-
 }
