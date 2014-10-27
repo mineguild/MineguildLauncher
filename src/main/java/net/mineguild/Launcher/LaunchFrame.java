@@ -14,6 +14,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -112,7 +114,7 @@ public class LaunchFrame extends JFrame {
 
     JPanel mainPanel = new JPanel();
     tabbedPane.addTab("Update/Launch", null, mainPanel, null);
-    mainPanel.setLayout(new MigLayout("", "[fill][grow][center]", "[grow][][][][][grow][][]"));
+    mainPanel.setLayout(new MigLayout("", "[center][grow][center]", "[grow][][][][][][]"));
 
     JLabel lblLogo = new JLabel("");
     lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
@@ -156,21 +158,6 @@ public class LaunchFrame extends JFrame {
     });
     mainPanel.add(btnLogoutchangeAccount, "cell 2 2");
 
-    chckbxForceUpdate = new JCheckBox("Force Update");
-    chckbxForceUpdate.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        JCheckBox source = (JCheckBox) e.getSource();
-        if (source.isSelected()) {
-          getBtnUpdateModpack().setEnabled(true);
-        } else {
-          if (!needsUpdate) {
-            getBtnUpdateModpack().setEnabled(false);
-          }
-        }
-      }
-    });
-    mainPanel.add(chckbxForceUpdate, "cell 0 3");
-
 
     btnUpdateModpack = new JButton("Update ModPack");
     btnUpdateModpack.addActionListener(new ActionListener() {
@@ -197,6 +184,27 @@ public class LaunchFrame extends JFrame {
         doVersionCheck();
       }
     });
+    
+        JLabel lblLocalDirectory = new JLabel("Local Directory:");
+        mainPanel.add(lblLocalDirectory, "cell 0 3");
+    
+        JLabel localDirLabel =
+            new JLabel("<html><FONT color=\"#000099\"><U>" + OSUtils.getLocalDir().getAbsolutePath()
+                + "</U></FONT></html>");
+        localDirLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        localDirLabel.addMouseListener(new MouseAdapter() {
+          @Override
+          public void mouseClicked(MouseEvent e) {
+
+            try {
+              Desktop.getDesktop().open(OSUtils.getLocalDir());
+            } catch (IOException e1) {
+              Logger.logError("Unable to open local dir!", e1);
+            }
+
+          }
+        });
+        mainPanel.add(localDirLabel, "cell 1 3");
     mainPanel.add(btnRedoVersioncheck, "cell 2 3");
 
     JButton btnOpenBuilder = new JButton("Open Builder");
@@ -210,9 +218,24 @@ public class LaunchFrame extends JFrame {
         }
       }
     });
+    
+        chckbxForceUpdate = new JCheckBox("Force Update");
+        chckbxForceUpdate.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            JCheckBox source = (JCheckBox) e.getSource();
+            if (source.isSelected()) {
+              getBtnUpdateModpack().setEnabled(true);
+            } else {
+              if (!needsUpdate) {
+                getBtnUpdateModpack().setEnabled(false);
+              }
+            }
+          }
+        });
+        mainPanel.add(chckbxForceUpdate, "cell 0 4");
     mainPanel.add(btnOpenBuilder, "cell 2 4");
     btnUpdateModpack.setEnabled(false);
-    mainPanel.add(btnUpdateModpack, "cell 0 6 3 1");
+    mainPanel.add(btnUpdateModpack, "cell 0 5 3 1,growx");
 
     btnLaunch = new JButton("Launch");
     btnLaunch.addActionListener(new ActionListener() {
@@ -221,7 +244,7 @@ public class LaunchFrame extends JFrame {
         launchMC();
       }
     });
-    mainPanel.add(btnLaunch, "cell 0 7 3 1");
+    mainPanel.add(btnLaunch, "cell 0 6 3 1,growx");
 
     JPanel settingsPanel = new JPanel();
     tabbedPane.addTab("Settings", null, settingsPanel, null);
@@ -378,6 +401,7 @@ public class LaunchFrame extends JFrame {
       }
     }
     pack();
+    setMinimumSize(getSize());
   }
 
   public void loadSettings() {
@@ -434,7 +458,7 @@ public class LaunchFrame extends JFrame {
       localPack = null;
       try {
         localPack = JsonFactory.loadModpack(localPackFile);
-        getLocalVersion().setText(localPack.getVersion());
+        getLocalVersion().setText(createVersionLabel(localPack));
       } catch (Exception e) {
         localPackFile.delete();
         Logger.logInfo("Unable to load current ModPack! Fresh-Install!");
@@ -449,10 +473,17 @@ public class LaunchFrame extends JFrame {
         getBtnUpdateModpack().setEnabled(true);
         needsUpdate = true;
       }
-      getLastestVersion().setText(remotePack.getVersion());
+      getLastestVersion().setText(createVersionLabel(remotePack));
     } catch (Exception e) {
       Logger.logError("Error during versioncheck!", e);
     }
+  }
+
+  public static String createVersionLabel(ModPack pack) {
+    SimpleDateFormat format = new SimpleDateFormat();
+    return String.format("<html><b>%s</b> - released %s [MC %s] [Forge %s]", pack.getVersion(),
+        format.format(new Date(pack.getReleaseTime())), pack.getMinecraftVersion(), pack
+            .getForgeVersion().split("-", 2)[1]);
   }
 
   public void doUpdate() {
@@ -469,7 +500,7 @@ public class LaunchFrame extends JFrame {
               "Create backup?", JOptionPane.YES_NO_OPTION);
       if (result == JOptionPane.YES_OPTION) {
         backupDirectory = new File(MineguildLauncher.getSettings().getInstancePath(), "backup");
-        if(backupDirectory.exists() && backupDirectory.isDirectory()){
+        if (backupDirectory.exists() && backupDirectory.isDirectory()) {
           FileUtils.cleanDirectory(backupDirectory);
         }
       }
@@ -518,8 +549,8 @@ public class LaunchFrame extends JFrame {
         JLabel component = new JLabel();
         final File _bkDir = backupDirectory;
         component.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        component.setText("<HTML>Backup was created in:<br><FONT color=\"#000099\"><U>" + backupDirectory.getAbsolutePath()
-            + "</U></FONT></HTML>");
+        component.setText("<HTML>Backup was created in:<br><FONT color=\"#000099\"><U>"
+            + backupDirectory.getAbsolutePath() + "</U></FONT></HTML>");
         component.addMouseListener(new MouseAdapter() {
 
           @Override
@@ -642,6 +673,8 @@ public class LaunchFrame extends JFrame {
       return null;
     }
   }
+
+
 
   public JSpinner getBufferSizeSpinner() {
     return bufferSizeSpinner;
