@@ -114,6 +114,7 @@ public class LaunchFrame extends JFrame {
     contentPane.add(tabbedPane, BorderLayout.CENTER);
 
     JPanel mainPanel = new JPanel();
+    mainPanel.setBorder(null);
     tabbedPane.addTab("Update/Launch", null, mainPanel, null);
     mainPanel.setLayout(new MigLayout("", "[center][grow][center]", "[grow][][][][][][]"));
 
@@ -261,6 +262,7 @@ public class LaunchFrame extends JFrame {
     mainPanel.add(btnLaunch, "cell 0 6 3 1,growx");
 
     JPanel settingsPanel = new JPanel();
+    settingsPanel.setBorder(null);
     tabbedPane.addTab("Settings", null, settingsPanel, null);
     settingsPanel.setLayout(new FormLayout(
         new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("right:default"),

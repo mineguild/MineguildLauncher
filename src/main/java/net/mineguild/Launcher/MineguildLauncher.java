@@ -1,5 +1,6 @@
 package net.mineguild.Launcher;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Frame;
@@ -11,6 +12,8 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
+
+
 
 import lombok.Getter;
 import lombok.Setter;
@@ -197,6 +200,14 @@ public class MineguildLauncher {
       for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {
           UIManager.setLookAndFeel(info.getClassName());
+          //UIManager.put("nimbusBase", new Color(74, 1, 1));
+          UIManager.put("nimbusBase", new Color(55, 0, 0));
+          UIManager.put("nimbusBlueGrey", new Color(120, 1, 1));
+          UIManager.put("control", Color.DARK_GRAY);
+          UIManager.put("menu", Color.green);
+          UIManager.put("nimbusLightBackground", new Color(28, 28, 28));
+          UIManager.put("text", Color.white);
+          UIManager.put("info", new Color(31, 31, 31));
           break;
         }
       }
