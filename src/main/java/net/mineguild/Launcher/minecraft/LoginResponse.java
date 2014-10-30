@@ -1,6 +1,7 @@
 package net.mineguild.Launcher.minecraft;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import com.mojang.authlib.UserAuthentication;
 
@@ -8,6 +9,8 @@ public class LoginResponse {
 
   @Getter
   private UserAuthentication auth;
+  @Getter @Setter
+  private boolean startedGame = false;
 
   /**
    * Constructor for LoginResponse class

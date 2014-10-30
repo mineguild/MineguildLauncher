@@ -344,6 +344,7 @@ public class LoginDialog extends JDialog {
     }
 
     if (!loginSuccess) {
+      setTitle("Login with MC-Account");
       loginButton.setText("Login");
       return;
     }
@@ -384,6 +385,7 @@ public class LoginDialog extends JDialog {
 
   public void trySilentLogin() {
     setReLogin();
+    setTitle("Logging in...");
     if (!userField.getText().isEmpty()
         && (passwordField.getPassword().length > 0 || saveTokenBox.isSelected())) {
       login();

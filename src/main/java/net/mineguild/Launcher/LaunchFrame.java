@@ -130,11 +130,11 @@ public class LaunchFrame extends JFrame {
       public void mouseClicked(MouseEvent e) {
         try {
           Desktop.getDesktop().browse(new URI("https://mineguild.net"));
-        } catch (Exception e1){
+        } catch (Exception e1) {
           Logger.logError("Can't open MG Homepage!", e1);
         }
       }
-      
+
     });
     JLabel lblInstalledVersion = new JLabel("Installed Version:");
     lblInstalledVersion.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -146,9 +146,7 @@ public class LaunchFrame extends JFrame {
     JButton btnRefreshLogin = new JButton("Refresh Login");
     btnRefreshLogin.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        LoginDialog d = new LoginDialog(MineguildLauncher.getLFrame());
-        d.trySilentLogin();
-        saveSettings();
+        refreshLogin();
       }
     });
     mainPanel.add(btnRefreshLogin, "cell 2 1");
@@ -587,7 +585,16 @@ public class LaunchFrame extends JFrame {
     }
   }
 
+  public void refreshLogin() {
+    LoginDialog d = new LoginDialog(this);
+    d.trySilentLogin();
+    saveSettings();
+  }
+
   public void launchMC() {
+    if(MineguildLauncher.res.isStartedGame()){
+      refreshLogin();
+    }
     Thread t = new Thread(new Runnable() {
 
       @Override
@@ -606,6 +613,7 @@ public class LaunchFrame extends JFrame {
               MineguildLauncher.getSettings().getInstancePath(), MineguildLauncher.getSettings()
                   .getJavaSettings(), MineguildLauncher.res, true);
           setVisible(false);
+          MineguildLauncher.res.setStartedGame(true);
         } catch (Exception e) {
           Logger.logError("Unable to launch!", e);
           JOptionPane.showMessageDialog(MineguildLauncher.getLFrame(),
