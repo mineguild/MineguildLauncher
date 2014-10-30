@@ -588,6 +588,7 @@ public class LaunchFrame extends JFrame {
   public void refreshLogin() {
     LoginDialog d = new LoginDialog(this);
     d.trySilentLogin();
+    MineguildLauncher.res = d.response;
     saveSettings();
   }
 
