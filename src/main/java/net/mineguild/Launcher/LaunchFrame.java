@@ -87,7 +87,11 @@ public class LaunchFrame extends JFrame {
   private JCheckBox optimizationBox;
   private JSpinner bufferSizeSpinner;
   private final String[] permGenSizes = new String[] {"192m", "256m", "512m", "1024m"};
+  private final ImageIcon tickIcon = createImageIcon("/tick.png", "Tick Icon");
+  private final ImageIcon crossIcon = createImageIcon("/cross.png", "Cross Icon");
   private JLabel localDirLabel;
+  private JPanel mainPanel;
+  private JLabel lblUpdated;
 
 
   /**
@@ -113,10 +117,10 @@ public class LaunchFrame extends JFrame {
     tabbedPane.setBorder(null);
     contentPane.add(tabbedPane, BorderLayout.CENTER);
 
-    JPanel mainPanel = new JPanel();
+    mainPanel = new JPanel();
     mainPanel.setBorder(null);
     tabbedPane.addTab("Update/Launch", null, mainPanel, null);
-    mainPanel.setLayout(new MigLayout("", "[center][grow][center]", "[grow][][][][][][]"));
+    mainPanel.setLayout(new MigLayout("", "[center][grow][center]", "[grow][][][][][][][]"));
 
     JLabel lblLogo = new JLabel("");
     lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
@@ -197,9 +201,12 @@ public class LaunchFrame extends JFrame {
         doVersionCheck();
       }
     });
+    
+    lblUpdated = new JLabel("");
+    mainPanel.add(lblUpdated, "cell 1 3");
 
     JLabel lblLocalDirectory = new JLabel("Local Directory:");
-    mainPanel.add(lblLocalDirectory, "cell 0 3");
+    mainPanel.add(lblLocalDirectory, "cell 0 4");
 
     localDirLabel =
         new JLabel("<html><FONT color=\"#000099\"><U>" + OSUtils.getLocalDir().getAbsolutePath()
@@ -217,8 +224,8 @@ public class LaunchFrame extends JFrame {
 
       }
     });
-    mainPanel.add(localDirLabel, "cell 1 3");
-    mainPanel.add(btnRedoVersioncheck, "cell 2 3");
+    mainPanel.add(localDirLabel, "cell 1 4");
+    mainPanel.add(btnRedoVersioncheck, "cell 2 4");
 
     JButton btnOpenBuilder = new JButton("Open Builder");
     btnOpenBuilder.addActionListener(new ActionListener() {
@@ -245,10 +252,10 @@ public class LaunchFrame extends JFrame {
         }
       }
     });
-    mainPanel.add(chckbxForceUpdate, "cell 0 4");
-    mainPanel.add(btnOpenBuilder, "cell 2 4");
+    mainPanel.add(chckbxForceUpdate, "cell 0 5");
+    mainPanel.add(btnOpenBuilder, "cell 2 5");
     btnUpdateModpack.setEnabled(false);
-    mainPanel.add(btnUpdateModpack, "cell 0 5 3 1,growx");
+    mainPanel.add(btnUpdateModpack, "cell 0 6 3 1,growx");
 
     btnLaunch = new JButton("Launch");
     btnLaunch.addActionListener(new ActionListener() {
@@ -257,7 +264,7 @@ public class LaunchFrame extends JFrame {
         launchMC();
       }
     });
-    mainPanel.add(btnLaunch, "cell 0 6 3 1,growx");
+    mainPanel.add(btnLaunch, "cell 0 7 3 1,growx");
 
     JPanel settingsPanel = new JPanel();
     settingsPanel.setBorder(null);
@@ -482,10 +489,14 @@ public class LaunchFrame extends JFrame {
         getChckbxForceUpdate().setEnabled(false);
         getBtnUpdateModpack().setEnabled(true);
         getBtnLaunch().setEnabled(false);
+        lblUpdated.setIcon(crossIcon);
         needsUpdate = true;
       } else if (remotePack.isNewer(localPack)) {
         getBtnUpdateModpack().setEnabled(true);
+        lblUpdated.setIcon(crossIcon);
         needsUpdate = true;
+      } else {
+        lblUpdated.setIcon(tickIcon);
       }
       getLastestVersion().setText(createVersionLabel(remotePack));
     } catch (Exception e) {
@@ -701,6 +712,13 @@ public class LaunchFrame extends JFrame {
 
   public JSpinner getBufferSizeSpinner() {
     return bufferSizeSpinner;
+  }
+
+  public JPanel getMainPanel() {
+    return mainPanel;
+  }
+  public JLabel getLblUpdated() {
+    return lblUpdated;
   }
 
 }

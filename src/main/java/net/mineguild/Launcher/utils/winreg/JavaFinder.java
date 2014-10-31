@@ -144,7 +144,7 @@ public class JavaFinder {
       try {
         result.add(new JavaInfo(javaPath));
       } catch (Exception e) {
-        // Logger.logError("Error while creating JavaInfo", e);
+        Logger.logError("Error while creating JavaInfo", e);
       }
     }
     return result;
@@ -179,8 +179,8 @@ public class JavaFinder {
       for (JavaInfo java : javas) {
         if (java.isJava8()) {
           java8Found = true;
-          Logger.logDebug("Found java 8, skipping");
-          continue;
+          //Logger.logDebug("Found java 8, skipping");
+          //continue;
         }
         if (java.supportedVersion) {
           if (preferred == null && java != null)
@@ -204,13 +204,13 @@ public class JavaFinder {
             preferred = aJava32;
         }
       }
-      // Logger.logInfo("Preferred: " + String.valueOf(preferred));
+      Logger.logInfo("Preferred: " + String.valueOf(preferred));
     }
 
     if (preferred != null) {
       return preferred;
     } else {
-      // Logger.logError("No Java versions found!");
+      Logger.logError("No Java versions found!");
       return null;
     }
   }
