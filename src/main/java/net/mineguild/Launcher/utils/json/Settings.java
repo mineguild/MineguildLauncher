@@ -30,6 +30,7 @@ public class Settings {
   private @Expose @Getter @Setter boolean autoLogin;
   private @Expose @Getter @Setter BuilderSettings builderSettings;
   private @Expose @Getter @Setter JavaSettings javaSettings;
+  private @Expose @Getter @Setter boolean redStyle = true;
   private @Expose @Getter @Setter long consoleBufferSize = 500;
 
   public Settings() {

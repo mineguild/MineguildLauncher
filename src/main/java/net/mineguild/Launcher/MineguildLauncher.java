@@ -13,8 +13,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 
-
-
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.log.Console;
@@ -69,7 +67,7 @@ public class MineguildLauncher {
     Logger
         .addListener(new LogWriter(new File(OSUtils.getLocalDir(), "combined.log"), LogSource.ALL));
     Logger.addListener(mcLogger);
-    
+    loadSettings();
     setNimbus();
     EventQueue.invokeLater(new Runnable() {
       public void run() {
@@ -194,20 +192,23 @@ public class MineguildLauncher {
       Logger.logError("Unable to save settings!", e);
     }
   }
-  
+
   public static void setNimbus() {
     try {
       for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
         if ("Nimbus".equals(info.getName())) {
           UIManager.setLookAndFeel(info.getClassName());
-          //UIManager.put("nimbusBase", new Color(74, 1, 1));
-          UIManager.put("nimbusBase", new Color(55, 0, 0));
-          UIManager.put("nimbusBlueGrey", new Color(120, 1, 1));
-          UIManager.put("control", Color.DARK_GRAY);
-          UIManager.put("menu", Color.green);
-          UIManager.put("nimbusLightBackground", new Color(28, 28, 28));
-          UIManager.put("text", Color.white);
-          UIManager.put("info", new Color(31, 31, 31));
+          // UIManager.put("nimbusBase", new Color(74, 1, 1));
+          if (getSettings().isRedStyle()) {
+            UIManager.put("nimbusBase", new Color(55, 0, 0));
+            UIManager.put("nimbusBlueGrey", new Color(120, 1, 1));
+            UIManager.put("control", Color.DARK_GRAY);
+            UIManager.put("menu", Color.green);
+            UIManager.put("nimbusLightBackground", new Color(28, 28, 28));
+            UIManager.put("text", Color.white);
+            UIManager.put("info", new Color(31, 31, 31));
+          }
+          
           break;
         }
       }
@@ -216,11 +217,10 @@ public class MineguildLauncher {
       e.printStackTrace();
     }
   }
-  
+
   public static void setSystem() {
     try {
-      UIManager.setLookAndFeel(
-          UIManager.getSystemLookAndFeelClassName());
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (ClassNotFoundException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

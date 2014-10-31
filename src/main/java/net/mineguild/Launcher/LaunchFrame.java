@@ -92,6 +92,7 @@ public class LaunchFrame extends JFrame {
   private JLabel localDirLabel;
   private JPanel mainPanel;
   private JLabel lblUpdated;
+  private JCheckBox chckbxUseRedStyle;
 
 
   /**
@@ -269,20 +270,36 @@ public class LaunchFrame extends JFrame {
     JPanel settingsPanel = new JPanel();
     settingsPanel.setBorder(null);
     tabbedPane.addTab("Settings", null, settingsPanel, null);
-    settingsPanel.setLayout(new FormLayout(
-        new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("right:default"),
-            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
-            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,}, new RowSpec[] {
-            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),}));
+    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {
+        FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("right:default"),
+        FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,
+        FormFactory.RELATED_GAP_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,},
+      new RowSpec[] {
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),}));
 
     JLabel lblGeneralSettings =
         DefaultComponentFactory.getInstance().createTitle("General Settings");
@@ -337,19 +354,26 @@ public class LaunchFrame extends JFrame {
     bufferSizeSpinner = new JSpinner();
     bufferSizeSpinner.setModel(new SpinnerNumberModel(new Long(0), new Long(0), null, new Long(1)));
     settingsPanel.add(bufferSizeSpinner, "4, 8, 3, 1");
+    
+    JLabel lblUseRedStyle = DefaultComponentFactory.getInstance().createLabel("Style");
+    settingsPanel.add(lblUseRedStyle, "2, 10");
+    
+    chckbxUseRedStyle = new JCheckBox("Use red style (REQUIRES RESTART!)");
+
+    settingsPanel.add(chckbxUseRedStyle, "4, 10, 3, 1");
 
     JLabel lblJavaSettings = DefaultComponentFactory.getInstance().createTitle("Java Settings");
-    settingsPanel.add(lblJavaSettings, "2, 10, left, default");
+    settingsPanel.add(lblJavaSettings, "2, 12, left, default");
 
     JSeparator separator = new JSeparator();
-    settingsPanel.add(separator, "3, 10, 6, 1");
+    settingsPanel.add(separator, "3, 12, 6, 1");
 
     JLabel lblJavaPath = DefaultComponentFactory.getInstance().createLabel("Java Path");
-    settingsPanel.add(lblJavaPath, "2, 12, right, default");
+    settingsPanel.add(lblJavaPath, "2, 14, right, default");
 
     javaPathField = new JTextField();
     javaPathField.setColumns(10);
-    settingsPanel.add(javaPathField, "4, 12, 3, 1, fill, default");
+    settingsPanel.add(javaPathField, "4, 14, 3, 1, fill, default");
 
     JButton autoDetectJavaBtn = new JButton("Auto-Detect");
     autoDetectJavaBtn.addActionListener(new ActionListener() {
@@ -357,10 +381,10 @@ public class LaunchFrame extends JFrame {
         javaPathField.setText(MCInstaller.getDefaultJavaPath());
       }
     });
-    settingsPanel.add(autoDetectJavaBtn, "8, 12");
+    settingsPanel.add(autoDetectJavaBtn, "8, 14");
 
     final JLabel lblMemory = DefaultComponentFactory.getInstance().createLabel("Memory");
-    settingsPanel.add(lblMemory, "2, 14");
+    settingsPanel.add(lblMemory, "2, 16");
 
     memSlider = new JSlider();
     memSlider.setSnapToTicks(true);
@@ -379,21 +403,21 @@ public class LaunchFrame extends JFrame {
         lblMemory.setText("Memory(" + ((float) source.getValue() * 512) / 1024.0 + "gb)");
       }
     });
-    settingsPanel.add(memSlider, "4, 14, 3, 1");
+    settingsPanel.add(memSlider, "4, 16, 3, 1");
 
     JLabel lblPermgen = DefaultComponentFactory.getInstance().createLabel("PermGen");
-    settingsPanel.add(lblPermgen, "2, 16, right, default");
+    settingsPanel.add(lblPermgen, "2, 18, right, default");
 
     permGenBox = new JComboBox<String>();
     permGenBox.setModel(new DefaultComboBoxModel<String>(permGenSizes));
-    settingsPanel.add(permGenBox, "4, 16, 3, 1, fill, default");
+    settingsPanel.add(permGenBox, "4, 18, 3, 1, fill, default");
 
     JLabel lblOptimizationArgs =
         DefaultComponentFactory.getInstance().createLabel("Optimization Args");
-    settingsPanel.add(lblOptimizationArgs, "2, 18");
+    settingsPanel.add(lblOptimizationArgs, "2, 20");
 
     optimizationBox = new JCheckBox("Use optimization arguments");
-    settingsPanel.add(optimizationBox, "4, 18, 3, 1");
+    settingsPanel.add(optimizationBox, "4, 20, 3, 1");
     if (MineguildLauncher.getSettings() == null) {
       MineguildLauncher.loadSettings();
       MineguildLauncher.addSaveHook();
@@ -438,7 +462,9 @@ public class LaunchFrame extends JFrame {
     if (set.getLastLocation() != null) {
       setLocation(set.getLastLocation());
     }
+    
 
+    chckbxUseRedStyle.setSelected(set.isRedStyle());
     // Java settings
     if (Lists.newArrayList(permGenSizes).contains(jSet.getPermGen())) {
       permGenBox.setSelectedItem(jSet.getPermGen());
@@ -460,11 +486,13 @@ public class LaunchFrame extends JFrame {
     set.setLastLocation(getLocation());
     set.setLastSize(getSize());
     set.setConsoleBufferSize((Long) bufferSizeSpinner.getValue());
+    set.setRedStyle(chckbxUseRedStyle.isSelected());
     // Java Settings
     jSet.setPermGen((String) permGenBox.getSelectedItem());
     jSet.setMaxMemory(memSlider.getValue() * 512);
     jSet.setJavaPath(javaPathField.getText());
     jSet.setOptimizationArgumentsUsed(optimizationBox.isSelected());
+    
     MineguildLauncher.saveSettingsSilent();
   }
 
@@ -510,6 +538,7 @@ public class LaunchFrame extends JFrame {
         format.format(new Date(pack.getReleaseTime())), pack.getMinecraftVersion(), pack
             .getForgeVersion().split("-", 2)[1]);
   }
+  
 
   public void doUpdate() {
     boolean updated = true;
@@ -721,4 +750,7 @@ public class LaunchFrame extends JFrame {
     return lblUpdated;
   }
 
+  public JCheckBox getChckbxUseRedStyle() {
+    return chckbxUseRedStyle;
+  }
 }
