@@ -87,6 +87,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
         if (isCancelled()) {
           executor.shutdownNow();
+          allDownloaded = false;
           Thread.currentThread().interrupt();
         }
 
@@ -324,6 +325,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
         }
       } catch (Exception e) {
         downloadSuccess = false;
+        asset.local.delete();
         e.printStackTrace();
         Logger.logError("Connection failed, trying again");
       }
@@ -512,8 +514,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
           }
         } catch (Exception e) {
           downloadSuccess = false;
-          e.printStackTrace();
-          Logger.logError("Connection failed, trying again");
+          asset.local.delete();
+          Logger.logError("Download failed, trying again", e);
         }
       }
       if (!downloadSuccess) {
