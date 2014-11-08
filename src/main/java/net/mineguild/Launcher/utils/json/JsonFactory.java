@@ -5,8 +5,11 @@ import java.awt.Point;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
@@ -55,7 +58,15 @@ public class JsonFactory {
   public static List<ModInfo> loadModInfoFile(File json) throws IOException {
     FileReader reader = new FileReader(json);
     List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
-    
+    return mods;
+  }
+  
+  public static List<ModInfo> loadModInfoFromJar(File f) throws IOException {
+    JarFile jar = new JarFile(f);
+    ZipEntry mcmod = jar.getEntry("mcmod.info");
+    InputStreamReader reader = new InputStreamReader(jar.getInputStream(mcmod));
+    List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
+    jar.close();
     return mods;
   }
 
