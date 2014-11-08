@@ -6,11 +6,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
+import net.mineguild.ModPack.ModInfo;
 import net.mineguild.ModPack.ModPack;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -47,6 +50,13 @@ public class JsonFactory {
   public static ModPack loadModpack(File json) throws IOException {
     FileReader reader = new FileReader(json);
     return GSON.fromJson(reader, ModPack.class);
+  }
+  
+  public static List<ModInfo> loadModInfoFile(File json) throws IOException {
+    FileReader reader = new FileReader(json);
+    List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
+    
+    return mods;
   }
 
   public static MCVersionIndex loadVersionIndex(File f) throws IOException {
