@@ -46,7 +46,6 @@ public class MineguildLauncher {
   public static LoginResponse res;
 
   public static void main(String[] args) throws Exception {
-    // System.setProperty("java.net.preferIPv4Stack", "true");
     if (args.length >= 1) {
       if (args.length == 2) {
         forceUpdate = args[1].equals("--forceUpdate");
@@ -208,7 +207,7 @@ public class MineguildLauncher {
             UIManager.put("text", Color.white);
             UIManager.put("info", new Color(31, 31, 31));
           }
-          
+
           break;
         }
       }

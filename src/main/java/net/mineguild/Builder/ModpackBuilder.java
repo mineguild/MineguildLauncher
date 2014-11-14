@@ -254,8 +254,8 @@ public class ModpackBuilder extends JFrame {
     showFilesDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
     final ModpackTableModel mTableModel = new ModpackTableModel(workPack);
     final JTable table = new JTable(mTableModel);
-    table.getColumnModel().getColumn(2).setMaxWidth(40);
-    table.getColumnModel().getColumn(1).setMaxWidth(100);
+    table.getColumnModel().getColumn(3).setMaxWidth(40);
+    table.getColumnModel().getColumn(2).setMaxWidth(100);
     table.setLayout(new BorderLayout());
     JScrollPane tableView = new JScrollPane(table);
     JButton removeButton = new JButton("Remove selected entry/entries");
@@ -282,7 +282,8 @@ public class ModpackBuilder extends JFrame {
 
       public void update(DocumentEvent e) {
         try {
-          mTableModel.applyFilter(convertGlobToRegEx(e.getDocument().getText(0, e.getDocument().getLength())));
+          mTableModel.applyFilter(convertGlobToRegEx(e.getDocument().getText(0,
+              e.getDocument().getLength())));
         } catch (BadLocationException e1) {
           Logger.logInfo("Couldn't update!", e1);
         }
@@ -391,7 +392,7 @@ public class ModpackBuilder extends JFrame {
 
     @Override
     public int getColumnCount() {
-      return 3;
+      return 4;
     }
 
     public void applyFilter(String filter) {
@@ -406,8 +407,10 @@ public class ModpackBuilder extends JFrame {
         case 0:
           return "Filename";
         case 1:
-          return "Side";
+          return "Mod(s)";
         case 2:
+          return "Side";
+        case 3:
           return "Optional";
         default:
           return "Unkown";
@@ -443,10 +446,12 @@ public class ModpackBuilder extends JFrame {
         case (0):
           return String.class;
         case (1):
-          return Side.class;
+          return String.class;
         case (2):
-          return ImageIcon.class;
+          return Side.class;
         case (3):
+          return ImageIcon.class;
+        case (4):
           return String.class;
         default:
           return String.class;
@@ -481,12 +486,21 @@ public class ModpackBuilder extends JFrame {
     @Override
     public Object getValueAt(int row, int column) {
       String path = (String) pack.getFilesMatching(filter).keySet().toArray()[row];
+
       switch (column) {
         case 0:
           return path;
+          
         case 1:
-          return pack.getFileByPath(path).getSide();
+          ModPackFile f = pack.getFileByPath(path);
+          if (f.getModInfo() == null) {
+            return "-";
+          } else {
+            return f.getModInfo().getName()+" - "+f.getModInfo().getVersion();
+          }
         case 2:
+          return pack.getFileByPath(path).getSide();
+        case 3:
           return pack.getFileByPath(path).isOptional() ? createImageIcon("/tick.png", "TICK")
               : createImageIcon("/cross.png", "CROSS");
         default:
@@ -500,7 +514,7 @@ public class ModpackBuilder extends JFrame {
     }
 
   }
-  
+
   public static ImageIcon createImageIcon(String path, String description) {
     java.net.URL imgURL = ModpackBuilder.class.getResource(path);
     if (imgURL != null) {
@@ -568,7 +582,7 @@ public class ModpackBuilder extends JFrame {
     return versions;
   }
 
-  
+
 
   private String convertGlobToRegEx(String line) {
     Logger.logDebug("got line [" + line + "]");

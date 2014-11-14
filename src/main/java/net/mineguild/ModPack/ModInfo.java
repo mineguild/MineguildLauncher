@@ -7,6 +7,7 @@ import lombok.Getter;
 public class ModInfo {
   private @Getter String modid;
   private @Getter String name;
+  private @Getter String version;
   private @Getter String mcversion;
   private @Getter String description;
   private @Getter String credits;
@@ -16,5 +17,5 @@ public class ModInfo {
   private @Getter List<String> authorList;
   private @Getter String parent;
   private @Getter List<String> dependencies;
-  
+
 }

@@ -91,7 +91,6 @@ public class MineguildLauncherConsole {
     File modsBackup = new File(baseDir, "modsBackup");
     modsBackup.mkdirs();
     FileUtils.cleanDirectory(modsBackup);
-
     if (new File(baseDir, "mods").exists()) {
       ModPackInstaller.clearFolder(new File(baseDir, "mods"), newPack, side, modsBackup);
     }

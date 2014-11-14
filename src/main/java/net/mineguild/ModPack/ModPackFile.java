@@ -11,6 +11,7 @@ public class ModPackFile {
   private @Getter @Setter @Expose Side side = Side.UNIVERSAL;
   private @Getter @Setter @Expose boolean optional = false;
   private @Getter @Expose String hash;
+  private @Getter @Setter ModInfo modInfo;
 
 
   /**
