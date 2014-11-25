@@ -271,22 +271,38 @@ public class LaunchFrame extends JFrame {
     JPanel settingsPanel = new JPanel();
     settingsPanel.setBorder(null);
     tabbedPane.addTab("Settings", null, settingsPanel, null);
-    settingsPanel.setLayout(new FormLayout(
-        new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("right:default"),
-            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
-            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,}, new RowSpec[] {
-            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),}));
+    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {
+        FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("right:default"),
+        FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,
+        FormFactory.RELATED_GAP_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,},
+      new RowSpec[] {
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC,
+        RowSpec.decode("default:grow"),}));
 
     JLabel lblGeneralSettings =
         DefaultComponentFactory.getInstance().createTitle("General Settings");
@@ -303,17 +319,27 @@ public class LaunchFrame extends JFrame {
     launchPathField = new JTextField();
     settingsPanel.add(launchPathField, "4, 4, fill, default");
     launchPathField.setColumns(10);
-
-    JButton browseLaunchPathBtn = new JButton("Browse...");
-    browseLaunchPathBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        launchPathField.setText(selectPath(launchPathField.getText()));
-      }
-    });
-
-    JButton mcFilesOpen = new JButton("Open..");
-    settingsPanel.add(mcFilesOpen, "6, 4");
-    settingsPanel.add(browseLaunchPathBtn, "8, 4");
+        
+            JButton browseLaunchPathBtn = new JButton("Browse...");
+            browseLaunchPathBtn.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                launchPathField.setText(selectPath(launchPathField.getText()));
+              }
+            });
+            settingsPanel.add(browseLaunchPathBtn, "6, 4");
+    
+        JButton mcFilesOpen = new JButton("Open..");
+        mcFilesOpen.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            try {
+              Desktop.getDesktop().open(new File((launchPathField.getText())));
+            } catch (IOException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            }
+          }
+        });
+        settingsPanel.add(mcFilesOpen, "8, 4");
 
     JLabel lblInstancePath = DefaultComponentFactory.getInstance().createLabel("Instance Path");
     lblInstancePath.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -322,17 +348,27 @@ public class LaunchFrame extends JFrame {
     gameDirField = new JTextField();
     settingsPanel.add(gameDirField, "4, 6, fill, default");
     gameDirField.setColumns(10);
-
-    JButton browseGameDirBtn = new JButton("Browse...");
-    browseGameDirBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        gameDirField.setText(selectPath(gameDirField.getText()));
-      }
-    });
-
-    JButton instancePathOpen = new JButton("Open..");
-    settingsPanel.add(instancePathOpen, "6, 6");
-    settingsPanel.add(browseGameDirBtn, "8, 6");
+        
+            JButton browseGameDirBtn = new JButton("Browse...");
+            browseGameDirBtn.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                gameDirField.setText(selectPath(gameDirField.getText()));
+              }
+            });
+            settingsPanel.add(browseGameDirBtn, "6, 6");
+    
+        JButton instancePathOpen = new JButton("Open..");
+        instancePathOpen.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            try {
+              Desktop.getDesktop().open(new File((gameDirField.getText())));
+            } catch (IOException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            }
+          }
+        });
+        settingsPanel.add(instancePathOpen, "8, 6");
 
     JLabel lblConsoleBufferSize =
         DefaultComponentFactory.getInstance().createLabel("Console Buffer Size");
