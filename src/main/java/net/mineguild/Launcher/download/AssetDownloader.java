@@ -16,12 +16,13 @@ import javax.swing.SwingWorker;
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.Constants;
+import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.download.DownloadInfo.DLType;
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.DownloadUtils;
-import net.mineguild.Launcher.utils.OSUtils;
 
 import org.apache.commons.io.FileUtils;
+
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -66,7 +67,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
   protected Boolean doInBackground() throws Exception {
     start = System.nanoTime();
     if (multithread) {
-      ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores() * 2);
+      ExecutorService executor = Executors.newFixedThreadPool(MineguildLauncher.getSettings().getDownloadThreads());
       if (totalSize == 0) {
         setTotalIndeterminate();
         DownloadUtils.setTotalSize(downloads, this);

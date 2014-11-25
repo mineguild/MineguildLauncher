@@ -32,6 +32,7 @@ public class Settings {
   private @Expose @Getter @Setter JavaSettings javaSettings;
   private @Expose @Getter @Setter boolean redStyle = true;
   private @Expose @Getter @Setter long consoleBufferSize = 500;
+  private @Expose @Getter @Setter int downloadThreads = OSUtils.getNumCores();
 
   public Settings() {
     launchPath = new File(OSUtils.getLocalDir(), "modpack");
@@ -39,7 +40,7 @@ public class Settings {
     lastLocation = null;
     MCUser = "";
     MCPassword = "";
-    //consoleBufferSize = 500;
+    // consoleBufferSize = 500;
     lastSize = null;
     clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
     builderSettings = new BuilderSettings();

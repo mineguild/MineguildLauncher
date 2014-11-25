@@ -93,6 +93,7 @@ public class LaunchFrame extends JFrame {
   private JPanel mainPanel;
   private JLabel lblUpdated;
   private JCheckBox chckbxUseRedStyle;
+  private JSpinner dlThreadsSpinner;
 
 
   /**
@@ -202,7 +203,7 @@ public class LaunchFrame extends JFrame {
         doVersionCheck();
       }
     });
-    
+
     lblUpdated = new JLabel("");
     mainPanel.add(lblUpdated, "cell 1 3");
 
@@ -270,36 +271,22 @@ public class LaunchFrame extends JFrame {
     JPanel settingsPanel = new JPanel();
     settingsPanel.setBorder(null);
     tabbedPane.addTab("Settings", null, settingsPanel, null);
-    settingsPanel.setLayout(new FormLayout(new ColumnSpec[] {
-        FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("right:default"),
-        FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,
-        FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,},
-      new RowSpec[] {
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        RowSpec.decode("default:grow"),}));
+    settingsPanel.setLayout(new FormLayout(
+        new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("right:default"),
+            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,}, new RowSpec[] {
+            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),}));
 
     JLabel lblGeneralSettings =
         DefaultComponentFactory.getInstance().createTitle("General Settings");
@@ -354,26 +341,43 @@ public class LaunchFrame extends JFrame {
     bufferSizeSpinner = new JSpinner();
     bufferSizeSpinner.setModel(new SpinnerNumberModel(new Long(0), new Long(0), null, new Long(1)));
     settingsPanel.add(bufferSizeSpinner, "4, 8, 3, 1");
-    
+
+    JLabel lblDownloadThreads =
+        DefaultComponentFactory.getInstance().createLabel("Download Threads");
+    settingsPanel.add(lblDownloadThreads, "2, 10");
+
+    dlThreadsSpinner = new JSpinner();
+    dlThreadsSpinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null,
+        new Integer(1)));
+    settingsPanel.add(dlThreadsSpinner, "4, 10, 3, 1");
+
+    JButton dlThreadsHelp = new JButton("?");
+    dlThreadsHelp.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        showDlThreadHelp();
+      }
+    });
+    settingsPanel.add(dlThreadsHelp, "8, 10");
+
     JLabel lblUseRedStyle = DefaultComponentFactory.getInstance().createLabel("Style");
-    settingsPanel.add(lblUseRedStyle, "2, 10");
-    
+    settingsPanel.add(lblUseRedStyle, "2, 12");
+
     chckbxUseRedStyle = new JCheckBox("Use red style (REQUIRES RESTART!)");
 
-    settingsPanel.add(chckbxUseRedStyle, "4, 10, 3, 1");
+    settingsPanel.add(chckbxUseRedStyle, "4, 12, 3, 1");
 
     JLabel lblJavaSettings = DefaultComponentFactory.getInstance().createTitle("Java Settings");
-    settingsPanel.add(lblJavaSettings, "2, 12, left, default");
+    settingsPanel.add(lblJavaSettings, "2, 14, left, default");
 
     JSeparator separator = new JSeparator();
-    settingsPanel.add(separator, "3, 12, 6, 1");
+    settingsPanel.add(separator, "3, 14, 6, 1");
 
     JLabel lblJavaPath = DefaultComponentFactory.getInstance().createLabel("Java Path");
-    settingsPanel.add(lblJavaPath, "2, 14, right, default");
+    settingsPanel.add(lblJavaPath, "2, 16, right, default");
 
     javaPathField = new JTextField();
     javaPathField.setColumns(10);
-    settingsPanel.add(javaPathField, "4, 14, 3, 1, fill, default");
+    settingsPanel.add(javaPathField, "4, 16, 3, 1, fill, default");
 
     JButton autoDetectJavaBtn = new JButton("Auto-Detect");
     autoDetectJavaBtn.addActionListener(new ActionListener() {
@@ -381,10 +385,10 @@ public class LaunchFrame extends JFrame {
         javaPathField.setText(MCInstaller.getDefaultJavaPath());
       }
     });
-    settingsPanel.add(autoDetectJavaBtn, "8, 14");
+    settingsPanel.add(autoDetectJavaBtn, "8, 16");
 
     final JLabel lblMemory = DefaultComponentFactory.getInstance().createLabel("Memory");
-    settingsPanel.add(lblMemory, "2, 16");
+    settingsPanel.add(lblMemory, "2, 18");
 
     memSlider = new JSlider();
     memSlider.setSnapToTicks(true);
@@ -403,21 +407,21 @@ public class LaunchFrame extends JFrame {
         lblMemory.setText("Memory(" + ((float) source.getValue() * 512) / 1024.0 + "gb)");
       }
     });
-    settingsPanel.add(memSlider, "4, 16, 3, 1");
+    settingsPanel.add(memSlider, "4, 18, 3, 1");
 
     JLabel lblPermgen = DefaultComponentFactory.getInstance().createLabel("PermGen");
-    settingsPanel.add(lblPermgen, "2, 18, right, default");
+    settingsPanel.add(lblPermgen, "2, 20, right, default");
 
     permGenBox = new JComboBox<String>();
     permGenBox.setModel(new DefaultComboBoxModel<String>(permGenSizes));
-    settingsPanel.add(permGenBox, "4, 18, 3, 1, fill, default");
+    settingsPanel.add(permGenBox, "4, 20, 3, 1, fill, default");
 
     JLabel lblOptimizationArgs =
         DefaultComponentFactory.getInstance().createLabel("Optimization Args");
-    settingsPanel.add(lblOptimizationArgs, "2, 20");
+    settingsPanel.add(lblOptimizationArgs, "2, 22");
 
     optimizationBox = new JCheckBox("Use optimization arguments");
-    settingsPanel.add(optimizationBox, "4, 20, 3, 1");
+    settingsPanel.add(optimizationBox, "4, 22, 3, 1");
     if (MineguildLauncher.getSettings() == null) {
       MineguildLauncher.loadSettings();
       MineguildLauncher.addSaveHook();
@@ -449,6 +453,14 @@ public class LaunchFrame extends JFrame {
     setMinimumSize(getSize());
   }
 
+  public void showDlThreadHelp() {
+    JOptionPane
+        .showMessageDialog(
+            this,
+            "Decrease this if you're having problems with corrupt files or breaking dl's. Increase if you want it to be faster (there's a limit).\n Can break the downloader if too high.",
+            "Download Threads Information", JOptionPane.INFORMATION_MESSAGE);
+  }
+
   public void loadSettings() {
     Settings set = MineguildLauncher.getSettings();
     JavaSettings jSet = set.getJavaSettings();
@@ -456,13 +468,13 @@ public class LaunchFrame extends JFrame {
     gameDirField.setText(set.getInstancePath().getAbsolutePath());
     launchPathField.setText(set.getLaunchPath().getAbsolutePath());
     bufferSizeSpinner.setValue(set.getConsoleBufferSize());
+    dlThreadsSpinner.setValue(set.getDownloadThreads());
     if (set.getLastSize() != null) {
       setSize(set.getLastSize());
     }
     if (set.getLastLocation() != null) {
       setLocation(set.getLastLocation());
     }
-    
 
     chckbxUseRedStyle.setSelected(set.isRedStyle());
     // Java settings
@@ -487,12 +499,13 @@ public class LaunchFrame extends JFrame {
     set.setLastSize(getSize());
     set.setConsoleBufferSize((Long) bufferSizeSpinner.getValue());
     set.setRedStyle(chckbxUseRedStyle.isSelected());
+    set.setDownloadThreads((Integer) dlThreadsSpinner.getValue());
     // Java Settings
     jSet.setPermGen((String) permGenBox.getSelectedItem());
     jSet.setMaxMemory(memSlider.getValue() * 512);
     jSet.setJavaPath(javaPathField.getText());
     jSet.setOptimizationArgumentsUsed(optimizationBox.isSelected());
-    
+
     MineguildLauncher.saveSettingsSilent();
   }
 
@@ -538,7 +551,7 @@ public class LaunchFrame extends JFrame {
         format.format(new Date(pack.getReleaseTime())), pack.getMinecraftVersion(), pack
             .getForgeVersion().split("-", 2)[1]);
   }
-  
+
 
   public void doUpdate() {
     boolean updated = true;
@@ -633,7 +646,7 @@ public class LaunchFrame extends JFrame {
   }
 
   public void launchMC() {
-    if(MineguildLauncher.res.isStartedGame()){
+    if (MineguildLauncher.res.isStartedGame()) {
       refreshLogin();
     }
     Thread t = new Thread(new Runnable() {
@@ -746,11 +759,16 @@ public class LaunchFrame extends JFrame {
   public JPanel getMainPanel() {
     return mainPanel;
   }
+
   public JLabel getLblUpdated() {
     return lblUpdated;
   }
 
   public JCheckBox getChckbxUseRedStyle() {
     return chckbxUseRedStyle;
+  }
+
+  public JSpinner getDlThreadsSpinner() {
+    return dlThreadsSpinner;
   }
 }
