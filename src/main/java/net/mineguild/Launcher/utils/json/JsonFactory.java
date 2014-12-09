@@ -6,11 +6,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.json.assets.AssetIndex;
 import net.mineguild.Launcher.utils.json.versions.Version;
 import net.mineguild.ModPack.ModInfo;
@@ -64,10 +66,17 @@ public class JsonFactory {
   public static List<ModInfo> loadModInfoFromJar(File f) throws IOException {
     JarFile jar = new JarFile(f);
     ZipEntry mcmod = jar.getEntry("mcmod.info");
-    InputStreamReader reader = new InputStreamReader(jar.getInputStream(mcmod));
-    List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
-    jar.close();
-    return mods;
+    if(mcmod != null){
+      InputStreamReader reader = new InputStreamReader(jar.getInputStream(mcmod));
+      List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
+      jar.close();
+      return mods;
+    } else {
+      Logger.logDebug(f.getPath()+ " has no mcmod.info! Ignoring.");
+      jar.close();
+      return null;
+    }
+    
   }
 
   public static MCVersionIndex loadVersionIndex(File f) throws IOException {

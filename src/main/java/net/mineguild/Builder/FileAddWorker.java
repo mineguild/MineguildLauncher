@@ -2,6 +2,7 @@ package net.mineguild.Builder;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.SwingWorker;
@@ -12,6 +13,7 @@ import net.mineguild.Launcher.utils.ChecksumUtil.ModPackEntry;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
 import net.mineguild.Launcher.utils.json.JsonFactory;
+import net.mineguild.ModPack.ModInfo;
 import net.mineguild.ModPack.ModPackFile;
 
 import com.google.common.collect.Maps;
@@ -52,7 +54,12 @@ public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
                 try {
                   ModPackEntry entry = ChecksumUtil.getFile(baseDirectory, e);
                   if (entry.getKey().endsWith(".jar") || entry.getKey().endsWith(".zip")) {
-                    entry.getValue().setModInfo(JsonFactory.loadModInfoFromJar(e).get(0));
+                    List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
+                    if(modInfo != null){
+                      if(modInfo.size() > 0){
+                        entry.getValue().setModInfo(modInfo.get(0));
+                      }
+                    }
                   }
                   updateProgress();
                   return entry;
