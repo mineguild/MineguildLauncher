@@ -21,13 +21,13 @@ public class ModPack {
   private @Expose @Getter @Setter String minecraftVersion;
   private @Expose @Getter String hash;
   private @Expose @Getter long releaseTime;
-  private @Expose @Getter Map<String, ModPackFile> files;
+  private @Expose @Getter Map<String, Mod> mods;
+  private @Expose @Getter Map<String, ModPackFile> other;
 
-  public ModPack(String version, long releaseTime, Map<String, ModPackFile> files) {
+  public ModPack(String version, long releaseTime) {
     this.version = version;
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
     this.releaseTime = releaseTime;
-    setFiles(files);
   }
 
   public ModPack(long releaseTime) {
@@ -41,12 +41,6 @@ public class ModPack {
     this.hash = ChecksumUtil.getMD5(Long.toString(releaseTime));
   }
 
-  public void setFiles(Map<String, ModPackFile> files) {
-    if (!(files instanceof TreeMap<?, ?>)) {
-      files = Maps.newTreeMap();
-    }
-    this.files = files;
-  }
 
   public boolean isNewer(ModPack otherPack) {
     return otherPack.getReleaseTime() < this.getReleaseTime();
@@ -58,12 +52,18 @@ public class ModPack {
 
 
   public ModPackFile getFileByPath(String path) {
-    return files.get(path);
+    return getFiles().get(path);
+  }
+  
+  public Map<String, ModPackFile> getFiles(){
+    Map<String, ModPackFile> allFiles = Maps.newTreeMap((TreeMap<String, ModPackFile>)other);
+    allFiles.putAll(mods);
+    return allFiles;
   }
 
   public Map<String, ModPackFile> getFilesByHash(String hash) {
     Map<String, ModPackFile> ret = Maps.newTreeMap();
-    for (Map.Entry<String, ModPackFile> entry : files.entrySet()) {
+    for (Map.Entry<String, ModPackFile> entry : getFiles().entrySet()) {
       if (entry.getValue().getHash().equals(hash)) {
         ret.put(entry.getKey(), entry.getValue());
       }
@@ -73,7 +73,7 @@ public class ModPack {
 
   public Map<String, ModPackFile> getFilesByHashAndSide(String hash, Side side) {
     Map<String, ModPackFile> ret = Maps.newTreeMap();
-    for (Map.Entry<String, ModPackFile> entry : files.entrySet()) {
+    for (Map.Entry<String, ModPackFile> entry : getFiles().entrySet()) {
       if (entry.getValue().getHash().equals(hash)) {
         if (entry.getValue().getSide() == Side.UNIVERSAL || entry.getValue().getSide() == side) {
           ret.put(entry.getKey(), entry.getValue());
@@ -85,7 +85,7 @@ public class ModPack {
 
   public List<String> getTopLevelDirectories() {
     List<String> ret = Lists.newArrayList();
-    for (String path : files.keySet()) {
+    for (String path : getFiles().keySet()) {
       String directory = path.split("/")[0];
       if (!ret.contains(directory)) {
         ret.add(directory);
@@ -97,13 +97,23 @@ public class ModPack {
   public Map<String, ModPackFile> getFilesMatching(String regex) {
     Map<String, ModPackFile> ret = Maps.newTreeMap();
     Pattern p = Pattern.compile(regex);
-    for (Map.Entry<String, ModPackFile> entry : files.entrySet()) {
+    for (Map.Entry<String, ModPackFile> entry : getFiles().entrySet()) {
       Matcher m = p.matcher(entry.getKey());
       if (m.find()) {
         ret.put(entry.getKey(), entry.getValue());
       }
     }
     return ret;
+  }
+
+  public void setFiles(Map<String, ModPackFile> map) {
+    for(Map.Entry<String, ModPackFile> entry : map.entrySet()){
+      if(entry.getValue() instanceof Mod){
+        mods.put(entry.getKey(), (Mod) entry.getValue());
+      } else {
+        other.put(entry.getKey(), entry.getValue());
+      }
+    }
   }
 
 }

@@ -40,11 +40,13 @@ import lombok.Getter;
 import net.mineguild.Launcher.Constants;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.log.Logger;
+import net.mineguild.Launcher.utils.CurseforgeUtil;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.BuilderSettings;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.MCVersionIndex;
+import net.mineguild.ModPack.Mod;
 import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModPackFile;
 import net.mineguild.ModPack.Side;
@@ -250,6 +252,7 @@ public class ModpackBuilder extends JFrame {
     WorkDialog dialog = new WorkDialog(parent);
     dialog.start(workPack);
     compareAndSetOptions(newestPack, workPack);
+    CurseforgeUtil.checkForUpdate(newestPack, workPack);
     final JFrame showFilesDialog = new JFrame("Edit your file-selection");
     showFilesDialog.setDefaultCloseOperation(EXIT_ON_CLOSE);
     final ModpackTableModel mTableModel = new ModpackTableModel(workPack);
@@ -490,14 +493,19 @@ public class ModpackBuilder extends JFrame {
       switch (column) {
         case 0:
           return path;
-          
+
         case 1:
           ModPackFile f = pack.getFileByPath(path);
-          if (f.getModInfo() == null) {
-            return "-";
-          } else {
-            return f.getModInfo().getName()+" - "+f.getModInfo().getVersion();
+
+          if (f instanceof Mod) {
+            if (((Mod) f).getInfo() == null) {
+              return "-";
+            } else {
+              return ((Mod) f).getInfo().getName() + " - " + ((Mod) f).getInfo().getVersion();
+            }
           }
+
+
         case 2:
           return pack.getFileByPath(path).getSide();
         case 3:

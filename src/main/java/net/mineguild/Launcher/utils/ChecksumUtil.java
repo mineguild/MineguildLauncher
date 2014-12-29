@@ -15,11 +15,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModPackFile;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 import com.google.common.collect.Maps;
 import com.google.common.hash.HashFunction;

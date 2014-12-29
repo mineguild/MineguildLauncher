@@ -6,20 +6,14 @@ import lombok.Setter;
 
 import com.google.gson.annotations.Expose;
 
+
 public class ModPackFile {
-  private @Getter @Setter @Expose long size;
-  private @Getter @Setter @Expose Side side = Side.UNIVERSAL;
-  private @Getter @Setter @Expose boolean optional = false;
-  private @Getter @Expose String hash;
-  private @Getter @Setter ModInfo modInfo;
 
-
-  /**
-   * Creates a new instance of {@link ModPackFile} with the given size and hash.
-   * 
-   * @param hash The file's MD5 hash (hexdigest)
-   * @param size The file's size in bytes
-   */
+  @Expose @Getter @Setter long size;
+  @Expose @Getter @Setter Side side;
+  @Expose @Getter @Setter boolean optional;
+  @Expose @Getter @Setter String hash;
+  
   public ModPackFile(String hash, long size) {
     this(hash);
     this.size = checkNotNull(size);
@@ -33,11 +27,8 @@ public class ModPackFile {
   public ModPackFile(String hash) {
     this.hash = checkNotNull(hash);
   }
-
-  @Override
-  public String toString() {
-    return String.format("ModPackFile Hash: %s Size: %.2d", hash, size);
+  
+  public ModPackFile(){
+    
   }
-
-
 }

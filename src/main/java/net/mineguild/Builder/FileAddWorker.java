@@ -13,6 +13,7 @@ import net.mineguild.Launcher.utils.ChecksumUtil.ModPackEntry;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
 import net.mineguild.Launcher.utils.json.JsonFactory;
+import net.mineguild.ModPack.Mod;
 import net.mineguild.ModPack.ModInfo;
 import net.mineguild.ModPack.ModPackFile;
 
@@ -55,9 +56,9 @@ public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
                   ModPackEntry entry = ChecksumUtil.getFile(baseDirectory, e);
                   if (entry.getKey().endsWith(".jar") || entry.getKey().endsWith(".zip")) {
                     List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
-                    if(modInfo != null){
-                      if(modInfo.size() > 0){
-                        entry.getValue().setModInfo(modInfo.get(0));
+                    if (modInfo != null) {
+                      if (modInfo.size() > 0) {
+                        ((Mod) entry.getValue()).setInfo(modInfo.get(0));
                       }
                     }
                   }
@@ -74,27 +75,7 @@ public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
       ret.put(entry.getKey(), entry.getValue());
     }
     return ret;
-    /*
-     * ExecutorService executor = Executors.newFixedThreadPool(OSUtils.getNumCores()); for (File
-     * file : files) { try { Runnable worker = new WorkerTask(file, Hashing.md5());
-     * executor.execute(worker); } catch (Exception ignored) { }
-     * 
-     * } executor.shutdown(); try { executor.awaitTermination(60, TimeUnit.SECONDS); } catch
-     * (InterruptedException e) { executor.shutdownNow(); Thread.currentThread().interrupt(); }
-     * return results;
-     */
   }
-  /*
-   * public static class WorkerTask implements Runnable {
-   * 
-   * File file; HashFunction hf;
-   * 
-   * WorkerTask(File file, HashFunction hf) { this.file = file; this.hf = hf; }
-   * 
-   * @Override public void run() { try { results.put(file, Files.hash(file, hf).toString());
-   * FileAddWorker.instance.updateProgress(); } catch (Exception ignored) { }
-   * 
-   * } }
-   */
+
 
 }

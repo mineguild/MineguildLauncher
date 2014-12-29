@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.mineguild.ModPack.Mod;
+import net.mineguild.ModPack.ModPack;
+import net.mineguild.ModPack.ModPackFile;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
@@ -16,7 +20,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class CurseforgeUtil {
 
@@ -49,6 +56,44 @@ public class CurseforgeUtil {
       versions.get(mcVersion).add(file);
     }
     return versions;
+  }
+  
+  public static void checkForUpdate(ModPack oldPack, ModPack workPack){
+    List<Mod> common = getCommonFiles(oldPack, workPack);
+    System.out.println(common.size());
+    for(Mod mod : common){
+      if(mod.getCurseforgeID() != null){
+        if(!mod.getCurseforgeID().isEmpty()){
+          Gson g = new GsonBuilder().setPrettyPrinting().create();
+          try {
+            System.out.println(g.toJson(getVersions(mod.getCurseforgeID()).get("1.7.10")));
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+  }
+  
+  public static List<Mod> getCommonFiles(ModPack oldPack, ModPack workPack){
+    List<Mod> common = Lists.newArrayList();
+    /*for(String hash : workPack.getFiles().keySet()){
+      Set<ModPackFile> hashMatching = (Set) oldPack.getFilesByHash(hash).entrySet();
+      if(hashMatching.size() > 0){
+        for(ModPackFile file : hashMatching){
+          if(file instanceof Mod){
+            common.add((Mod) file);
+          }
+        }
+      }
+    }*/
+    for(ModPackFile f : oldPack.getFiles().values()){
+      if(f instanceof Mod){
+        common.add((Mod) f);
+      }
+    }
+    return common;
   }
 
   public static Document getCachedDocument(String requestPath) throws IOException {
