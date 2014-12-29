@@ -39,7 +39,9 @@ public class AuthWorkDialog extends JDialog implements PropertyChangeListener {
             Constants.AUTHLIB_VERSION);
     worker.addPropertyChangeListener(this);
     worker.execute();
-    Thread.sleep(1000);
+    while(!worker.isDone()){
+      Thread.sleep(10);
+    }
     setVisible(true);
     try {
       boolean result = worker.get();
