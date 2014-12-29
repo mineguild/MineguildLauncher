@@ -23,6 +23,7 @@ public class ModPack {
   private @Expose @Getter long releaseTime;
   private @Expose @Getter Map<String, Mod> mods;
   private @Expose @Getter Map<String, ModPackFile> other;
+  private Map<String, ModPackFile> files;
 
   public ModPack(String version, long releaseTime) {
     this.version = version;
@@ -34,7 +35,10 @@ public class ModPack {
     this.releaseTime = releaseTime;
   }
 
-  public ModPack() {}
+  public ModPack() {
+    mods = Maps.newTreeMap();
+    other = Maps.newTreeMap();
+  }
 
   public void setReleaseTime(long releaseTime) {
     this.releaseTime = releaseTime;
@@ -56,6 +60,10 @@ public class ModPack {
   }
   
   public Map<String, ModPackFile> getFiles(){
+    if(!files.isEmpty()){
+      other.putAll(files);
+      files.clear();
+    }
     Map<String, ModPackFile> allFiles = Maps.newTreeMap((TreeMap<String, ModPackFile>)other);
     allFiles.putAll(mods);
     return allFiles;
