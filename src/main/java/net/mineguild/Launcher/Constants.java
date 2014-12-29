@@ -32,6 +32,9 @@ public class Constants {
   public static final String PASTEBIN_POST_URL = "http://pastebin.com/api/api_post.php";
 
   public static final String AUTHLIB_VERSION = "1.5.16";
+  
+  // Build Number, filled in by gradle
+  public static final String BUILD = "$BUILD";
 
 
 }
