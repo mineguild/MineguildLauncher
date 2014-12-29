@@ -312,7 +312,10 @@ public class LoginDialog extends JDialog {
         throw w.t;
       }
     } catch (Exception e) {
-      if (e instanceof InvalidCredentialsException) {
+
+      if (e instanceof UserMigratedException) {
+        JOptionPane.showMessageDialog(this, "User migrated! Use E-Mail to sign in!");
+      } else if (e instanceof InvalidCredentialsException) {
         if (mojangData) {
           if (hasPassword) {
             Logger.logInfo("Unable to login with MCToken, trying stored password.");
@@ -328,8 +331,6 @@ public class LoginDialog extends JDialog {
         } else {
           JOptionPane.showMessageDialog(this, "Invalid username and/or password");
         }
-      } else if (e instanceof UserMigratedException) {
-        JOptionPane.showMessageDialog(this, "User migrated! Use E-Mail to sign in!");
       } else if (e instanceof AuthenticationUnavailableException) {
         JOptionPane.showMessageDialog(this,
             "Couldn't authenticate with mojang. Either them or you are offline.");
