@@ -9,6 +9,7 @@ import javax.swing.SwingWorker;
 
 import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.utils.ChecksumUtil;
+import net.mineguild.Launcher.utils.ChecksumUtil.Entry;
 import net.mineguild.Launcher.utils.ChecksumUtil.ModPackEntry;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.Parallel;
@@ -20,7 +21,7 @@ import net.mineguild.ModPack.ModPackFile;
 import com.google.common.collect.Maps;
 
 
-public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
+public class FileAddWorker<T> extends SwingWorker<Map<String, T>, Void> {
 
   @Override
   protected void done() {
@@ -31,12 +32,14 @@ public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
   private Collection<File> files;
   private float progressPerFile;
   private File baseDirectory;
+  private boolean mods;
   private int progress;
 
-  public FileAddWorker(Collection<File> files, File baseDirectory) {
+  public FileAddWorker(Collection<File> files, File baseDirectory, boolean mods) {
     this.files = files;
     this.baseDirectory = baseDirectory;
     this.progressPerFile = 100f / files.size();
+    this.mods = mods;
   }
 
   public void updateProgress() {
@@ -45,33 +48,45 @@ public class FileAddWorker extends SwingWorker<Map<String, ModPackFile>, Void> {
 
 
   @Override
-  protected Map<String, ModPackFile> doInBackground() throws Exception {
-    Collection<ModPackEntry> result =
-        new Parallel.ForEach<File, ModPackEntry>(files).withFixedThreads(OSUtils.getNumCores() * 2)
-            .apply(new Parallel.F<File, ModPackEntry>() {
+  protected Map<String, T> doInBackground() throws Exception {
+    Collection<Entry<T>> result =
+        new Parallel.ForEach<File, Entry<T>>(files).withFixedThreads(OSUtils.getNumCores() * 2)
+            .apply(new Parallel.F<File, Entry<T>>() {
 
               @Override
-              public ModPackEntry apply(File e) {
+              public Entry<T> apply(File e) {
                 try {
                   ModPackEntry entry = ChecksumUtil.getFile(baseDirectory, e);
-                  if (entry.getKey().endsWith(".jar") || entry.getKey().endsWith(".zip")) {
-                    List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
-                    if (modInfo != null) {
-                      if (modInfo.size() > 0) {
-                        ((Mod) entry.getValue()).setInfo(modInfo.get(0));
+                  if (mods) {
+                    if (entry.getKey().endsWith(".jar") || entry.getKey().endsWith(".zip")) {
+                      List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
+                      if (modInfo != null) {
+                        Entry<Mod> ret =
+                            new Entry<Mod>(entry.getKey(), Mod.fromModPackFile(entry.getValue()));
+                        ret.getValue().setInfo(modInfo.get(0));
+                        updateProgress();
+                        return (Entry<T>) ret;
                       }
                     }
+                    updateProgress();
+                    return null;
+                  } else {
+                    Entry<ModPackFile> ret =
+                        new Entry<ModPackFile>(entry.getKey(), entry.getValue());
+                    updateProgress();
+                    return (Entry<T>) ret;
                   }
-                  updateProgress();
-                  return entry;
+
+
                 } catch (Exception e1) {
                   Logger.logError("Unable to add file!", e1);
                 }
+                updateProgress();
                 return null;
               }
             }).values();
-    Map<String, ModPackFile> ret = Maps.newTreeMap();
-    for (ModPackEntry entry : result) {
+    Map<String, T> ret = Maps.newTreeMap();
+    for (Entry<T> entry : result) {
       ret.put(entry.getKey(), entry.getValue());
     }
     return ret;

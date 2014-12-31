@@ -10,8 +10,8 @@ import com.google.gson.annotations.Expose;
 public class ModPackFile {
 
   @Expose @Getter @Setter long size;
-  @Expose @Getter @Setter Side side;
-  @Expose @Getter @Setter boolean optional;
+  @Expose @Getter @Setter Side side = Side.UNIVERSAL;
+  @Expose @Getter @Setter boolean optional = false;
   @Expose @Getter @Setter String hash;
   
   public ModPackFile(String hash, long size) {

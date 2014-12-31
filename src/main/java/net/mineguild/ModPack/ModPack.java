@@ -58,13 +58,16 @@ public class ModPack {
   public ModPackFile getFileByPath(String path) {
     return getFiles().get(path);
   }
-  
-  public Map<String, ModPackFile> getFiles(){
-    if(!files.isEmpty()){
-      other.putAll(files);
-      files.clear();
+
+  public Map<String, ModPackFile> getFiles() {
+    if (files != null) {
+      if (!files.isEmpty()) {
+        other.putAll(files);
+        files.clear();
+      }
     }
-    Map<String, ModPackFile> allFiles = Maps.newTreeMap((TreeMap<String, ModPackFile>)other);
+    Map<String, ModPackFile> allFiles = Maps.newTreeMap();
+    allFiles.putAll(other);
     allFiles.putAll(mods);
     return allFiles;
   }
@@ -115,8 +118,8 @@ public class ModPack {
   }
 
   public void setFiles(Map<String, ModPackFile> map) {
-    for(Map.Entry<String, ModPackFile> entry : map.entrySet()){
-      if(entry.getValue() instanceof Mod){
+    for (Map.Entry<String, ModPackFile> entry : map.entrySet()) {
+      if (entry.getValue() instanceof Mod) {
         mods.put(entry.getKey(), (Mod) entry.getValue());
       } else {
         other.put(entry.getKey(), entry.getValue());

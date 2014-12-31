@@ -68,12 +68,12 @@ public class ChecksumUtil {
    */
   public static synchronized Map<String, ModPackFile> getFiles(final File baseDirectory,
       Collection<File> files) throws InterruptedException, ExecutionException {
-    Collection<Entry<String, ModPackFile>> results =
-        new Parallel.ForEach<File, Entry<String, ModPackFile>>(files)
+    Collection<Map.Entry<String, ModPackFile>> results =
+        new Parallel.ForEach<File, Map.Entry<String, ModPackFile>>(files)
             .withFixedThreads(2 * OSUtils.getNumCores())
-            .apply(new Parallel.F<File, Entry<String, ModPackFile>>() {
+            .apply(new Parallel.F<File, Map.Entry<String, ModPackFile>>() {
               @Override
-              public Entry<String, ModPackFile> apply(final File e) {
+              public Map.Entry<String, ModPackFile> apply(final File e) {
                 try {
                   return getFile(baseDirectory, e);
                 } catch (Exception e1) {
@@ -83,7 +83,7 @@ public class ChecksumUtil {
               }
             }).values();
     Map<String, ModPackFile> ret = Maps.newTreeMap();
-    for (Entry<String, ModPackFile> e : results) {
+    for (Map.Entry<String, ModPackFile> e : results) {
       ret.put(e.getKey(), e.getValue());
     }
     return ret;
@@ -166,6 +166,33 @@ public class ChecksumUtil {
 
     @Override
     public ModPackFile setValue(ModPackFile value) {
+      throw new NotImplementedException("Not in this implementation!");
+    }
+
+  }
+  
+  public static class Entry<T> implements Map.Entry<String, T> {
+
+    final String key;
+    final T value;
+
+    public Entry(String key, T value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    @Override
+    public String getKey() {
+      return key;
+    }
+
+    @Override
+    public T getValue() {
+      return value;
+    }
+
+    @Override
+    public T setValue(T value) {
       throw new NotImplementedException("Not in this implementation!");
     }
 

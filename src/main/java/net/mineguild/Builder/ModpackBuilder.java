@@ -249,7 +249,9 @@ public class ModpackBuilder extends JFrame {
         + (String) forgeVersionBox.getSelectedItem());
     workPack.setVersion(ModpackBuilder.instance.versionField.getText());
     workPack.setReleaseTime(System.currentTimeMillis());
-    WorkDialog dialog = new WorkDialog(parent);
+    WorkDialog dialog = new WorkDialog(parent, false);
+    dialog.start(workPack);
+    dialog = new WorkDialog(parent, true);
     dialog.start(workPack);
     compareAndSetOptions(newestPack, workPack);
     CurseforgeUtil.checkForUpdate(newestPack, workPack);
@@ -303,7 +305,9 @@ public class ModpackBuilder extends JFrame {
     refreshButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        WorkDialog dialog = new WorkDialog(parent);
+        WorkDialog dialog = new WorkDialog(parent, false);
+        dialog.start(mTableModel.getPack());
+        dialog = new WorkDialog(parent, true);
         dialog.start(mTableModel.getPack());
         compareAndSetOptions(newestPack, mTableModel.getPack());
         mTableModel.fireTableDataChanged();
@@ -344,7 +348,21 @@ public class ModpackBuilder extends JFrame {
         System.exit(0);
       }
     });
+    JButton curseForge = new JButton("Curseforge Options");
+    curseForge.addActionListener(new ActionListener() {
+      
+      @Override
+      public synchronized void actionPerformed(ActionEvent e) {
+        int row = table.getSelectedRow();
+        ModPackFile f = mTableModel.getFileAtRow(row);
+        if(f instanceof Mod){
+          String result = JOptionPane.showInputDialog("Enter ID", ((Mod) f).getCurseforgeID());
+          ((Mod) f).setCurseforgeID(result);
+        }
+      }
+    });
     bottomButtonPanel.add(filterField);
+    //bottomButtonPanel.add(curseForge);
     bottomButtonPanel.add(refreshButton);
     bottomButtonPanel.add(removeButton);
     bottomButtonPanel.add(clientSide);
@@ -504,8 +522,7 @@ public class ModpackBuilder extends JFrame {
               return ((Mod) f).getInfo().getName() + " - " + ((Mod) f).getInfo().getVersion();
             }
           }
-
-
+          return "-";
         case 2:
           return pack.getFileByPath(path).getSide();
         case 3:
@@ -519,6 +536,11 @@ public class ModpackBuilder extends JFrame {
     @Override
     public boolean isCellEditable(int t, int t2) {
       return false;
+    }
+    
+    public ModPackFile getFileAtRow(int row){
+      String path = (String) pack.getFilesMatching(filter).keySet().toArray()[row];
+      return pack.getFileByPath(path);
     }
 
   }
