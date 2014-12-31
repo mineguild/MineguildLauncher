@@ -2,11 +2,10 @@ package net.mineguild.ModPack;
 
 import java.util.Date;
 
-import com.google.gson.annotations.Expose;
-import com.sun.prism.impl.BaseMesh.FaceMembers;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import com.google.gson.annotations.Expose;
 
 public class Mod extends ModPackFile {
 
