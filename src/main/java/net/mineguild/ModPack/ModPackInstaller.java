@@ -95,21 +95,8 @@ public class ModPackInstaller {
 
                 @Override
                 public DownloadInfo apply(Entry<String, ModPackFile> e) {
-                  // boolean isInInstalled = false;
                   ModPackFile packFile = e.getValue();
-                  /*
-                   * if (localPack.getFileByPath(e.getKey()) != null) { isInInstalled =
-                   * localPack.getFileByPath(e.getKey()).getHash() .equals(e.getValue().getHash());
-                   * }
-                   */
                   File localFile = new File(installDirectory, e.getKey());
-                  if (side == Side.BOTH || packFile.getSide() == Side.UNIVERSAL
-                      || side == packFile.getSide()) {
-                    Logger.logDebug(String.format("Keeping %s - side matches", localFile.getName()));
-                  } else {
-                    localFile.delete();
-                  }
-
                   try {
                     if (!localFile.exists()) {
                       String dlPath = packFile.getHash().substring(0, 2) + "/" + packFile.getHash();
@@ -276,19 +263,30 @@ public class ModPackInstaller {
 
             @Override
             public Void apply(Entry<String, ModPackFile> entry) {
+              String path = entry.getKey();
+              String hash = entry.getValue().getHash();
               try {
-                boolean isInNewPack =
-                    pack.getFileByPath(entry.getKey()) == null ? false : pack
-                        .getFileByPath(entry.getKey()).getHash().equals(entry.getValue().getHash());
+                boolean isInNewPack = false;
+                ModPackFile found = pack.getFileByPath(path);
+                if (found != null) {
+                  isInNewPack = found.getHash().equals(hash);
+                }
                 boolean delete = false;
-                File localFile = new File(target, entry.getKey());
+                File localFile = new File(target, path);
+
+                if (!(side == Side.BOTH || entry.getValue().getSide() == Side.UNIVERSAL || side == entry.getValue().getSide())) {
+                  Logger.logDebug("Side doesn't match! Deleting.");
+                  delete = true;
+                }
 
                 if (localFile.exists() && isInNewPack) {
-                  String hash = ChecksumUtil.getChecksum(localFile);
-                  if (!entry.getValue().getHash().equals(hash)) {
+                  String fileHash = ChecksumUtil.getMD5(localFile);
+                  if (!hash.equals(fileHash)) {
+                    Logger.logDebug(String.format("%s hash doesn't match", path));
                     delete = true;
                   }
                 } else if (localFile.exists()) {
+                  Logger.logDebug(String.format("%s not in new pack!", path));
                   delete = true;
                 }
 
@@ -296,13 +294,15 @@ public class ModPackInstaller {
                   if (doBackup) {
                     try {
                       FileUtils.moveFileToDirectory(localFile, new File(backupDirectory,
-                          RelativePath.getRelativePath(target, new File(localFile.getParent()))),
-                          true);
+                                      RelativePath.getRelativePath(target, new File(localFile.getParent()))),
+                              true);
                     } catch (Exception e) {
                       localFile.delete();
+                      Logger.logInfo(String.format("Deleting %s", path));
                     }
                   } else {
                     localFile.delete();
+                    Logger.logInfo(String.format("Deleting %s", path));
                   }
                 }
 

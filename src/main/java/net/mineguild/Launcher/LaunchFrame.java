@@ -605,9 +605,12 @@ public class LaunchFrame extends JFrame {
     File modsDir = new File(MineguildLauncher.getSettings().getInstancePath(), "mods");
     File backupDirectory = null;
     try {
-      int result =
-          JOptionPane.showConfirmDialog(this, "Do you want to backup your locally modified files?",
-              "Create backup?", JOptionPane.YES_NO_OPTION);
+      int result = JOptionPane.NO_OPTION;
+      if(localPack != null) {
+        result =
+                JOptionPane.showConfirmDialog(this, "Do you want to backup your locally modified files?",
+                        "Create backup?", JOptionPane.YES_NO_OPTION);
+      }
       if (result == JOptionPane.YES_OPTION) {
         backupDirectory = new File(MineguildLauncher.getSettings().getInstancePath(), "backup");
         if (backupDirectory.exists() && backupDirectory.isDirectory()) {
