@@ -1,6 +1,7 @@
 package net.mineguild.Builder;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -74,9 +75,13 @@ public class FileAddWorker<T> extends SwingWorker<Map<String, T>, Void> {
                     Entry<ModPackFile> ret =
                             new Entry<ModPackFile>(entry.getKey(), entry.getValue());
                     if (entry.getKey().endsWith(".jar") || entry.getKey().endsWith(".zip")) {
-                      List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
-                      if (modInfo != null) {
-                        return null;
+                      try {
+                        List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
+                        if (modInfo != null) {
+                          return null;
+                        }
+                      } catch (IOException e2){
+                        Logger.logError("ModJar check failed!", e2);
                       }
                     }
                     updateProgress();
