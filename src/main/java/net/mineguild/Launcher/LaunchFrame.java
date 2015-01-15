@@ -635,7 +635,7 @@ public class LaunchFrame extends JFrame {
       } else {
         dlinfo =
             ModPackInstaller.checkNeededFiles(MineguildLauncher.getSettings().getInstancePath(),
-                localPack, remotePack, Side.CLIENT);
+                    remotePack, Side.CLIENT);
       }
     } catch (Exception e) {
       Logger.logError("Error during ModPack hash checking!", e);

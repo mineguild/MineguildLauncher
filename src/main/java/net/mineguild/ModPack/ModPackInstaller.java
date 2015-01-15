@@ -52,18 +52,8 @@ public class ModPackInstaller {
               public DownloadInfo apply(Map.Entry<String, ModPackFile> entry) {
                 String path = entry.getKey();
                 ModPackFile packFile = entry.getValue();
-                if (side == Side.BOTH || packFile.getSide() == side
-                    || packFile.getSide() == Side.UNIVERSAL) {
+                if (packFile.sideMatches(side)) {
                   File localFile = new File(installDirectory, path);
-                  if (localFile.exists()) {
-                    try {
-                      if (!ChecksumUtil.getMD5(localFile).equals(packFile.getHash())) {
-                        localFile.delete();
-                      }
-                    } catch (IOException e) {
-                      Logger.logError("Error occurred during ModPackFile Hash-Checking", e);
-                    }
-                  }
                   try {
                     if (!localFile.exists()) {
                       String dlPath = packFile.getHash().substring(0, 2) + "/" + packFile.getHash();
@@ -83,43 +73,6 @@ public class ModPackInstaller {
 
             }).values();
     return result;
-  }
-
-  public static synchronized List<DownloadInfo> checkNeededFiles(final File installDirectory,
-      final ModPack localPack, ModPack remotePack, final Side side) {
-    try {
-      List<DownloadInfo> result =
-          (List<DownloadInfo>) new Parallel.ForEach<Entry<String, ModPackFile>, DownloadInfo>(
-              remotePack.getFiles().entrySet()).withFixedThreads(OSUtils.getNumCores() * 2)
-              .apply(new Parallel.F<Map.Entry<String, ModPackFile>, DownloadInfo>() {
-
-                @Override
-                public DownloadInfo apply(Entry<String, ModPackFile> e) {
-                  ModPackFile packFile = e.getValue();
-                  File localFile = new File(installDirectory, e.getKey());
-                  try {
-                    if (!localFile.exists()) {
-                      String dlPath = packFile.getHash().substring(0, 2) + "/" + packFile.getHash();
-                      DownloadInfo ret =
-                          new DownloadInfo(new URL(Constants.MG_MMP_FILES + dlPath), localFile,
-                              localFile.getName(), Lists.newArrayList(packFile.getHash()), "md5",
-                              DLType.ContentMD5, DLType.NONE);
-                      ret.size = packFile.getSize();
-                      return ret;
-                    }
-                  } catch (MalformedURLException e2) {
-                    Logger.logError("Unable to add url!", e2);
-                  }
-
-                  return null;
-                }
-              }).values();
-      return result;
-    } catch (Exception e) {
-      Logger.logError("Error during multithreaded action!", e);
-    }
-
-    return null;
   }
 
   /**
@@ -185,8 +138,7 @@ public class ModPackInstaller {
               }
             } else {
               for (ModPackFile packFile : files.values()) {
-                if (packFile.getSide() == Side.UNIVERSAL || side == Side.BOTH
-                    || packFile.getSide() == side) {
+                if (packFile.sideMatches(side)) {
                   Logger.logDebug(String.format("Leaving %s in there - side matches", f.getName()));
                 } else {
                   if (doBackup) {
@@ -274,14 +226,13 @@ public class ModPackInstaller {
                 boolean delete = false;
                 File localFile = new File(target, path);
 
-                if (!(side == Side.BOTH || entry.getValue().getSide() == Side.UNIVERSAL || side == entry.getValue().getSide())) {
+                if (!entry.getValue().sideMatches(side)) {
                   Logger.logDebug("Side doesn't match! Deleting.");
                   delete = true;
                 }
 
                 if (localFile.exists() && isInNewPack) {
-                  String fileHash = ChecksumUtil.getMD5(localFile);
-                  if (!hash.equals(fileHash)) {
+                  if (!entry.getValue().hashMatches(localFile)) {
                     Logger.logDebug(String.format("%s hash doesn't match", path));
                     delete = true;
                   }
@@ -298,11 +249,11 @@ public class ModPackInstaller {
                               true);
                     } catch (Exception e) {
                       localFile.delete();
-                      Logger.logInfo(String.format("Deleting %s", path));
+                      Logger.logError(String.format("Deleting %s - error during backup", path), e);
                     }
                   } else {
                     localFile.delete();
-                    Logger.logInfo(String.format("Deleting %s", path));
+                    Logger.logDebug(String.format("Deleting %s", path));
                   }
                 }
 

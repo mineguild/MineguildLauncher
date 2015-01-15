@@ -62,7 +62,7 @@ public class FileAddWorker<T> extends SwingWorker<Map<String, T>, Void> {
                       List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
                       if (modInfo != null) {
                         Entry<Mod> ret =
-                            new Entry<Mod>(entry.getKey(), Mod.fromModPackFile(entry.getValue()));
+                                new Entry<Mod>(entry.getKey(), Mod.fromModPackFile(entry.getValue()));
                         ret.getValue().setInfo(modInfo.get(0));
                         updateProgress();
                         return (Entry<T>) ret;
@@ -72,7 +72,13 @@ public class FileAddWorker<T> extends SwingWorker<Map<String, T>, Void> {
                     return null;
                   } else {
                     Entry<ModPackFile> ret =
-                        new Entry<ModPackFile>(entry.getKey(), entry.getValue());
+                            new Entry<ModPackFile>(entry.getKey(), entry.getValue());
+                    if (entry.getKey().endsWith(".jar") || entry.getKey().endsWith(".zip")) {
+                      List<ModInfo> modInfo = JsonFactory.loadModInfoFromJar(e);
+                      if (modInfo != null) {
+                        return null;
+                      }
+                    }
                     updateProgress();
                     return (Entry<T>) ret;
                   }
@@ -85,12 +91,12 @@ public class FileAddWorker<T> extends SwingWorker<Map<String, T>, Void> {
                 return null;
               }
             }).values();
-    Map<String, T> ret = Maps.newTreeMap();
-    for (Entry<T> entry : result) {
-      ret.put(entry.getKey(), entry.getValue());
-    }
-    return ret;
-  }
+                Map<String, T> ret = Maps.newTreeMap();
+                for (Entry<T> entry : result) {
+                  ret.put(entry.getKey(), entry.getValue());
+                }
+                return ret;
+              }
 
 
-}
+            }

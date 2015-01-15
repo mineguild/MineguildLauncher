@@ -79,9 +79,11 @@ public class ModpackBuilder extends JFrame {
   public static ModPack workPack;
   public static MCLaunchFrame launch;
   public static String forgeVersionIndex;
+  public static String forge1_8_index;
   public static ModpackBuilder instance;
   public static BuilderSettings settings;
   public static File forgeIndex = new File(OSUtils.getLocalDir(), "forgeIndex.html");
+  public static File forge1_8_db = new File(OSUtils.getLocalDir(), "forge1_8.html");
   public static File mcIndex = new File(OSUtils.getLocalDir(), "mcVersions.json");
   public static MCVersionIndex mcVersionIndex;
 
@@ -90,6 +92,10 @@ public class ModpackBuilder extends JFrame {
       FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/index.html"), forgeIndex);
     }
     forgeVersionIndex = FileUtils.readFileToString(forgeIndex);
+    if(!forge1_8_db.exists()){
+      FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/minecraftforge//1.8"), forge1_8_db);
+    }
+    forge1_8_index = FileUtils.readFileToString(forge1_8_db);
 
     if (!mcIndex.exists()) {
       FileUtils.copyURLToFile(new URL(
@@ -123,6 +129,8 @@ public class ModpackBuilder extends JFrame {
           FileUtils
               .copyURLToFile(new URL("http://files.minecraftforge.net/index.html"), forgeIndex);
           forgeVersionIndex = FileUtils.readFileToString(forgeIndex);
+          FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/minecraftforge//1.8"), forge1_8_db);
+          forge1_8_index = FileUtils.readFileToString(forge1_8_db);
           Object item = forgeVersionBox.getSelectedItem();
           forgeVersionBox.setModel(new JComboBox(getForgeForMC(
               (String) mcVersionBox.getSelectedItem()).toArray()).getModel());
@@ -235,6 +243,7 @@ public class ModpackBuilder extends JFrame {
                 (String) mcVersionBox.getSelectedItem()).toArray()).getModel());
 
           } catch (Exception e2) {
+            e2.printStackTrace();
             JOptionPane.showMessageDialog(getRootPane(), "No forge versions for this mc version!");
           }
         }
@@ -596,23 +605,37 @@ public class ModpackBuilder extends JFrame {
 
   public static List<String> getForgeForMC(String mc_version) {
     List<String> versions = Lists.newArrayList();
-    Document d = Jsoup.parse(forgeVersionIndex);
-    Element e = d.getElementById(mc_version + "_builds");
-    Elements elem = e.getElementsByTag("td");
     Pattern p = Pattern.compile("\\d*\\.\\d*\\.\\d*\\.\\d*");
-    for (Element e1 : elem) {
+    if(mc_version.equals("1.8")){
+    Document d2 = Jsoup.parse(forge1_8_index);
+    Element e2 = d2.getElementById(mc_version + "_builds");
+    Elements elem2 = e2.getElementsByTag("td");
+    p = Pattern.compile("\\d*\\.\\d*\\.\\d*\\.\\d*");
+    for (Element e1 : elem2) {
       String text = e1.ownText();
-      if (!text.equals(mc_version)) {
-        Matcher m = p.matcher(text);
-        if (m.matches()) {
-          versions.add(text);
+      Matcher m = p.matcher(text);
+      if (m.matches()) {
+        versions.add(text);
+      }
+
+    }
+    } else {
+      Document d = Jsoup.parse(forgeVersionIndex);
+      Element e = d.getElementById(mc_version + "_builds");
+      Elements elem = e.getElementsByTag("td");
+
+      for (Element e1 : elem) {
+        String text = e1.ownText();
+        if (!text.equals(mc_version)) {
+          Matcher m = p.matcher(text);
+          if (m.matches()) {
+            versions.add(text);
+          }
         }
       }
     }
     return versions;
   }
-
-
 
   private String convertGlobToRegEx(String line) {
     Logger.logDebug("got line [" + line + "]");
