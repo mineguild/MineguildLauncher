@@ -80,7 +80,7 @@ public class FileAddWorker<T> extends SwingWorker<Map<String, T>, Void> {
                         if (modInfo != null) {
                           return null;
                         }
-                      } catch (IOException e2){
+                      } catch (Exception e2){
                         Logger.logError("ModJar check failed!", e2);
                       }
                     }
