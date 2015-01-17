@@ -15,5 +15,5 @@
 package net.mineguild.Launcher.utils.json.versions;
 
 public enum Action {
-  ALLOW, DISALLOW
+    ALLOW, DISALLOW
 }

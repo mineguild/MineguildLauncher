@@ -11,17 +11,17 @@ import com.google.gson.annotations.Expose;
 
 public class BuilderSettings {
 
-  private @Expose @Getter @Setter String lastPath;
-  private @Expose @Getter @Setter String launchPath;
-  private @Expose @Getter @Setter String gameDir;
-  private @Expose @Getter @Setter Dimension lastSize;
-  private @Expose @Getter @Setter JavaSettings javaSettings;
+    private @Expose @Getter @Setter String lastPath;
+    private @Expose @Getter @Setter String launchPath;
+    private @Expose @Getter @Setter String gameDir;
+    private @Expose @Getter @Setter Dimension lastSize;
+    private @Expose @Getter @Setter JavaSettings javaSettings;
 
-  public BuilderSettings() {
-    lastPath = new File("").getAbsolutePath();
-    lastSize = new Dimension();
-    javaSettings = new JavaSettings();
-  }
+    public BuilderSettings() {
+        lastPath = new File("").getAbsolutePath();
+        lastSize = new Dimension();
+        javaSettings = new JavaSettings();
+    }
 
 
 }

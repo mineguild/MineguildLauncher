@@ -17,15 +17,15 @@ package net.mineguild.Launcher.utils.json.versions;
 import java.util.List;
 
 public class ExtractRule {
-  private List<String> exclude;
+    private List<String> exclude;
 
-  public boolean exclude(String name) {
-    if (exclude == null)
-      return false;
-    for (String s : exclude) {
-      if (name.startsWith(s))
-        return true;
+    public boolean exclude(String name) {
+        if (exclude == null)
+            return false;
+        for (String s : exclude) {
+            if (name.startsWith(s))
+                return true;
+        }
+        return false;
     }
-    return false;
-  }
 }

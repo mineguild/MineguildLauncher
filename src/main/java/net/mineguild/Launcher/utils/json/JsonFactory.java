@@ -22,74 +22,74 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class JsonFactory {
-  public static final Gson GSON;
+    public static final Gson GSON;
 
-  static {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapterFactory(new EnumAdaptorFactory());
-    builder.registerTypeAdapter(Date.class, new DateAdapter());
-    builder.registerTypeAdapter(File.class, new FileAdapter());
-    builder.registerTypeAdapter(Dimension.class, new DimensionAdapter());
-    builder.registerTypeAdapter(Point.class, new PointAdapter());
-    builder.enableComplexMapKeySerialization();
-    builder.setPrettyPrinting();
-    GSON = builder.create();
-  }
-
-  public static AssetIndex loadAssetIndex(File json) throws IOException {
-    FileReader reader = new FileReader(json);
-    return GSON.fromJson(reader, AssetIndex.class);
-  }
-
-  public static Version loadVersion(File json) throws IOException {
-    FileReader reader = new FileReader(json);
-    return GSON.fromJson(reader, Version.class);
-  }
-
-  public static Settings loadSettings(File json) throws IOException {
-    FileReader reader = new FileReader(json);
-    return GSON.fromJson(reader, Settings.class);
-  }
-
-  public static ModPack loadModpack(File json) throws IOException {
-    FileReader reader = new FileReader(json);
-    return GSON.fromJson(reader, ModPack.class);
-  }
-  
-  public static List<ModInfo> loadModInfoFile(File json) throws IOException {
-    FileReader reader = new FileReader(json);
-    List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
-    return mods;
-  }
-  
-  public static List<ModInfo> loadModInfoFromJar(File f) throws IOException {
-    JarFile jar = new JarFile(f);
-    ZipEntry mcmod = jar.getEntry("mcmod.info");
-    if(mcmod != null){
-      InputStreamReader reader = new InputStreamReader(jar.getInputStream(mcmod));
-      List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
-      jar.close();
-      return mods;
-    } else {
-      Logger.logDebug(f.getPath()+ " has no mcmod.info! Ignoring.");
-      jar.close();
-      return null;
+    static {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(new EnumAdaptorFactory());
+        builder.registerTypeAdapter(Date.class, new DateAdapter());
+        builder.registerTypeAdapter(File.class, new FileAdapter());
+        builder.registerTypeAdapter(Dimension.class, new DimensionAdapter());
+        builder.registerTypeAdapter(Point.class, new PointAdapter());
+        builder.enableComplexMapKeySerialization();
+        builder.setPrettyPrinting();
+        GSON = builder.create();
     }
-    
-  }
 
-  public static MCVersionIndex loadVersionIndex(File f) throws IOException {
-    FileReader reader = new FileReader(f);
-    return GSON.fromJson(reader, MCVersionIndex.class);
-  }
-
-  public static BuilderSettings loadBuilderSettings(File json) {
-    try {
-      FileReader reader = new FileReader(json);
-      return GSON.fromJson(reader, BuilderSettings.class);
-    } catch (IOException e) {
-      return new BuilderSettings();
+    public static AssetIndex loadAssetIndex(File json) throws IOException {
+        FileReader reader = new FileReader(json);
+        return GSON.fromJson(reader, AssetIndex.class);
     }
-  }
+
+    public static Version loadVersion(File json) throws IOException {
+        FileReader reader = new FileReader(json);
+        return GSON.fromJson(reader, Version.class);
+    }
+
+    public static Settings loadSettings(File json) throws IOException {
+        FileReader reader = new FileReader(json);
+        return GSON.fromJson(reader, Settings.class);
+    }
+
+    public static ModPack loadModpack(File json) throws IOException {
+        FileReader reader = new FileReader(json);
+        return GSON.fromJson(reader, ModPack.class);
+    }
+
+    public static List<ModInfo> loadModInfoFile(File json) throws IOException {
+        FileReader reader = new FileReader(json);
+        List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
+        return mods;
+    }
+
+    public static List<ModInfo> loadModInfoFromJar(File f) throws IOException {
+        JarFile jar = new JarFile(f);
+        ZipEntry mcmod = jar.getEntry("mcmod.info");
+        if (mcmod != null) {
+            InputStreamReader reader = new InputStreamReader(jar.getInputStream(mcmod));
+            List<ModInfo> mods = Lists.newArrayList(GSON.fromJson(reader, ModInfo[].class));
+            jar.close();
+            return mods;
+        } else {
+            Logger.logDebug(f.getPath() + " has no mcmod.info! Ignoring.");
+            jar.close();
+            return null;
+        }
+
+    }
+
+    public static MCVersionIndex loadVersionIndex(File f) throws IOException {
+        FileReader reader = new FileReader(f);
+        return GSON.fromJson(reader, MCVersionIndex.class);
+    }
+
+    public static BuilderSettings loadBuilderSettings(File json) {
+        try {
+            FileReader reader = new FileReader(json);
+            return GSON.fromJson(reader, BuilderSettings.class);
+        } catch (IOException e) {
+            return new BuilderSettings();
+        }
+    }
 
 }

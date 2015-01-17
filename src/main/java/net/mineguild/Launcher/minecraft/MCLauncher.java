@@ -35,68 +35,68 @@ import com.mojang.util.UUIDTypeAdapter;
 
 public class MCLauncher {
 
-  public static boolean isLegacy = false;
-  private static StringBuilder cpb;
+    public static boolean isLegacy = false;
+    private static StringBuilder cpb;
 
-  public static Process launchMinecraft(String javaPath, String gameFolder, File assetDir,
-      File nativesDir, List<File> classpath, String mainClass, String args, String assetIndex,
-      String version, UserAuthentication authentication, boolean legacy, JavaSettings settings)
-      throws IOException {
+    public static Process launchMinecraft(String javaPath, String gameFolder, File assetDir,
+        File nativesDir, List<File> classpath, String mainClass, String args, String assetIndex,
+        String version, UserAuthentication authentication, boolean legacy, JavaSettings settings)
+        throws IOException {
 
-    cpb = new StringBuilder("");
-    isLegacy = legacy;
-    File gameDir = new File(gameFolder);
-    assetDir = syncAssets(assetDir, assetIndex);
+        cpb = new StringBuilder("");
+        isLegacy = legacy;
+        File gameDir = new File(gameFolder);
+        assetDir = syncAssets(assetDir, assetIndex);
 
-    for (File f : classpath) {
-      cpb.append(OSUtils.getJavaDelimiter());
-      cpb.append(f.getAbsolutePath());
-    }
-
-    List<String> arguments = Lists.newArrayList();
-
-    Logger.logInfo("Java Path: " + javaPath);
-    Logger.logInfo("MC Version: " + version);
-    arguments.add(javaPath);
-
-    setMemory(arguments, settings);
-
-    if (OSUtils.getCurrentOS().equals(OSUtils.OS.WINDOWS)) {
-      if (!OSUtils.is64BitWindows()) {
-        if (settings.getPermGen() == null || settings.getPermGen().isEmpty()) {
-          if (OSUtils.getOSTotalMemory() > 2046) {
-            settings.setPermGen("192m");
-            Logger.logInfo("Defaulting PermSize to 192m");
-          } else {
-            settings.setPermGen("192m");
-            Logger.logInfo("Defaulting PermSize to 128m");
-          }
+        for (File f : classpath) {
+            cpb.append(OSUtils.getJavaDelimiter());
+            cpb.append(f.getAbsolutePath());
         }
-      }
-    }
 
-    if (settings.getPermGen() == null || settings.getPermGen().isEmpty()) {
-      // 64-bit or Non-Windows
-      settings.setPermGen("256m");
-      Logger.logInfo("Defaulting PermSize to 256m");
-    }
+        List<String> arguments = Lists.newArrayList();
 
-    arguments.add("-XX:PermSize=" + settings.getPermGen());
-    arguments.add("-Djava.library.path=" + nativesDir.getAbsolutePath());
-    arguments.add("-Dorg.lwjgl.librarypath=" + nativesDir.getAbsolutePath());
-    arguments.add("-Dnet.java.games.input.librarypath=" + nativesDir.getAbsolutePath());
-    arguments.add("-Duser.home=" + gameDir.getParentFile().getAbsolutePath());
+        Logger.logInfo("Java Path: " + javaPath);
+        Logger.logInfo("MC Version: " + version);
+        arguments.add(javaPath);
 
-    // Use IPv4 when possible, only use IPv6 when connecting to IPv6 only addresses
-    arguments.add("-Djava.net.preferIPv4Stack=true");
+        setMemory(arguments, settings);
+
+        if (OSUtils.getCurrentOS().equals(OSUtils.OS.WINDOWS)) {
+            if (!OSUtils.is64BitWindows()) {
+                if (settings.getPermGen() == null || settings.getPermGen().isEmpty()) {
+                    if (OSUtils.getOSTotalMemory() > 2046) {
+                        settings.setPermGen("192m");
+                        Logger.logInfo("Defaulting PermSize to 192m");
+                    } else {
+                        settings.setPermGen("192m");
+                        Logger.logInfo("Defaulting PermSize to 128m");
+                    }
+                }
+            }
+        }
+
+        if (settings.getPermGen() == null || settings.getPermGen().isEmpty()) {
+            // 64-bit or Non-Windows
+            settings.setPermGen("256m");
+            Logger.logInfo("Defaulting PermSize to 256m");
+        }
+
+        arguments.add("-XX:PermSize=" + settings.getPermGen());
+        arguments.add("-Djava.library.path=" + nativesDir.getAbsolutePath());
+        arguments.add("-Dorg.lwjgl.librarypath=" + nativesDir.getAbsolutePath());
+        arguments.add("-Dnet.java.games.input.librarypath=" + nativesDir.getAbsolutePath());
+        arguments.add("-Duser.home=" + gameDir.getParentFile().getAbsolutePath());
+
+        // Use IPv4 when possible, only use IPv6 when connecting to IPv6 only addresses
+        arguments.add("-Djava.net.preferIPv4Stack=true");
 
     /*
      * if (Settings.getSettings().getUseSystemProxy()) {
      * arguments.add("-Djava.net.useSystemProxies=true"); }
      */
 
-    arguments.add("-cp");
-    arguments.add(cpb.toString());
+        arguments.add("-cp");
+        arguments.add(cpb.toString());
 
     /*
      * String additionalOptions = Settings.getSettings().getAdditionalJavaOptions(); if
@@ -106,85 +106,88 @@ public class MCLauncher {
      * ErrorUtils.tossError("JARMODDING DETECTED in 1.6.4+ " + s,
      * "FTB Does not support jarmodding in MC 1.6+ "); } else { arguments.add(s); } } }
      */
-    // if (Settings.getSettings().getOptJavaArgs()) {
-    if (settings.isOptimizationArgumentsUsed()) {
-      Logger.logInfo("Adding Optimization Arguments");
-      Collections.addAll(arguments,
-          "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CICompilerCountPerCPU -XX:+TieredCompilation"
-              .split("\\s+"));
-    }
-
-    // Undocumented environment variable to control JVM
-    String additionalEnvVar = System.getenv("_JAVA_OPTIONS");
-    if (additionalEnvVar != null && !additionalEnvVar.isEmpty()) {
-      Logger.logInfo("_JAVA_OPTIONS defined: " + additionalEnvVar);
-    }
-    // Documented environment variable to control JVM
-    additionalEnvVar = System.getenv("JAVA_TOOL_OPTIONS");
-    if (additionalEnvVar != null && !additionalEnvVar.isEmpty()) {
-      Logger.logInfo("JAVA_TOOL_OPTIONS defined: " + additionalEnvVar);
-    }
-
-    arguments.add(mainClass);
-    for (String s : args.split(" ")) {
-      boolean done = false;
-      if (authentication.getSelectedProfile() != null) {
-        if (s.equals("${auth_player_name}")) {
-          arguments.add(authentication.getSelectedProfile().getName());
-          done = true;
-        } else if (s.equals("${auth_uuid}")) {
-          arguments.add(UUIDTypeAdapter.fromUUID(authentication.getSelectedProfile().getId()));
-          done = true;
-        } else if (s.equals("${user_type}")) {
-          arguments.add(authentication.getUserType().getName());
-          done = true;
+        // if (Settings.getSettings().getOptJavaArgs()) {
+        if (settings.isOptimizationArgumentsUsed()) {
+            Logger.logInfo("Adding Optimization Arguments");
+            Collections.addAll(arguments,
+                "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CICompilerCountPerCPU -XX:+TieredCompilation"
+                    .split("\\s+"));
         }
-      } else {
-        if (s.equals("${auth_player_name}")) {
-          arguments.add("Player");
-          done = true;
-        } else if (s.equals("${auth_uuid}")) {
-          arguments.add(new UUID(0L, 0L).toString());
-          done = true;
-        } else if (s.equals("${user_type}")) {
-          arguments.add(UserType.LEGACY.getName());
-          done = true;
+
+        // Undocumented environment variable to control JVM
+        String additionalEnvVar = System.getenv("_JAVA_OPTIONS");
+        if (additionalEnvVar != null && !additionalEnvVar.isEmpty()) {
+            Logger.logInfo("_JAVA_OPTIONS defined: " + additionalEnvVar);
         }
-      }
-      if (!done) {
-        if (s.equals("${auth_session}")) {
-          if (authentication.isLoggedIn() && authentication.canPlayOnline()) {
-            if (authentication instanceof YggdrasilUserAuthentication && !isLegacy) {
-              arguments.add(String.format("token:%s:%s", authentication.getAuthenticatedToken(),
-                  UUIDTypeAdapter.fromUUID(authentication.getSelectedProfile().getId())));
+        // Documented environment variable to control JVM
+        additionalEnvVar = System.getenv("JAVA_TOOL_OPTIONS");
+        if (additionalEnvVar != null && !additionalEnvVar.isEmpty()) {
+            Logger.logInfo("JAVA_TOOL_OPTIONS defined: " + additionalEnvVar);
+        }
+
+        arguments.add(mainClass);
+        for (String s : args.split(" ")) {
+            boolean done = false;
+            if (authentication.getSelectedProfile() != null) {
+                if (s.equals("${auth_player_name}")) {
+                    arguments.add(authentication.getSelectedProfile().getName());
+                    done = true;
+                } else if (s.equals("${auth_uuid}")) {
+                    arguments
+                        .add(UUIDTypeAdapter.fromUUID(authentication.getSelectedProfile().getId()));
+                    done = true;
+                } else if (s.equals("${user_type}")) {
+                    arguments.add(authentication.getUserType().getName());
+                    done = true;
+                }
             } else {
-              arguments.add(authentication.getAuthenticatedToken());
+                if (s.equals("${auth_player_name}")) {
+                    arguments.add("Player");
+                    done = true;
+                } else if (s.equals("${auth_uuid}")) {
+                    arguments.add(new UUID(0L, 0L).toString());
+                    done = true;
+                } else if (s.equals("${user_type}")) {
+                    arguments.add(UserType.LEGACY.getName());
+                    done = true;
+                }
             }
-          } else {
-            arguments.add("-");
-          }
-        } else if (s.equals("${auth_access_token}"))
-          arguments.add(authentication.getAuthenticatedToken());
-        else if (s.equals("${version_name}"))
-          arguments.add(version);
-        else if (s.equals("${game_directory}"))
-          arguments.add(gameDir.getAbsolutePath());
-        else if (s.equals("${game_assets}") || s.equals("${assets_root}"))
-          arguments.add(assetDir.getAbsolutePath());
-        else if (s.equals("${assets_index_name}"))
-          arguments.add(assetIndex == null ? "legacy" : assetIndex);
-        else if (s.equals("${user_properties}"))
-          arguments.add(new GsonBuilder()
-              .registerTypeAdapter(PropertyMap.class, new OldPropertyMapSerializer()).create()
-              .toJson(authentication.getUserProperties()));
-        else if (s.equals("${user_properties_map}"))
-          arguments.add(new GsonBuilder()
-              .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer()).create()
-              .toJson(authentication.getUserProperties()));
-        else
-          arguments.add(s);
-      }
-    }/*
+            if (!done) {
+                if (s.equals("${auth_session}")) {
+                    if (authentication.isLoggedIn() && authentication.canPlayOnline()) {
+                        if (authentication instanceof YggdrasilUserAuthentication && !isLegacy) {
+                            arguments.add(String
+                                .format("token:%s:%s", authentication.getAuthenticatedToken(),
+                                    UUIDTypeAdapter
+                                        .fromUUID(authentication.getSelectedProfile().getId())));
+                        } else {
+                            arguments.add(authentication.getAuthenticatedToken());
+                        }
+                    } else {
+                        arguments.add("-");
+                    }
+                } else if (s.equals("${auth_access_token}"))
+                    arguments.add(authentication.getAuthenticatedToken());
+                else if (s.equals("${version_name}"))
+                    arguments.add(version);
+                else if (s.equals("${game_directory}"))
+                    arguments.add(gameDir.getAbsolutePath());
+                else if (s.equals("${game_assets}") || s.equals("${assets_root}"))
+                    arguments.add(assetDir.getAbsolutePath());
+                else if (s.equals("${assets_index_name}"))
+                    arguments.add(assetIndex == null ? "legacy" : assetIndex);
+                else if (s.equals("${user_properties}"))
+                    arguments.add(new GsonBuilder()
+                        .registerTypeAdapter(PropertyMap.class, new OldPropertyMapSerializer())
+                        .create().toJson(authentication.getUserProperties()));
+                else if (s.equals("${user_properties_map}"))
+                    arguments.add(new GsonBuilder()
+                        .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
+                        .create().toJson(authentication.getUserProperties()));
+                else
+                    arguments.add(s);
+            }
+        }/*
       * if (!isLegacy) {// legacy is handled separately boolean fullscreen = false; if
       * (Settings.getSettings().getLastExtendedState() == JFrame.MAXIMIZED_BOTH) {
       * GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment(); Rectangle
@@ -200,107 +203,105 @@ public class MCLauncher {
       */
 
 
-    ProcessBuilder builder = new ProcessBuilder(arguments);
+        ProcessBuilder builder = new ProcessBuilder(arguments);
     /*
      * StringBuilder tmp = new StringBuilder(); for (String a : builder.command())
      * tmp.append(a).append(' '); Logger.logInfo("Launching: " + tmp.toString());
      */
-    builder.directory(gameDir);
-    builder.redirectErrorStream(true);
-    // OSUtils.cleanEnvVars(builder.environment());
-    return builder.start();
-  }
-
-  private static void setMemory(List<String> arguments, JavaSettings settings) {
-    boolean memorySet = false;
-    try {
-      int min = 256;
-      if (settings.getMaxMemory() > 0) {
-        arguments.add("-Xms" + min + "M");
-        Logger.logInfo("Setting MinMemory to " + min);
-        arguments.add("-Xmx" + settings.getMaxMemory() + "M");
-        Logger.logInfo("Setting MaxMemory to " + settings.getMaxMemory());
-        memorySet = true;
-      }
-    } catch (Exception e) {
-      Logger.logError("Error parsing memory settings", e);
+        builder.directory(gameDir);
+        builder.redirectErrorStream(true);
+        // OSUtils.cleanEnvVars(builder.environment());
+        return builder.start();
     }
-    if (!memorySet) {
-      arguments.add("-Xms" + 256 + "M");
-      Logger.logInfo("Defaulting MinMemory to " + 256);
-      arguments.add("-Xmx" + 1024 + "M");
-      Logger.logInfo("Defaulting MaxMemory to " + 1024);
-      settings.setMaxMemory(1024);
+
+    private static void setMemory(List<String> arguments, JavaSettings settings) {
+        boolean memorySet = false;
+        try {
+            int min = 256;
+            if (settings.getMaxMemory() > 0) {
+                arguments.add("-Xms" + min + "M");
+                Logger.logInfo("Setting MinMemory to " + min);
+                arguments.add("-Xmx" + settings.getMaxMemory() + "M");
+                Logger.logInfo("Setting MaxMemory to " + settings.getMaxMemory());
+                memorySet = true;
+            }
+        } catch (Exception e) {
+            Logger.logError("Error parsing memory settings", e);
+        }
+        if (!memorySet) {
+            arguments.add("-Xms" + 256 + "M");
+            Logger.logInfo("Defaulting MinMemory to " + 256);
+            arguments.add("-Xmx" + 1024 + "M");
+            Logger.logInfo("Defaulting MaxMemory to " + 1024);
+            settings.setMaxMemory(1024);
+        }
     }
-  }
 
-  private static File syncAssets(File assetDir, String indexName) throws JsonSyntaxException,
-      JsonIOException, IOException {
-    Logger.logInfo("Syncing Assets:");
-    final File objects = new File(assetDir, "objects");
-    AssetIndex index =
-        JsonFactory.loadAssetIndex(new File(assetDir, "indexes/{INDEX}.json".replace("{INDEX}",
-            indexName)));
+    private static File syncAssets(File assetDir, String indexName)
+        throws JsonSyntaxException, JsonIOException, IOException {
+        Logger.logInfo("Syncing Assets:");
+        final File objects = new File(assetDir, "objects");
+        AssetIndex index = JsonFactory.loadAssetIndex(
+            new File(assetDir, "indexes/{INDEX}.json".replace("{INDEX}", indexName)));
 
-    if (!index.virtual)
-      return assetDir;
+        if (!index.virtual)
+            return assetDir;
 
-    final File targetDir = new File(assetDir, "virtual/" + indexName);
+        final File targetDir = new File(assetDir, "virtual/" + indexName);
 
-    final ConcurrentSkipListSet<File> old = new ConcurrentSkipListSet<File>();
-    old.addAll(FileUtils.listFiles(targetDir, FileFilterUtils.trueFileFilter(),
-        FileFilterUtils.trueFileFilter()));
+        final ConcurrentSkipListSet<File> old = new ConcurrentSkipListSet<File>();
+        old.addAll(FileUtils.listFiles(targetDir, FileFilterUtils.trueFileFilter(),
+            FileFilterUtils.trueFileFilter()));
 
-    // Benchmark.reset("threading");
-    Parallel.TaskHandler<Void> th =
-        new Parallel.ForEach<Entry<String, Asset>, Void>(index.objects.entrySet())
-            .withFixedThreads(2 * OSUtils.getNumCores())
+        // Benchmark.reset("threading");
+        Parallel.TaskHandler<Void> th = new Parallel.ForEach<Entry<String, Asset>, Void>(
+            index.objects.entrySet()).withFixedThreads(2 * OSUtils.getNumCores())
             // .configurePoolSize(2*2*OSUtils.getNumCores(), 10)
             .apply(new Parallel.F<Entry<String, Asset>, Void>() {
-              public Void apply(Entry<String, Asset> e) {
-                Asset asset = e.getValue();
-                File local = new File(targetDir, e.getKey());
-                File object = new File(objects, asset.hash.substring(0, 2) + "/" + asset.hash);
+                public Void apply(Entry<String, Asset> e) {
+                    Asset asset = e.getValue();
+                    File local = new File(targetDir, e.getKey());
+                    File object = new File(objects, asset.hash.substring(0, 2) + "/" + asset.hash);
 
-                old.remove(local);
+                    old.remove(local);
 
-                try {
-                  if (local.exists() && !ChecksumUtil.getSHA(local).equals(asset.hash)) {
-                    Logger.logInfo("  Changed: " + e.getKey());
-                    FileUtils.copyFile(object, local);
-                  } else if (!local.exists()) {
-                    Logger.logInfo("  Added: " + e.getKey());
-                    FileUtils.copyFile(object, local);
-                  }
-                } catch (Exception ex) {
-                  Logger.logError("Asset checking failed: ", ex);
+                    try {
+                        if (local.exists() && !ChecksumUtil.getSHA(local).equals(asset.hash)) {
+                            Logger.logInfo("  Changed: " + e.getKey());
+                            FileUtils.copyFile(object, local);
+                        } else if (!local.exists()) {
+                            Logger.logInfo("  Added: " + e.getKey());
+                            FileUtils.copyFile(object, local);
+                        }
+                    } catch (Exception ex) {
+                        Logger.logError("Asset checking failed: ", ex);
+                    }
+                    return null;
                 }
-                return null;
-              }
             });
-    try {
-      th.shutdown();
-      th.wait(60, TimeUnit.SECONDS);
-    } catch (Exception ex) {
-      Logger.logError("Asset checking failed: ", ex);
-    }
-    // Benchmark.logBenchAs("threading", "parallel asset(virtual) check");
+        try {
+            th.shutdown();
+            th.wait(60, TimeUnit.SECONDS);
+        } catch (Exception ex) {
+            Logger.logError("Asset checking failed: ", ex);
+        }
+        // Benchmark.logBenchAs("threading", "parallel asset(virtual) check");
 
-    for (File f : old) {
-      f.getAbsolutePath().replace(targetDir.getAbsolutePath(), "");
-      // Logger.logInfo("  Removed: " + name.substring(1));
-      f.delete();
+        for (File f : old) {
+            f.getAbsolutePath().replace(targetDir.getAbsolutePath(), "");
+            // Logger.logInfo("  Removed: " + name.substring(1));
+            f.delete();
+        }
+
+        return targetDir;
     }
 
-    return targetDir;
-  }
-
-  public static void killMC() {
-    if (MineguildLauncher.MCRunning && MineguildLauncher.procmon != null) {
-      MineguildLauncher.procmon.stop();
-      Logger.logWarn("Minecraft was killed by user.");
+    public static void killMC() {
+        if (MineguildLauncher.MCRunning && MineguildLauncher.procmon != null) {
+            MineguildLauncher.procmon.stop();
+            Logger.logWarn("Minecraft was killed by user.");
+        }
     }
-  }
 
 
 }
