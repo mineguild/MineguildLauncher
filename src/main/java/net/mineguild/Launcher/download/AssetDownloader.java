@@ -42,6 +42,8 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     private double start;
 
     final static int BYTESPERMB = 1000000;
+    final static int SPEED_UPDATE_RATE = 1;
+    final static double NANOS_PER_SECOND = 1000000000.0;
 
     @Getter @Setter private boolean multithread = false;
     @Getter private String status;
@@ -59,8 +61,28 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
     }
 
 
+    public static Thread startUpdateThread(){
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run(){
+                while(Thread.currentThread().isAlive()){
+                    instance.setSpeed((long) (NANOS_PER_SECOND / 1 * instance.totalBytesRead / (
+                            System.nanoTime() - instance.start + 1)));
+                    try{
+                        Thread.sleep(SPEED_UPDATE_RATE * 1000);
+                    } catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t.start();
+        return t;
+    }
+
     @Override protected Boolean doInBackground() throws Exception {
         start = System.nanoTime();
+        Thread updateThread = startUpdateThread();
         if (multithread) {
             ExecutorService executor =
                 Executors.newFixedThreadPool(MineguildLauncher.getSettings().getDownloadThreads());
@@ -78,6 +100,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             }
             executor.shutdown();
             try {
+
                 boolean done = false;
                 while (!isCancelled() && !done) {
                     done = executor.awaitTermination(100, TimeUnit.MILLISECONDS);
@@ -102,7 +125,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 currentFile++;
             }
         }
-
+        updateThread.interrupt();
         setStatus(allDownloaded ? "Success" : "Downloads failed");
         return allDownloaded;
     }
@@ -156,7 +179,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
             newProg = (int) ((totalBytesRead * 100) / totalSize);
         } else if (currentSize > 0 && remoteSize > 0) {
             newProg = (int) (((currentSize * (percentPerFile)) / remoteSize)
-                + percentPerFile * currentFile);
+                    + percentPerFile * currentFile);
         } else {
             newProg = (int) (percentPerFile * (currentFile + 1));
         }
@@ -204,8 +227,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                         "Connecting.. Try " + attempt + " of " + attempts + " for: " + asset.url);
                 }
 
-                // Will this break something?
-                // HTTPURLConnection con = (HttpURLConnection) asset.url.openConnection();
                 URLConnection con = asset.url.openConnection();
                 if (con instanceof HttpURLConnection) {
                     con.setRequestProperty("Cache-Control", "no-cache, no-transform");
@@ -276,7 +297,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                 if (totalSize == 0) {
                     start = System.nanoTime();
                 }
-                final double NANOS_PER_SECOND = 1000000000.0;
+
                 InputStream input = con.getInputStream();
                 FileOutputStream output = new FileOutputStream(asset.local);
                 while ((readLen = input.read(buffer, 0, BUFFER_SIZE)) != -1) {
@@ -297,14 +318,14 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                     if (prog < 0) {
                         prog = 0;
                     }
-                    if (totalSize == 0) {
+                    /*if (totalSize == 0) {
                         setSpeed(
                             (long) (NANOS_PER_SECOND / 1 * currentSize / (System.nanoTime() - start
                                 + 1)));
                     } else {
                         setSpeed((long) (NANOS_PER_SECOND / 1 * totalBytesRead / (
                             System.nanoTime() - start + 1)));
-                    }
+                    }*/
 
                     setProgress(prog);
                     setTotalProgress(calculateTotalProgress(currentSize, remoteSize));
@@ -392,8 +413,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                             + asset.url);
                     }
 
-                    // Will this break something?
-                    // HTTPURLConnection con = (HttpURLConnection) asset.url.openConnection();
                     URLConnection con = asset.url.openConnection();
                     if (con instanceof HttpURLConnection) {
                         con.setRequestProperty("Cache-Control", "no-cache, no-transform");
@@ -494,14 +513,14 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                         if (showIndProgress) {
                             instance.updateIndividualProgress(threadId, prog);
                         }
-
+                        /*
                         instance.setSpeed((long) (NANOS_PER_SECOND / 1 * instance.totalBytesRead / (
                             System.nanoTime() - instance.start + 1)));
 
                         if (instance.totalSize > 0) {
                             instance.setTotalProgress(
                                 instance.calculateTotalProgress(currentSize, remoteSize));
-                        }
+                        }*/
 
                     }
                     if (showIndProgress) {
