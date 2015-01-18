@@ -22,6 +22,7 @@ import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
 import net.mineguild.Launcher.utils.AuthWorkDialog;
+import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
@@ -32,8 +33,6 @@ import net.mineguild.ModPack.Side;
 
 public class MineguildLauncher {
 
-    public static File baseDirectory;
-    public static boolean doExactCheck = true;
     public static boolean MCRunning;
     public static boolean forceUpdate;
     public static ProcessMonitor procmon;
@@ -60,6 +59,7 @@ public class MineguildLauncher {
             System.exit(0);
         }
         // Logger.addListener(new StdOutLogger());
+        DownloadUtils.ssl_hack();
         mcLogger =
             new LogWriter(new File(OSUtils.getLocalDir(), "minecraft.log"), LogSource.EXTERNAL);
         Logger.addListener(
@@ -84,72 +84,6 @@ public class MineguildLauncher {
                 }
             }
         });
-    }
-
-    public static File getInstallPath(Component par) {
-        Component parent = (par == null) ? con : par;
-        File folder;
-        try {
-            folder = MineguildLauncher.settings.getLaunchPath() == null ?
-                new File("modpack") :
-                MineguildLauncher.settings.getLaunchPath();
-        } catch (NullPointerException e) {
-            folder = new File("modpack");
-        }
-        int result = JOptionPane.showConfirmDialog(parent, String.format(
-                "Do you want to select a different install location for the modpack?\nOtherwise it will be installed in %s",
-                folder.getAbsolutePath()), "Select MMP install location.",
-            JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            result = chooser.showDialog(con, "Use selected directory");
-            if (result == JFileChooser.APPROVE_OPTION) {
-                return chooser.getSelectedFile();
-            } else {
-                return getInstallPath(parent);
-            }
-
-        } else {
-            if (!folder.exists()) {
-                if (folder.mkdirs()) {
-                    return folder;
-                } else {
-                    return getInstallPath(parent);
-                }
-            } else if (folder.canWrite()) {
-                return folder;
-            } else {
-                return getInstallPath(parent);
-            }
-        }
-    }
-
-    public static boolean needsUpdate(ModPack localPack, ModPack newestPack, boolean askUpdate) {
-
-        Logger.logInfo(String
-            .format("Local pack version: %s released on %s", localPack.getVersion(),
-                localPack.getReleaseDate()));
-        if (newestPack.isNewer(localPack)) {
-            if (askUpdate) {
-                int result = JOptionPane.showConfirmDialog(con, String.format(
-                        "A new version %s released on %s is available! Do you want to update?",
-                        newestPack.getVersion(), newestPack.getReleaseDate()), "Update modpack?",
-                    JOptionPane.YES_NO_OPTION);
-                if (result == JOptionPane.YES_OPTION) {
-                    return true;
-                } else {
-                    // We let him launch the pack although he won't be able to play on the server.
-                    Logger.logInfo("Pack wasn't updated, because user denied.");
-                }
-            } else {
-                return true;
-            }
-        } else {
-            Logger.logInfo("Not updating, because not newer");
-        }
-
-        return false;
     }
 
     public static void addSaveHook() {
@@ -208,24 +142,6 @@ public class MineguildLauncher {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void setSystem() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

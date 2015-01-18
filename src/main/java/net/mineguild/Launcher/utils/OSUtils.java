@@ -272,12 +272,20 @@ public class OSUtils {
     }
 
     public static File getLocalDir() {
+        File directory;
         switch (getCurrentOS()) {
             case WINDOWS:
-                return new File(System.getenv("AppData") + "/mmp");
+                directory = new File(System.getenv("AppData") + "/mmp");
             default:
-                return new File(System.getProperty("user.home") + "/.mmp");
+                directory = new File(System.getProperty("user.home") + "/.mmp");
         }
+        if(directory.exists() && !directory.isDirectory()){
+            directory.delete();
+        }
+        if(!directory.exists()){
+            directory.mkdir();
+        }
+        return directory;
     }
 
 }

@@ -139,7 +139,7 @@ import com.google.gson.Gson;
         }
     }
 
-    public static void setTotalSize(final List<DownloadInfo> downloads,
+    public static synchronized void setTotalSize(final List<DownloadInfo> downloads,
         final AssetDownloader instance) {
         Thread t = new Thread(new Runnable() {
             @Override public void run() {
