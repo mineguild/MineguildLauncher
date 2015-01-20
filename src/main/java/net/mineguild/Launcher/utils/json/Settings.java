@@ -33,6 +33,7 @@ public class Settings {
     private @Expose @Getter @Setter boolean redStyle = true;
     private @Expose @Getter @Setter long consoleBufferSize = 500;
     private @Expose @Getter @Setter int downloadThreads = OSUtils.getNumCores();
+    private @Expose @Getter @Setter boolean facebookAsked = false;
 
     public Settings() {
         launchPath = new File(OSUtils.getLocalDir(), "modpack");

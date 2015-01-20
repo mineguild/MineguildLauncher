@@ -276,6 +276,7 @@ public class OSUtils {
         switch (getCurrentOS()) {
             case WINDOWS:
                 directory = new File(System.getenv("AppData") + "/mmp");
+                break;
             default:
                 directory = new File(System.getProperty("user.home") + "/.mmp");
         }
