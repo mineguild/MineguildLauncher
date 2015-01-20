@@ -2,15 +2,14 @@ package net.mineguild.ModPack;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.File;
+import java.io.IOException;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import com.google.gson.annotations.Expose;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import com.google.gson.annotations.Expose;
 
 
 public class ModPackFile {

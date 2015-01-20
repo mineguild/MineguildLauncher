@@ -1,9 +1,8 @@
 package net.mineguild.ModPack;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,8 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.utils.ChecksumUtil;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
 
 public class ModPack {

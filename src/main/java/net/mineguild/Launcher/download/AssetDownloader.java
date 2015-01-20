@@ -480,7 +480,6 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                     asset.local.getParentFile().mkdirs();
                     int readLen;
                     long currentSize = 0;
-                    final double NANOS_PER_SECOND = 1000000000.0;
                     boolean showIndProgress =
                         (remoteSize / BYTESPERMB) >= 1; // Make sure only files worth
                     // showing are shown.
@@ -515,12 +514,12 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                         }
                         /*
                         instance.setSpeed((long) (NANOS_PER_SECOND / 1 * instance.totalBytesRead / (
-                            System.nanoTime() - instance.start + 1)));
+                            System.nanoTime() - instance.start + 1)));*/
 
                         if (instance.totalSize > 0) {
                             instance.setTotalProgress(
                                 instance.calculateTotalProgress(currentSize, remoteSize));
-                        }*/
+                        }
 
                     }
                     if (showIndProgress) {
