@@ -19,25 +19,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
@@ -52,7 +42,6 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
-import net.mineguild.Launcher.utils.json.Settings.JavaSettings;
 import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModPackInstaller;
 import net.mineguild.ModPack.Side;
@@ -60,18 +49,10 @@ import net.mineguild.ModPack.Side;
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Lists;
-import com.jgoodies.forms.factories.DefaultComponentFactory;
-import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
 
 @SuppressWarnings("serial") public class LaunchFrame extends JFrame {
 
     private JPanel contentPane;
-    private JTextField launchPathField;
-    private JTextField gameDirField;
-    private JTextField javaPathField;
     private JLabel localVersion;
     private JLabel lastestVersion;
     private ModPack remotePack;
@@ -81,20 +62,12 @@ import com.jgoodies.forms.layout.RowSpec;
     private JButton btnLaunch;
     private boolean needsUpdate = false;
     private @Setter boolean crashed = false;
-    private JSlider memSlider;
-    private JComboBox<String> permGenBox;
-    private JCheckBox optimizationBox;
-    private JSpinner bufferSizeSpinner;
-    private final String[] permGenSizes = new String[] {"192m", "256m", "512m", "1024m"};
     private final ImageIcon tickIcon = createImageIcon("/tick.png", "Tick Icon");
     private final ImageIcon crossIcon = createImageIcon("/cross.png", "Cross Icon");
     private JLabel localDirLabel;
     private JPanel mainPanel;
+    private SettingsPanel settingsPanel;
     private JLabel lblUpdated;
-    private JCheckBox chckbxUseRedStyle;
-    private JSpinner dlThreadsSpinner;
-
-
     /**
      * Create the frame.
      */
@@ -120,7 +93,8 @@ import com.jgoodies.forms.layout.RowSpec;
 
         mainPanel = new JPanel();
         mainPanel.setBorder(null);
-        tabbedPane.addTab("Update/Launch", null, mainPanel, null);
+        tabbedPane.addTab("Launch", null, mainPanel, null);
+        tabbedPane.setEnabledAt(0, true);
         mainPanel.setLayout(new MigLayout("", "[center][grow][center]", "[grow][][][][][][][]"));
 
         JLabel lblLogo = new JLabel("");
@@ -264,180 +238,11 @@ import com.jgoodies.forms.layout.RowSpec;
         });
         mainPanel.add(btnLaunch, "cell 0 7 3 1,growx");
 
-        JPanel settingsPanel = new JPanel();
-        settingsPanel.setBorder(null);
+        settingsPanel = new SettingsPanel(MineguildLauncher.getSettings());
+        
         tabbedPane.addTab("Settings", null, settingsPanel, null);
-        settingsPanel.setLayout(new FormLayout(
-            new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("right:default"),
-                FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
-                FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-                FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,},
-            new RowSpec[] {FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("default:grow"),}));
-
-        JLabel lblGeneralSettings =
-            DefaultComponentFactory.getInstance().createTitle("General Settings");
-        settingsPanel.add(lblGeneralSettings, "2, 2, left, default");
-
-        JSeparator separator_1 = new JSeparator();
-        settingsPanel.add(separator_1, "3, 2, 6, 1");
-
-        JLabel lblMinecraftFilesPath =
-            DefaultComponentFactory.getInstance().createLabel("Minecraft Files Path");
-        lblMinecraftFilesPath.setHorizontalAlignment(SwingConstants.RIGHT);
-        settingsPanel.add(lblMinecraftFilesPath, "2, 4, right, default");
-
-        launchPathField = new JTextField();
-        settingsPanel.add(launchPathField, "4, 4, fill, default");
-        launchPathField.setColumns(10);
-
-        JButton browseLaunchPathBtn = new JButton("Browse...");
-        browseLaunchPathBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                launchPathField.setText(selectPath(launchPathField.getText()));
-            }
-        });
-        settingsPanel.add(browseLaunchPathBtn, "6, 4");
-
-        JButton mcFilesOpen = new JButton("Open..");
-        mcFilesOpen.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Desktop.getDesktop().open(new File((launchPathField.getText())));
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        });
-        settingsPanel.add(mcFilesOpen, "8, 4");
-
-        JLabel lblInstancePath = DefaultComponentFactory.getInstance().createLabel("Instance Path");
-        lblInstancePath.setHorizontalAlignment(SwingConstants.RIGHT);
-        settingsPanel.add(lblInstancePath, "2, 6, right, default");
-
-        gameDirField = new JTextField();
-        settingsPanel.add(gameDirField, "4, 6, fill, default");
-        gameDirField.setColumns(10);
-
-        JButton browseGameDirBtn = new JButton("Browse...");
-        browseGameDirBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                gameDirField.setText(selectPath(gameDirField.getText()));
-            }
-        });
-        settingsPanel.add(browseGameDirBtn, "6, 6");
-
-        JButton instancePathOpen = new JButton("Open..");
-        instancePathOpen.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Desktop.getDesktop().open(new File((gameDirField.getText())));
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        });
-        settingsPanel.add(instancePathOpen, "8, 6");
-
-        JLabel lblConsoleBufferSize =
-            DefaultComponentFactory.getInstance().createLabel("Console Buffer Size");
-        settingsPanel.add(lblConsoleBufferSize, "2, 8");
-
-        bufferSizeSpinner = new JSpinner();
-        bufferSizeSpinner
-            .setModel(new SpinnerNumberModel(new Long(0), new Long(0), null, new Long(1)));
-        settingsPanel.add(bufferSizeSpinner, "4, 8, 3, 1");
-
-        JLabel lblDownloadThreads =
-            DefaultComponentFactory.getInstance().createLabel("Download Threads");
-        settingsPanel.add(lblDownloadThreads, "2, 10");
-
-        dlThreadsSpinner = new JSpinner();
-        dlThreadsSpinner
-            .setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
-        settingsPanel.add(dlThreadsSpinner, "4, 10, 3, 1");
-
-        JButton dlThreadsHelp = new JButton("?");
-        dlThreadsHelp.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showDlThreadHelp();
-            }
-        });
-        settingsPanel.add(dlThreadsHelp, "8, 10");
-
-        JLabel lblUseRedStyle = DefaultComponentFactory.getInstance().createLabel("Style");
-        settingsPanel.add(lblUseRedStyle, "2, 12");
-
-        chckbxUseRedStyle = new JCheckBox("Use red style (REQUIRES RESTART!)");
-
-        settingsPanel.add(chckbxUseRedStyle, "4, 12, 3, 1");
-
-        JLabel lblJavaSettings = DefaultComponentFactory.getInstance().createTitle("Java Settings");
-        settingsPanel.add(lblJavaSettings, "2, 14, left, default");
-
-        JSeparator separator = new JSeparator();
-        settingsPanel.add(separator, "3, 14, 6, 1");
-
-        JLabel lblJavaPath = DefaultComponentFactory.getInstance().createLabel("Java Path");
-        settingsPanel.add(lblJavaPath, "2, 16, right, default");
-
-        javaPathField = new JTextField();
-        javaPathField.setColumns(10);
-        settingsPanel.add(javaPathField, "4, 16, 3, 1, fill, default");
-
-        JButton autoDetectJavaBtn = new JButton("Auto-Detect");
-        autoDetectJavaBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                javaPathField.setText(MCInstaller.getDefaultJavaPath());
-            }
-        });
-        settingsPanel.add(autoDetectJavaBtn, "8, 16");
-
-        final JLabel lblMemory = DefaultComponentFactory.getInstance().createLabel("Memory");
-        settingsPanel.add(lblMemory, "2, 18");
-
-        memSlider = new JSlider();
-        memSlider.setSnapToTicks(true);
-        memSlider.setPaintTicks(true);
-        memSlider.setValue(1);
-        memSlider.setMinimum(1);
-        memSlider.setMaximum((int) OSUtils.getOSTotalMemory() / 512);
-        memSlider.setMinorTickSpacing(1);
-        memSlider.setMajorTickSpacing(2);
-
-        memSlider.addChangeListener(new ChangeListener() {
-
-            @Override public void stateChanged(ChangeEvent e) {
-                JSlider source = (JSlider) e.getSource();
-                lblMemory.setText("Memory(" + ((float) source.getValue() * 512) / 1024.0 + "gb)");
-            }
-        });
-        settingsPanel.add(memSlider, "4, 18, 3, 1");
-
-        JLabel lblPermgen = DefaultComponentFactory.getInstance().createLabel("PermGen");
-        settingsPanel.add(lblPermgen, "2, 20, right, default");
-
-        permGenBox = new JComboBox<String>();
-        permGenBox.setModel(new DefaultComboBoxModel<String>(permGenSizes));
-        settingsPanel.add(permGenBox, "4, 20, 3, 1, fill, default");
-
-        JLabel lblOptimizationArgs =
-            DefaultComponentFactory.getInstance().createLabel("Optimization Args");
-        settingsPanel.add(lblOptimizationArgs, "2, 22");
-
-        optimizationBox = new JCheckBox("Use optimization arguments");
-        settingsPanel.add(optimizationBox, "4, 22, 3, 1");
+        tabbedPane.setEnabledAt(1, true);
+        
         if (MineguildLauncher.getSettings() == null) {
             MineguildLauncher.loadSettings();
             MineguildLauncher.addSaveHook();
@@ -477,49 +282,22 @@ import com.jgoodies.forms.layout.RowSpec;
 
     public void loadSettings() {
         Settings set = MineguildLauncher.getSettings();
-        JavaSettings jSet = set.getJavaSettings();
-        // Launcher settings
-        gameDirField.setText(set.getInstancePath().getAbsolutePath());
-        launchPathField.setText(set.getLaunchPath().getAbsolutePath());
-        bufferSizeSpinner.setValue(set.getConsoleBufferSize());
-        dlThreadsSpinner.setValue(set.getDownloadThreads());
+        pack();
         if (set.getLastSize() != null) {
-            setSize(set.getLastSize());
+        	if(set.getLastSize().getHeight() > getHeight() && set.getLastSize().getWidth() > getWidth()){
+        		setSize(set.getLastSize());
+        	}
         }
         if (set.getLastLocation() != null) {
             setLocation(set.getLastLocation());
         }
-
-        chckbxUseRedStyle.setSelected(set.isRedStyle());
-        // Java settings
-        if (Lists.newArrayList(permGenSizes).contains(jSet.getPermGen())) {
-            permGenBox.setSelectedItem(jSet.getPermGen());
-        } else {
-            jSet.setPermGen((String) permGenBox.getSelectedItem());
-        }
-
-        memSlider.setValue(jSet.getMaxMemory() / 512);
-        javaPathField.setText(jSet.getJavaPath());
-        optimizationBox.setSelected(jSet.isOptimizationArgumentsUsed());
+        settingsPanel.loadSettings();
     }
 
     public void saveSettings() {
         Settings set = MineguildLauncher.getSettings();
-        JavaSettings jSet = set.getJavaSettings();
-        // Launcher settings
-        set.setInstancePath(new File(gameDirField.getText()));
-        set.setLaunchPath(new File(launchPathField.getText()));
         set.setLastLocation(getLocation());
-        set.setLastSize(getSize());
-        set.setConsoleBufferSize((Long) bufferSizeSpinner.getValue());
-        set.setRedStyle(chckbxUseRedStyle.isSelected());
-        set.setDownloadThreads((Integer) dlThreadsSpinner.getValue());
-        // Java Settings
-        jSet.setPermGen((String) permGenBox.getSelectedItem());
-        jSet.setMaxMemory(memSlider.getValue() * 512);
-        jSet.setJavaPath(javaPathField.getText());
-        jSet.setOptimizationArgumentsUsed(optimizationBox.isSelected());
-
+        settingsPanel.saveSettings();
         MineguildLauncher.saveSettingsSilent();
     }
 
@@ -755,33 +533,6 @@ import com.jgoodies.forms.layout.RowSpec;
         return btnLaunch;
     }
 
-    public JTextField getTextField() {
-        return javaPathField;
-    }
-
-    public JSlider getMemSlider() {
-        return memSlider;
-    }
-
-    public JComboBox<String> getPermGenBox() {
-        return permGenBox;
-    }
-
-    public String selectPath(String currentPath) {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = chooser.showOpenDialog(this);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile().getAbsolutePath();
-        }
-        return currentPath;
-    }
-
-    public JCheckBox getOptimizationBox() {
-        return optimizationBox;
-    }
-
     protected ImageIcon createImageIcon(String path, String description) {
         java.net.URL imgURL = ModpackBuilder.class.getResource(path);
         if (imgURL != null) {
@@ -792,23 +543,11 @@ import com.jgoodies.forms.layout.RowSpec;
         }
     }
 
-    public JSpinner getBufferSizeSpinner() {
-        return bufferSizeSpinner;
-    }
-
     public JPanel getMainPanel() {
         return mainPanel;
     }
 
     public JLabel getLblUpdated() {
         return lblUpdated;
-    }
-
-    public JCheckBox getChckbxUseRedStyle() {
-        return chckbxUseRedStyle;
-    }
-
-    public JSpinner getDlThreadsSpinner() {
-        return dlThreadsSpinner;
     }
 }
