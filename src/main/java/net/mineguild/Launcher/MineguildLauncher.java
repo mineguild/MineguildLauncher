@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import org.apache.commons.io.FileUtils;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.log.Console;
@@ -36,152 +38,150 @@ import com.google.common.collect.Lists;
 
 public class MineguildLauncher {
 
-	public static boolean MCRunning;
-	public static boolean forceUpdate;
-	public static ProcessMonitor procmon;
-	public static Console con;
-	private static @Getter LaunchFrame lFrame;
-	private static @Getter Frame parent;
-	private static @Getter @Setter LogWriter mcLogger = null;
-	public static long totalDownloadTime = 0;
-	private static @Getter Settings settings;
-	public static LoginResponse res;
-	private static @Getter List<ModpackRepository> repositories = Lists.newArrayList();
+  public static boolean MCRunning;
+  public static boolean forceUpdate;
+  public static ProcessMonitor procmon;
+  public static Console con;
+  private static @Getter LaunchFrame lFrame;
+  private static @Getter Frame parent;
+  private static @Getter @Setter LogWriter mcLogger = null;
+  public static long totalDownloadTime = 0;
+  private static @Getter Settings settings;
+  public static LoginResponse res;
+  private static @Getter List<ModpackRepository> repositories = Lists.newArrayList();
 
-	public static void main(String[] args) throws Exception {
-		if (args.length >= 1) {
-			if (args.length == 2) {
-				forceUpdate = args[1].equals("--forceUpdate");
-			}
-			if (args[0].equals("updateServer")) {
-				MineguildLauncherConsole.update(Side.SERVER);
-			} else if (args[0].equals("updateClient")) {
-				MineguildLauncherConsole.update(Side.CLIENT);
-			} else if (args[0].equals("updateBoth")) {
-				MineguildLauncherConsole.update(Side.BOTH);
-			}
-			System.exit(0);
-		}
-		ModpackRepository repo = JsonFactory.loadRepository(new File("defaultrepository.json"));
-		repo.setJsonUrl(Constants.MG_REPOSITORY);
-		VersionRepository verRepo = repo.getPacks().get("MMP");
-		//FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"),
-        //    new File(OSUtils.getLocalDir(), "newest.json"));
-		verRepo.getVersions().add((ModPackVersion) JsonFactory.loadModpack(new File("modpack.json")));
-		//JsonWriter.saveRepository(repo, new File("defaultrepository.json"));
-		//System.exit(0);
-		// Logger.addListener(new StdOutLogger());
-		DownloadUtils.ssl_hack();
-		mcLogger = new LogWriter(new File(OSUtils.getLocalDir(),
-				"minecraft.log"), LogSource.EXTERNAL);
-		Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(),
-				"launcher.log"), LogSource.LAUNCHER));
-		Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(),
-				"combined.log"), LogSource.ALL));
-		Logger.addListener(mcLogger);
-		loadSettings();
-		setNimbus();
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					AuthWorkDialog dl = new AuthWorkDialog(con);
-					dl.start();
-					lFrame = new LaunchFrame();
-					lFrame.loadSettings();
-					lFrame.setVisible(true);
-					if(settings.getRepositories().isEmpty()){
-					  settings.getRepositories().add(Constants.MG_REPOSITORY);
-					}
-					lFrame.doVersionCheck();
-					parent = lFrame;
-					if (!getSettings().isFacebookAsked()) {
-						int res = JOptionPane.showOptionDialog(parent,
-								"Please like us on Facebook if you like us!",
-								"Facebook Like?",
-								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, lFrame.createImageIcon("/icon.png", "MG Icon"),
-								new String[] { "Yes! (Opens MG FB Page)", "No",
-										"Ask me later" }, "Ask me later");
-						if (res == JOptionPane.YES_OPTION) {
-							Desktop d = Desktop.getDesktop();
-							d.browse(new URI(Constants.MG_FB_PAGE));
-							getSettings().setFacebookAsked(true);
-						} else if (res == JOptionPane.NO_OPTION) {
-							getSettings().setFacebookAsked(true);
-						}
+  public static void main(String[] args) throws Exception {
+    if (args.length >= 1) {
+      if (args.length == 2) {
+        forceUpdate = args[1].equals("--forceUpdate");
+      }
+      if (args[0].equals("updateServer")) {
+        MineguildLauncherConsole.update(Side.SERVER);
+      } else if (args[0].equals("updateClient")) {
+        MineguildLauncherConsole.update(Side.CLIENT);
+      } else if (args[0].equals("updateBoth")) {
+        MineguildLauncherConsole.update(Side.BOTH);
+      }
+      System.exit(0);
+    }
 
-					}
-					addSaveHook();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    // JsonWriter.saveRepository(repo, new File("defaultrepository.json"));
+    // System.exit(0);
+    // Logger.addListener(new StdOutLogger());
+    DownloadUtils.ssl_hack();
+    mcLogger = new LogWriter(new File(OSUtils.getLocalDir(), "minecraft.log"), LogSource.EXTERNAL);
+    Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"),
+        LogSource.LAUNCHER));
+    Logger
+        .addListener(new LogWriter(new File(OSUtils.getLocalDir(), "combined.log"), LogSource.ALL));
+    Logger.addListener(mcLogger);
+    loadSettings();
+    setNimbus();
 
-	public static void addSaveHook() {
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					JsonWriter.saveSettings(MineguildLauncher.settings,
-							new File(OSUtils.getLocalDir(), "settings.json"));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}));
-	}
+    EventQueue.invokeLater(new Runnable() {
+      public void run() {
+        try {
+          AuthWorkDialog dl = new AuthWorkDialog(con);
+          dl.start();
+          lFrame = new LaunchFrame();
+          lFrame.loadSettings();
+          lFrame.setVisible(true);
+          JOptionPane.showMessageDialog(lFrame,
+              "Migrating MMP to new location. This can take a couple of moments.",
+              "Migration", JOptionPane.INFORMATION_MESSAGE);
+          if (settings.getInstancePath().exists() && settings.getInstancePath().isDirectory()) {
+            File newDir = new File(settings.getInstancesPath(), "MMP");
+            Logger.logInfo("Migrating old pack.");
+            FileUtils.moveDirectory(settings.getInstancePath(), newDir);
+          }
+          if (settings.getRepositories().isEmpty()) {
+            settings.getRepositories().add(Constants.MG_REPOSITORY);
+          }
+          lFrame.doVersionCheck();
+          parent = lFrame;
+          if (!getSettings().isFacebookAsked()) {
+            int res =
+                JOptionPane.showOptionDialog(parent, "Please like us on Facebook if you like us!",
+                    "Facebook Like?", JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE, lFrame.createImageIcon("/icon.png", "MG Icon"),
+                    new String[] {"Yes! (Opens MG FB Page)", "No", "Ask me later"}, "Ask me later");
+            if (res == JOptionPane.YES_OPTION) {
+              Desktop d = Desktop.getDesktop();
+              d.browse(new URI(Constants.MG_FB_PAGE));
+              getSettings().setFacebookAsked(true);
+            } else if (res == JOptionPane.NO_OPTION) {
+              getSettings().setFacebookAsked(true);
+            }
 
-	public static void loadSettings() {
-		try {
-			settings = JsonFactory.loadSettings(new File(OSUtils.getLocalDir(),
-					"settings.json"));
-		} catch (IOException e) {
-			OSUtils.getLocalDir().mkdirs();
-			settings = new Settings();
-			try {
-				JsonWriter.saveSettings(settings,
-						new File(OSUtils.getLocalDir(), "settings.json"));
-			} catch (IOException e1) {
-				Logger.logError("Unable to write new settings!", e1);
-			}
-		}
-	}
+          }
+          addSaveHook();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
 
-	public static void saveSettingsSilent() {
-		try {
-			JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(),
-					"settings.json"));
-		} catch (IOException e) {
-			Logger.logError("Unable to save settings!", e);
-		}
-	}
+  public static void addSaveHook() {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          JsonWriter.saveSettings(MineguildLauncher.settings, new File(OSUtils.getLocalDir(),
+              "settings.json"));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }));
+  }
 
-	public static void setNimbus() {
-		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					// UIManager.put("nimbusBase", new Color(74, 1, 1));
-					if (getSettings().isRedStyle()) {
-						UIManager.put("nimbusBase", new Color(55, 0, 0));
-						UIManager.put("nimbusBlueGrey", new Color(120, 1, 1));
-						UIManager.put("control", Color.DARK_GRAY);
-						UIManager.put("menu", Color.green);
-						UIManager.put("nimbusLightBackground", new Color(28,
-								28, 28));
-						UIManager.put("text", Color.white);
-						UIManager.put("info", new Color(31, 31, 31));
-					}
+  public static void loadSettings() {
+    try {
+      settings = JsonFactory.loadSettings(new File(OSUtils.getLocalDir(), "settings.json"));
+    } catch (IOException e) {
+      OSUtils.getLocalDir().mkdirs();
+      settings = new Settings();
+      try {
+        JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+      } catch (IOException e1) {
+        Logger.logError("Unable to write new settings!", e1);
+      }
+    }
+  }
 
-					break;
-				}
-			}
+  public static void saveSettingsSilent() {
+    try {
+      JsonWriter.saveSettings(settings, new File(OSUtils.getLocalDir(), "settings.json"));
+    } catch (IOException e) {
+      Logger.logError("Unable to save settings!", e);
+    }
+  }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
+  public static void setNimbus() {
+    try {
+      for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+        if ("Nimbus".equals(info.getName())) {
+          UIManager.setLookAndFeel(info.getClassName());
+          // UIManager.put("nimbusBase", new Color(74, 1, 1));
+          if (getSettings().isRedStyle()) {
+            UIManager.put("nimbusBase", new Color(55, 0, 0));
+            UIManager.put("nimbusBlueGrey", new Color(120, 1, 1));
+            UIManager.put("control", Color.DARK_GRAY);
+            UIManager.put("menu", Color.green);
+            UIManager.put("nimbusLightBackground", new Color(28, 28, 28));
+            UIManager.put("text", Color.white);
+            UIManager.put("info", new Color(31, 31, 31));
+          }
+
+          break;
+        }
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
 
 }
