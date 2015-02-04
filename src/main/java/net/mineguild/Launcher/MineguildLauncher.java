@@ -86,10 +86,11 @@ public class MineguildLauncher {
           lFrame = new LaunchFrame();
           lFrame.loadSettings();
           lFrame.setVisible(true);
-          JOptionPane.showMessageDialog(lFrame,
-              "Migrating MMP to new location. This can take a couple of moments.",
-              "Migration", JOptionPane.INFORMATION_MESSAGE);
+          
           if (settings.getInstancePath().exists() && settings.getInstancePath().isDirectory()) {
+            JOptionPane.showMessageDialog(lFrame,
+                "Migrating MMP to new location. This can take a couple of moments.",
+                "Migration", JOptionPane.INFORMATION_MESSAGE);
             File newDir = new File(settings.getInstancesPath(), "MMP");
             Logger.logInfo("Migrating old pack.");
             FileUtils.moveDirectory(settings.getInstancePath(), newDir);
