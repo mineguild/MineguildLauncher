@@ -4,14 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeSet;
 
-import org.apache.commons.io.FileUtils;
-
-import net.mineguild.Launcher.utils.OSUtils;
-import net.mineguild.Launcher.utils.json.JsonFactory;
 import lombok.Getter;
 import lombok.Setter;
+import net.mineguild.Launcher.utils.OSUtils;
+import net.mineguild.Launcher.utils.json.JsonFactory;
+
+import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -27,7 +27,7 @@ public class ModpackRepository {
   }
 
   public static class VersionRepository {
-    @Expose @Getter @Setter Set<ModPackVersion> versions;
+    @Expose @Getter @Setter TreeSet<ModPackVersion> versions;
     @Expose @Getter @Setter String name;
     @Expose @Getter @Setter String repoBaseURL;
 

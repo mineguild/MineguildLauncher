@@ -3,13 +3,9 @@ package net.mineguild.Launcher.utils.json;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import com.google.common.collect.Lists;
-import com.google.gson.annotations.Expose;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +13,9 @@ import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.utils.CryptoUtils;
 import net.mineguild.Launcher.utils.OSUtils;
-import net.mineguild.ModPack.ModpackRepository;
+
+import com.google.common.collect.Lists;
+import com.google.gson.annotations.Expose;
 
 public class Settings {
 

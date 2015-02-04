@@ -3,12 +3,11 @@ package net.mineguild.Launcher;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -16,15 +15,11 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -36,7 +31,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
+import lombok.Getter;
 import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
 import net.mineguild.Builder.ModpackBuilder;
@@ -50,12 +47,13 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
+import net.mineguild.Launcher.workers.ModPackInstallWorkDialog;
+import net.mineguild.Launcher.workers.ModPackInstallWorker;
+import net.mineguild.Launcher.workers.ModPackInstallWorker.InstallAction;
+import net.mineguild.Launcher.workers.VersionCheckWorkDialog;
 import net.mineguild.ModPack.ModPack;
-import net.mineguild.ModPack.ModPackInstaller;
 import net.mineguild.ModPack.ModPackVersion;
-import net.mineguild.ModPack.ModpackRepository;
 import net.mineguild.ModPack.ModpackRepository.VersionRepository;
-import net.mineguild.ModPack.Side;
 
 import org.apache.commons.io.FileUtils;
 
@@ -79,8 +77,9 @@ public class LaunchFrame extends JFrame {
   private JPanel mainPanel;
   private SettingsPanel settingsPanel;
   private JLabel lblUpdated;
-  private JComboBox<VersionRepository> modpackSelection;
+  private @Getter JComboBox<VersionRepository> modpackSelection;
   private JComboBox<ModPackVersion> targetVersion;
+  private boolean ignoreEvents;
 
   /**
    * Create the frame.
@@ -112,12 +111,15 @@ public class LaunchFrame extends JFrame {
     mainPanel.setLayout(new MigLayout("", "[grow,center][grow][center]", "[][grow][][][][][][][]"));
 
     modpackSelection = new JComboBox<VersionRepository>();
-    /*modpackSelection.addActionListener(new ActionListener() {
+
+    modpackSelection.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        updateGUI(true);
+        if (!isIgnoreEvents()) {
+          updateGUI(true);
+        }
       }
-    });*/
-    modpackSelection.addItemListener(new ItemChangeListener());
+    });
+
     mainPanel.add(modpackSelection, "cell 1 0,growx");
 
     JLabel lblLogo = new JLabel("");
@@ -160,7 +162,9 @@ public class LaunchFrame extends JFrame {
     targetVersion = new JComboBox<ModPackVersion>();
     targetVersion.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        updateGUI(false);
+        if (!isIgnoreEvents()) {
+          updateGUI(false);
+        }
       }
     });
     mainPanel.add(targetVersion, "cell 1 3,growx");
@@ -302,7 +306,7 @@ public class LaunchFrame extends JFrame {
       }
     }
     pack();
-    setMinimumSize(getSize());
+    setMinimumSize(new Dimension(getSize().width + 100, getSize().height + 100));
   }
 
   public void showDlThreadHelp() {
@@ -335,78 +339,16 @@ public class LaunchFrame extends JFrame {
   }
 
   public void doVersionCheck() {
-    MineguildLauncher.getRepositories().clear();
-
-    for (String repoUrl : MineguildLauncher.getSettings().getRepositories()) {
-      try {
-        modpackSelection.removeAllItems();
-        ModpackRepository updated = JsonFactory.loadRepository(repoUrl);
-        MineguildLauncher.getRepositories().add(updated);
-        for (ModpackRepository mRepo : MineguildLauncher.getRepositories()) {
-          for (VersionRepository repo : mRepo.getPacks().values()) {
-
-            modpackSelection.addItem(repo);
-          }
-          if (mRepo.getPacks().containsKey(MineguildLauncher.getSettings().getLastPack())) {
-            modpackSelection.setSelectedItem(mRepo.getPacks().get(
-                MineguildLauncher.getSettings().getLastPack()));
-          }
-        }
-      } catch (Exception e) { // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-
-    /*
-     * try { ModpackRepository localRepo = JsonFactory.loadRepository(new
-     * File("defaultrepository.json")); for (VersionRepository repo : localRepo.getPacks().values())
-     * { modpackSelection.addItem(repo); }
-     * 
-     * if (localRepo.getPacks().containsKey(MineguildLauncher.getSettings().getLastPack())) {
-     * modpackSelection.setSelectedItem(localRepo.getPacks().get(
-     * MineguildLauncher.getSettings().getLastPack()));
-     * 
-     * } } catch (Exception e) { e.printStackTrace(); }
-     */
-    
-
-    /*
-     * try { FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"), new
-     * File(OSUtils.getLocalDir(), "newest.json")); remotePack = JsonFactory.loadModpack(new
-     * File(OSUtils.getLocalDir(), "newest.json")); File localPackFile = new
-     * File(MineguildLauncher.getSettings().getInstancePath(), "currentPack.json"); localPack =
-     * null; int result = JOptionPane.NO_OPTION; try { localPack =
-     * JsonFactory.loadModpack(localPackFile);
-     * getLocalVersion().setText(createVersionLabel(localPack)); } catch (Exception e) {
-     * localPackFile.delete(); Logger.logInfo("Unable to load current ModPack! Fresh-Install!"); }
-     * if (!localPackFile.exists()) { getChckbxForceUpdate().setSelected(true);
-     * getChckbxForceUpdate().setEnabled(false); getBtnUpdateModpack().setEnabled(true);
-     * getBtnLaunch().setEnabled(false); lblUpdated.setIcon(crossIcon); needsUpdate = true; result =
-     * JOptionPane.showConfirmDialog(this,
-     * "The modpack needs to be re-installed! Do you want to install it now?", "Install ModPack",
-     * JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE); } else if
-     * (remotePack.isNewer(localPack)) { getBtnUpdateModpack().setEnabled(true);
-     * lblUpdated.setIcon(crossIcon); needsUpdate = true; result = JOptionPane.showConfirmDialog(
-     * this, String.format("A new update (%s %s) is available! Update now?",
-     * remotePack.getVersion(), remotePack.getReleaseDate()), "Update ModPack",
-     * JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE); } else {
-     * lblUpdated.setIcon(tickIcon); } //setText(createVersionLabel(remotePack)); if (needsUpdate &&
-     * result == JOptionPane.YES_OPTION) { saveSettings();
-     * 
-     * Thread t = new Thread(new Runnable() {
-     * 
-     * @Override public void run() { getBtnLaunch().setEnabled(false);
-     * getBtnUpdateModpack().setEnabled(false); doUpdate(); } }); t.start(); } } catch (Exception e)
-     * { Logger.logError("Error during versioncheck!", e); }
-     */
+    VersionCheckWorkDialog dialog = new VersionCheckWorkDialog(this);
+    dialog.start();
   }
 
   public void updateGUI(boolean modpackChanged) {
+    ignoreEvents = true;
     if (modpackChanged) {
       targetVersion.removeAllItems();
       VersionRepository repo = (VersionRepository) modpackSelection.getSelectedItem();
-      LinkedList<ModPackVersion> list =
-          new LinkedList<ModPackVersion>((LinkedHashSet) repo.getVersions());
+      LinkedList<ModPackVersion> list = new LinkedList<ModPackVersion>(repo.getVersions());
       Iterator<ModPackVersion> itr = list.descendingIterator();
       while (itr.hasNext()) {
         ModPackVersion version = (ModPackVersion) itr.next();
@@ -416,39 +358,36 @@ public class LaunchFrame extends JFrame {
     }
     getBtnLaunch().setEnabled(true);
     File localPackFile =
-        new File(MineguildLauncher.getSettings().getInstancesPath(), ((VersionRepository) modpackSelection.getSelectedItem()).getName()
-            + "/currentPack.json");
+        new File(MineguildLauncher.getSettings().getInstancesPath(),
+            ((VersionRepository) modpackSelection.getSelectedItem()).getName()
+                + "/currentPack.json");
     if (!localPackFile.exists()) {
       btnUpdateModpack.setEnabled(true);
       chckbxForceUpdate.setEnabled(true);
       chckbxForceUpdate.setSelected(true);
       MineguildLauncher.forceUpdate = true;
       btnLaunch.setEnabled(false);
-      needsUpdate = true;
       lblUpdated.setIcon(crossIcon);
-      return;
-    }
-    try {
-      localPack = JsonFactory.loadModpack(localPackFile);
-      ModPackVersion selectedVersion = (ModPackVersion) targetVersion.getSelectedItem();
-      if (selectedVersion.isNewer(localPack) || localPack.isNewer(selectedVersion)) {
-        btnUpdateModpack.setEnabled(true);
-        chckbxForceUpdate.setEnabled(true);
-        lblUpdated.setIcon(crossIcon);
-        
-      } else {
-        btnUpdateModpack.setEnabled(false);
-        chckbxForceUpdate.setEnabled(true);
-        MineguildLauncher.forceUpdate = true;
-        needsUpdate = true;
-
-        lblUpdated.setIcon(tickIcon);
+    } else {
+      try {
+        localPack = JsonFactory.loadModpack(localPackFile);
+        ModPackVersion selectedVersion = (ModPackVersion) targetVersion.getSelectedItem();
+        if (selectedVersion.isNewer(localPack) || localPack.isNewer(selectedVersion)) {
+          btnUpdateModpack.setEnabled(true);
+          chckbxForceUpdate.setEnabled(true);
+          lblUpdated.setIcon(crossIcon);
+        } else {
+          btnUpdateModpack.setEnabled(false);
+          chckbxForceUpdate.setEnabled(true);
+          lblUpdated.setIcon(tickIcon);
+        }
+        localVersion.setText(createVersionLabel(localPack));
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
       }
-      localVersion.setText(createVersionLabel(localPack));
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     }
+    ignoreEvents = false;
   }
 
   public static String createVersionLabel(ModPack pack) {
@@ -475,7 +414,6 @@ public class LaunchFrame extends JFrame {
     Logger.logInfo("Updating to Remote");
     File instancePath =
         new File(MineguildLauncher.getSettings().getInstancesPath(), selectedRepo.getName());
-    File modsDir = new File(instancePath, "mods");
     File backupDirectory = null;
     try {
       int result = JOptionPane.NO_OPTION;
@@ -491,23 +429,24 @@ public class LaunchFrame extends JFrame {
           FileUtils.cleanDirectory(backupDirectory);
         }
       }
-      System.out.println(MineguildLauncher.forceUpdate);
-      if (!MineguildLauncher.forceUpdate) {
-        ModPackInstaller.clearFolder(instancePath, localPack, remotePack, Side.CLIENT,
-            backupDirectory);
-      } else {
-        ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, backupDirectory);
-      }
+      ModPackInstallWorkDialog dialog = new ModPackInstallWorkDialog(this);
+      InstallAction action =
+          MineguildLauncher.forceUpdate ? InstallAction.CLEAR_FORCE : InstallAction.CLEAR;
+      dialog.start(new ModPackInstallWorker(remotePack, localPack,
+          instancePath, backupDirectory, action));
+      /*
+       * if (MineguildLauncher.forceUpdate) { action = InstallAction.CLEAR_FORCE; } else {
+       * ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, backupDirectory); }
+       */
     } catch (IOException e) {
       Logger.logError("Couldn't clear folder!", e);
     }
     List<DownloadInfo> dlinfo = Lists.newArrayList();
     try {
-      if (MineguildLauncher.forceUpdate) {
-        dlinfo = ModPackInstaller.checkNeededFiles(instancePath, remotePack, Side.CLIENT);
-      } else {
-        dlinfo = ModPackInstaller.checkNeededFiles(instancePath, remotePack, Side.CLIENT);
-      }
+      ModPackInstallWorkDialog dialog = new ModPackInstallWorkDialog(this);
+      dialog.start(new ModPackInstallWorker(remotePack, localPack,
+          instancePath, backupDirectory, InstallAction.CHECK));
+      dlinfo = dialog.getResult();
     } catch (Exception e) {
       Logger.logError("Error during ModPack hash checking!", e);
     }
@@ -579,10 +518,12 @@ public class LaunchFrame extends JFrame {
               MineguildLauncher.con.repaint();
             }
           });
-          File instancePath = new File(MineguildLauncher.getSettings().getInstancesPath(), ((VersionRepository)modpackSelection.getSelectedItem()).getName());
+          File instancePath =
+              new File(MineguildLauncher.getSettings().getInstancesPath(),
+                  ((VersionRepository) modpackSelection.getSelectedItem()).getName());
           MCInstaller.setup(localPack, MineguildLauncher.getSettings().getMinecraftResourcePath(),
-              MineguildLauncher.getSettings().getInstancePath(), MineguildLauncher.getSettings()
-                  .getJavaSettings(), MineguildLauncher.res, true);
+              instancePath, MineguildLauncher.getSettings().getJavaSettings(),
+              MineguildLauncher.res, true);
           setVisible(false);
           MineguildLauncher.res.setStartedGame(true);
         } catch (Exception e) {
@@ -609,7 +550,14 @@ public class LaunchFrame extends JFrame {
               "It seems like Minecraft crashed!\nMaybe try to up your memory settings (PermGen&Memory) a bit.");
       crashed = false;
     }
-    doVersionCheck();
+    SwingUtilities.invokeLater(new Runnable() {
+
+      @Override
+      public void run() {
+        doVersionCheck();
+      }
+    });
+
   }
 
   public JLabel getLocalVersion() {
@@ -646,13 +594,13 @@ public class LaunchFrame extends JFrame {
   public JLabel getLblUpdated() {
     return lblUpdated;
   }
-  
-  private class ItemChangeListener implements ItemListener{
-    @Override
-    public void itemStateChanged(ItemEvent event) {
-       if (event.getStateChange() == ItemEvent.SELECTED) {
-         updateGUI(true);
-       }
-    }       
-}
+
+  public boolean isIgnoreEvents() {
+    return ignoreEvents;
+  }
+
+  public void setIgnoreEvents(boolean ignoreEvents) {
+    this.ignoreEvents = ignoreEvents;
+  }
+
 }

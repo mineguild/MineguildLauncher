@@ -71,7 +71,7 @@ public class AssetDownloader extends SwingWorker<Boolean, Void> {
                     try{
                         Thread.sleep(SPEED_UPDATE_RATE * 1000);
                     } catch (InterruptedException e){
-                        e.printStackTrace();
+                        Logger.logDebug("Sleep interrupted - no problem here(DL-TICK)", e);
                     }
                 }
             }

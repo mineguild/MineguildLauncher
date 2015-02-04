@@ -7,16 +7,11 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-
-import org.apache.commons.io.FileUtils;
-
-import com.google.common.collect.Lists;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -36,6 +31,8 @@ import net.mineguild.ModPack.ModPackVersion;
 import net.mineguild.ModPack.ModpackRepository;
 import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 import net.mineguild.ModPack.Side;
+
+import com.google.common.collect.Lists;
 
 public class MineguildLauncher {
 
