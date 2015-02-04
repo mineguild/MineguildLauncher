@@ -7,10 +7,16 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+
+import org.apache.commons.io.FileUtils;
+
+import com.google.common.collect.Lists;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +32,9 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
+import net.mineguild.ModPack.ModPackVersion;
+import net.mineguild.ModPack.ModpackRepository;
+import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 import net.mineguild.ModPack.Side;
 
 public class MineguildLauncher {
@@ -40,6 +49,7 @@ public class MineguildLauncher {
 	public static long totalDownloadTime = 0;
 	private static @Getter Settings settings;
 	public static LoginResponse res;
+	private static @Getter List<ModpackRepository> repositories = Lists.newArrayList();
 
 	public static void main(String[] args) throws Exception {
 		if (args.length >= 1) {
@@ -55,6 +65,14 @@ public class MineguildLauncher {
 			}
 			System.exit(0);
 		}
+		ModpackRepository repo = JsonFactory.loadRepository(new File("defaultrepository.json"));
+		repo.setJsonUrl(Constants.MG_REPOSITORY);
+		VersionRepository verRepo = repo.getPacks().get("MMP");
+		//FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"),
+        //    new File(OSUtils.getLocalDir(), "newest.json"));
+		verRepo.getVersions().add((ModPackVersion) JsonFactory.loadModpack(new File("modpack.json")));
+		//JsonWriter.saveRepository(repo, new File("defaultrepository.json"));
+		//System.exit(0);
 		// Logger.addListener(new StdOutLogger());
 		DownloadUtils.ssl_hack();
 		mcLogger = new LogWriter(new File(OSUtils.getLocalDir(),
@@ -74,6 +92,9 @@ public class MineguildLauncher {
 					lFrame = new LaunchFrame();
 					lFrame.loadSettings();
 					lFrame.setVisible(true);
+					if(settings.getRepositories().isEmpty()){
+					  settings.getRepositories().add(Constants.MG_REPOSITORY);
+					}
 					lFrame.doVersionCheck();
 					parent = lFrame;
 					if (!getSettings().isFacebookAsked()) {
@@ -164,5 +185,6 @@ public class MineguildLauncher {
 			e.printStackTrace();
 		}
 	}
+	
 
 }

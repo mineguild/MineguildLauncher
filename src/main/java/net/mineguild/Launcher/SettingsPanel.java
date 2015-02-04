@@ -272,8 +272,8 @@ public class SettingsPanel extends JPanel {
 	public void loadSettings() {
 		// Launcher settings
 		JavaSettings jSet = set.getJavaSettings();
-		instancePathField.setText(set.getInstancePath().getAbsolutePath());
-		launchPathField.setText(set.getLaunchPath().getAbsolutePath());
+		instancePathField.setText(set.getInstancesPath().getAbsolutePath());
+		launchPathField.setText(set.getMinecraftResourcePath().getAbsolutePath());
 		bufferSizeSpinner.setValue(set.getConsoleBufferSize());
 		dlThreadsSpinner.setValue(set.getDownloadThreads());
 		chckbxUseRedStyle.setSelected(set.isRedStyle());
@@ -292,8 +292,8 @@ public class SettingsPanel extends JPanel {
 	public void saveSettings() {
 		JavaSettings jSet = set.getJavaSettings();
 		// Launcher settings
-		set.setInstancePath(new File(instancePathField.getText()));
-		set.setLaunchPath(new File(launchPathField.getText()));
+		set.setInstancesPath(new File(instancePathField.getText()));
+		set.setMinecraftResourcePath(new File(launchPathField.getText()));
 		set.setConsoleBufferSize((Long) bufferSizeSpinner.getValue());
 		set.setRedStyle(chckbxUseRedStyle.isSelected());
 		set.setDownloadThreads((Integer) dlThreadsSpinner.getValue());

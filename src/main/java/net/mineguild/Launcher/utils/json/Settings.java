@@ -3,9 +3,12 @@ package net.mineguild.Launcher.utils.json;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
+import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
 
 import lombok.Getter;
@@ -14,6 +17,7 @@ import net.mineguild.Launcher.log.Logger;
 import net.mineguild.Launcher.minecraft.MCInstaller;
 import net.mineguild.Launcher.utils.CryptoUtils;
 import net.mineguild.Launcher.utils.OSUtils;
+import net.mineguild.ModPack.ModpackRepository;
 
 public class Settings {
 
@@ -23,8 +27,8 @@ public class Settings {
     private @Expose String MCPassword;
     private @Expose @Getter @Setter String modpack_hash;
     private @Expose File modpackPath;
-    private @Expose @Getter @Setter File instancePath;
-    private @Expose @Getter @Setter File launchPath;
+    private @Expose @Getter File instancePath;
+    private @Expose @Getter @Setter File minecraftResourcePath;
     private @Expose @Getter @Setter Dimension lastSize;
     private @Expose @Getter @Setter Point lastLocation;
     private @Expose @Getter @Setter boolean autoLogin;
@@ -34,10 +38,14 @@ public class Settings {
     private @Expose @Getter @Setter long consoleBufferSize = 500;
     private @Expose @Getter @Setter int downloadThreads = OSUtils.getNumCores();
     private @Expose @Getter @Setter boolean facebookAsked = false;
+    private @Expose @Getter @Setter List<String> repositories;
+    private @Expose @Getter @Setter String lastPack;
+    private @Expose @Getter @Setter File instancesPath;
 
     public Settings() {
-        launchPath = new File(OSUtils.getLocalDir(), "modpack");
-        instancePath = new File(launchPath, "minecraft");
+        minecraftResourcePath = new File(OSUtils.getLocalDir(), "modpack");
+        //instancePath = new File(minecraftResourcePath, "minecraft");
+        instancesPath = new File(minecraftResourcePath, "packs");
         lastLocation = null;
         MCUser = "";
         MCPassword = "";
@@ -46,6 +54,7 @@ public class Settings {
         clientToken = CryptoUtils.encrypt(UUID.randomUUID().toString());
         builderSettings = new BuilderSettings();
         javaSettings = new JavaSettings();
+        repositories = Lists.newArrayList();
     }
 
     public String getClientToken() {

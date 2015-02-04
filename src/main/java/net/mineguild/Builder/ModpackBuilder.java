@@ -48,6 +48,8 @@ import net.mineguild.Launcher.utils.json.MCVersionIndex;
 import net.mineguild.ModPack.Mod;
 import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModPackFile;
+import net.mineguild.ModPack.ModpackRepository;
+import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 import net.mineguild.ModPack.Side;
 
 import org.apache.commons.io.FileUtils;
@@ -106,13 +108,13 @@ import com.jgoodies.forms.layout.FormLayout;
         instance.setVisible(true);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"}) public ModpackBuilder() throws IOException {
+    @SuppressWarnings({"unchecked", "rawtypes"}) public ModpackBuilder() throws Exception {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setIconImage(
             Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
-        File newestFile = new File(OSUtils.getLocalDir(), "newest.json");
-        FileUtils.copyURLToFile(new URL(Constants.MG_MMP + "modpack.json"), newestFile);
-        newestPack = JsonFactory.loadModpack(newestFile);
+        ModpackRepository repo = JsonFactory.loadRepository(Constants.MG_REPOSITORY);
+        VersionRepository verRepo = (VersionRepository) JOptionPane.showInputDialog(this, "Select Modpack", "Select Modpack", JOptionPane.QUESTION_MESSAGE, null, repo.getPacks().values().toArray(), null);
+        newestPack = (ModPack) verRepo.getVersions().toArray()[0];
         setTitle("Mineguild ModpackBuilder");
         versionField = new JTextField();
         new GhostText(versionField, newestPack.getVersion());
