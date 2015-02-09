@@ -56,6 +56,7 @@ public class MCInstaller {
     MCInstaller.launchPath = launchPath;
     MCInstaller.gameDirectory = gameDirectory;
     packmcversion = pack.getMinecraftVersion();
+    packbasejson = new String();
     try {
       libraries = getLibraries(pack);
     } catch (Exception e) {

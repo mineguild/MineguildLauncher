@@ -5,7 +5,6 @@ import javax.swing.SwingWorker;
 import net.mineguild.Launcher.LaunchFrame;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.utils.json.JsonFactory;
-import net.mineguild.ModPack.ModPackVersion;
 import net.mineguild.ModPack.ModpackRepository;
 import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 

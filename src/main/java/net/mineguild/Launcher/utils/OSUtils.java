@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Map;
 
 import lombok.Getter;
 import net.mineguild.Launcher.log.Logger;
@@ -288,5 +289,11 @@ public class OSUtils {
         }
         return directory;
     }
+    
+    public static void cleanEnvVars (Map<String, String> environment) {
+      environment.remove("_JAVA_OPTIONS");
+      environment.remove("JAVA_TOOL_OPTIONS");
+      environment.remove("JAVA_OPTIONS");
+  }
 
 }

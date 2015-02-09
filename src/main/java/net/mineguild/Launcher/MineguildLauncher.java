@@ -27,10 +27,8 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
-import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModpackRepository;
 import net.mineguild.ModPack.Side;
-import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 
 import org.apache.commons.io.FileUtils;
 
