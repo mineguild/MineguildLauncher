@@ -212,7 +212,7 @@ import net.mineguild.Launcher.utils.PastebinPoster;
             @Override public void removeUpdate(DocumentEvent e) {
             }
 
-            @Override public void insertUpdate(DocumentEvent e) {
+            @Override public void insertUpdate(final DocumentEvent e) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         long BUFFER_SIZE = MineguildLauncher.getSettings() != null ?
@@ -223,6 +223,8 @@ import net.mineguild.Launcher.utils.PastebinPoster;
                         while (root.getElementCount() > BUFFER_SIZE) {
                             try {
                                 document.remove(0, root.getElement(0).getEndOffset());
+                                
+                                //insertUpdate(e);
                             } catch (BadLocationException localBadLocationException) {
                             }
                         }

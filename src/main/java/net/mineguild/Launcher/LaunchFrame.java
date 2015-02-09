@@ -80,6 +80,7 @@ public class LaunchFrame extends JFrame {
   private @Getter JComboBox<VersionRepository> modpackSelection;
   private JComboBox<ModPackVersion> targetVersion;
   private boolean ignoreEvents;
+  private CustomizationPanel customizationPanel;
 
   /**
    * Create the frame.
@@ -108,7 +109,7 @@ public class LaunchFrame extends JFrame {
     mainPanel.setBorder(null);
     tabbedPane.addTab("Launch", null, mainPanel, null);
     tabbedPane.setEnabledAt(0, true);
-    mainPanel.setLayout(new MigLayout("", "[grow,center][grow][center]", "[][grow][][][][][][][]"));
+    mainPanel.setLayout(new MigLayout("", "[grow,center][grow][center]", "[][grow][][][grow 50][][][][]"));
 
     modpackSelection = new JComboBox<VersionRepository>();
 
@@ -272,11 +273,15 @@ public class LaunchFrame extends JFrame {
       }
     });
     mainPanel.add(btnLaunch, "cell 0 8 3 1,growx");
+    
+    customizationPanel = new CustomizationPanel();
+    tabbedPane.addTab("Customization", null, customizationPanel, null);
+    tabbedPane.setEnabledAt(1, false);
 
     settingsPanel = new SettingsPanel(MineguildLauncher.getSettings());
 
     tabbedPane.addTab("Settings", null, settingsPanel, null);
-    tabbedPane.setEnabledAt(1, true);
+    tabbedPane.setEnabledAt(2, true);
 
     if (MineguildLauncher.getSettings() == null) {
       MineguildLauncher.loadSettings();
@@ -328,17 +333,22 @@ public class LaunchFrame extends JFrame {
     if (set.getLastLocation() != null) {
       setLocation(set.getLastLocation());
     }
+    
     settingsPanel.loadSettings();
   }
 
   public void saveSettings() {
     Settings set = MineguildLauncher.getSettings();
     set.setLastLocation(getLocation());
+    if(modpackSelection.getSelectedItem() != null){
+      set.setLastPack(((VersionRepository) modpackSelection.getSelectedItem()).getName());
+    }
     settingsPanel.saveSettings();
     MineguildLauncher.saveSettingsSilent();
   }
 
   public void doVersionCheck() {
+    saveSettings();
     VersionCheckWorkDialog dialog = new VersionCheckWorkDialog(this);
     dialog.start();
   }
@@ -392,9 +402,13 @@ public class LaunchFrame extends JFrame {
 
   public static String createVersionLabel(ModPack pack) {
     SimpleDateFormat format = new SimpleDateFormat();
-    return String.format("<html><b>%s</b> - released %s [MC %s] [Forge %s]", pack.getVersion(),
+    if(pack.getForgeVersion().isEmpty()){
+      return String.format("%s", pack.getMinecraftVersion());
+    } else {
+      return String.format("<html><b>%s</b> - released %s [MC %s] [Forge %s]", pack.getVersion(),
         format.format(new Date(pack.getReleaseTime())), pack.getMinecraftVersion(), pack
             .getForgeVersion().split("-", 2)[1]);
+    }
   }
 
 
@@ -431,7 +445,11 @@ public class LaunchFrame extends JFrame {
       }
       ModPackInstallWorkDialog dialog = new ModPackInstallWorkDialog(this);
       InstallAction action =
-          MineguildLauncher.forceUpdate ? InstallAction.CLEAR_FORCE : InstallAction.CLEAR;
+          MineguildLauncher.forceUpdate ? InstallAction.CLEAR_FORCE : InstallAction.CLEAR; 
+      for(String dir : remotePack.getTopLevelDirectories()){ // We don't want to clear everything thats in the instance... This would include saves/screenshots..
+        dialog.start(new ModPackInstallWorker(remotePack, localPack, new File(instancePath, dir), backupDirectory, action));
+      }
+      
       dialog.start(new ModPackInstallWorker(remotePack, localPack,
           instancePath, backupDirectory, action));
       /*

@@ -5,6 +5,7 @@ import javax.swing.SwingWorker;
 import net.mineguild.Launcher.LaunchFrame;
 import net.mineguild.Launcher.MineguildLauncher;
 import net.mineguild.Launcher.utils.json.JsonFactory;
+import net.mineguild.ModPack.ModPackVersion;
 import net.mineguild.ModPack.ModpackRepository;
 import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 
@@ -21,6 +22,7 @@ public class VersionCheckWorker extends SwingWorker<Void, Void> {
   protected Void doInBackground() throws Exception {
     MineguildLauncher.getRepositories().clear();
     frame.setIgnoreEvents(true);
+    VersionRepository select = null;
     for (String repoUrl : MineguildLauncher.getSettings().getRepositories()) {
       try {
         frame.getModpackSelection().removeAllItems();
@@ -32,6 +34,7 @@ public class VersionCheckWorker extends SwingWorker<Void, Void> {
             frame.getModpackSelection().addItem(repo);
           }
           if (mRepo.getPacks().containsKey(MineguildLauncher.getSettings().getLastPack())) {
+            select = mRepo.getPacks().get(MineguildLauncher.getSettings().getLastPack());
             frame.getModpackSelection().setSelectedItem(mRepo.getPacks().get(
                 MineguildLauncher.getSettings().getLastPack()));
           }
@@ -42,6 +45,7 @@ public class VersionCheckWorker extends SwingWorker<Void, Void> {
     }
     frame.setIgnoreEvents(false);
     frame.updateGUI(true);
+    frame.getModpackSelection().setSelectedItem(select);
     return null;
   }
 

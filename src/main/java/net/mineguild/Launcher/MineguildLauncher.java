@@ -13,8 +13,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import org.apache.commons.io.FileUtils;
-
 import lombok.Getter;
 import lombok.Setter;
 import net.mineguild.Launcher.log.Console;
@@ -29,10 +27,12 @@ import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
-import net.mineguild.ModPack.ModPackVersion;
+import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModpackRepository;
-import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 import net.mineguild.ModPack.Side;
+import net.mineguild.ModPack.ModpackRepository.VersionRepository;
+
+import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Lists;
 
@@ -64,10 +64,18 @@ public class MineguildLauncher {
       }
       System.exit(0);
     }
-
-    // JsonWriter.saveRepository(repo, new File("defaultrepository.json"));
-    // System.exit(0);
-    // Logger.addListener(new StdOutLogger());
+    /*ModpackRepository repo = JsonFactory.loadRepository(new File("defaultrepository.json"));
+    VersionRepository vanilla = new VersionRepository("Vanilla");
+    vanilla.setRepoBaseURL("https://mineguild.net/download/mmp/vanilla/");
+    ModPack m = new ModPack();
+    m.setMinecraftVersion("1.8.1");
+    m.setVersion("1.8.1");
+    m.setReleaseTime(System.currentTimeMillis());
+    vanilla.getVersions().add(m);
+    repo.getPacks().put("Vanilla", vanilla);
+    JsonWriter.saveModpack(m, new File(m.getHash()));
+    JsonWriter.saveRepository(repo, new File("newdefaultrepository.json"));
+    System.exit(0);*/
     DownloadUtils.ssl_hack();
     mcLogger = new LogWriter(new File(OSUtils.getLocalDir(), "minecraft.log"), LogSource.EXTERNAL);
     Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"),

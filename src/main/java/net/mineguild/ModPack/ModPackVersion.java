@@ -10,7 +10,7 @@ import com.google.gson.annotations.Expose;
 public class ModPackVersion implements Comparable<ModPackVersion> {
 
   protected @Expose @Getter @Setter String version;
-  protected @Expose @Getter @Setter String forgeVersion;
+  protected @Expose @Getter @Setter String forgeVersion = "";
   protected @Expose @Getter @Setter String minecraftVersion;
   protected @Expose @Getter @Setter String modpackName;
   protected @Expose @Getter String hash;

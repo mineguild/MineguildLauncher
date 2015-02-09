@@ -119,7 +119,7 @@ public class MCInstaller {
         Logger.logError("Couldn't load local pack file... Getting online file");
       }
     }
-    if (forgeVersion == null) {
+    if (forgeVersion == null && !pack.getForgeVersion().isEmpty()) {
       FileUtils.copyURLToFile(
           new URL(Constants.MG_FORGE + pack.getForgeVersion() + "/version.json"), forgeJson);
       forgeVersion = JsonFactory.loadVersion(forgeJson);
@@ -128,28 +128,31 @@ public class MCInstaller {
     File local;
     File libDir = new File(launchPath, "libraries");
 
+    if (forgeVersion != null) {
+      if (forgeVersion.jar != null && !forgeVersion.jar.isEmpty())
+        packmcversion = forgeVersion.jar;
+      if (forgeVersion.inheritsFrom != null && !forgeVersion.inheritsFrom.isEmpty())
+        packbasejson = forgeVersion.inheritsFrom;
 
-    if (forgeVersion.jar != null && !forgeVersion.jar.isEmpty())
-      packmcversion = forgeVersion.jar;
-    if (forgeVersion.inheritsFrom != null && !forgeVersion.inheritsFrom.isEmpty())
-      packbasejson = forgeVersion.inheritsFrom;
-
-    for (Library lib : forgeVersion.getLibraries()) {
-      local = new File(libDir, lib.getPath());
-      if (!local.exists() || MineguildLauncher.forceUpdate) {
-        if (lib.checksums != null) {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName(),
-              lib.checksums, "sha1", DownloadInfo.DLType.NONE, DownloadInfo.DLType.NONE));
-        } else if (lib.url != null) {
-          if (lib.url.toLowerCase().equals(Constants.MG_LIBS)) {
+      for (Library lib : forgeVersion.getLibraries()) {
+        local = new File(libDir, lib.getPath());
+        if (!local.exists() || MineguildLauncher.forceUpdate) {
+          if (lib.checksums != null) {
             list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local,
-                local.getName(), null, "md5", DownloadInfo.DLType.ContentMD5,
-                DownloadInfo.DLType.ContentMD5));
+                local.getName(), lib.checksums, "sha1", DownloadInfo.DLType.NONE,
+                DownloadInfo.DLType.NONE));
+          } else if (lib.url != null) {
+            if (lib.url.toLowerCase().equals(Constants.MG_LIBS)) {
+              list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local
+                  .getName(), null, "md5", DownloadInfo.DLType.ContentMD5,
+                  DownloadInfo.DLType.ContentMD5));
+            }
+          } else {
+            list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
           }
-        } else {
-          list.add(new DownloadInfo(new URL(lib.getUrl() + lib.getPath()), local, local.getName()));
         }
       }
+
     }
 
     if (packbasejson == null || packbasejson.isEmpty())
@@ -190,15 +193,20 @@ public class MCInstaller {
   private static List<DownloadInfo> getAssets() throws Exception {
     List<DownloadInfo> list = Lists.newArrayList();
     File forgeJson = new File(gameDirectory, "pack.json");
-    Version version = JsonFactory.loadVersion(forgeJson);
+    Version version = null;
+    if(forgeJson.exists()){
+    version = JsonFactory.loadVersion(forgeJson);
+    } else {
+      version = JsonFactory.loadVersion(new File(launchPath, "versions/{MC_VER}/{MC_VER}.json".replace("{MC_VER}", packbasejson)));
+    }
 
-    
+
     File json =
-        new File(launchPath, "assets/indexes/{MC_VER}.json".replace("{MC_VER}", packbasejson));
-    if(MineguildLauncher.forceUpdate || !json.exists()){
-    FileUtils.copyURLToFile(
-        new URL("https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(
-            "${version}", version.getAssets())), json);
+        new File(launchPath, "assets/indexes/{MC_VER}.json".replace("{MC_VER}", version.getAssets()));
+    if (MineguildLauncher.forceUpdate || !json.exists()) {
+      FileUtils.copyURLToFile(
+          new URL("https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(
+              "${version}", version.getAssets())), json);
     }
 
     AssetIndex index = JsonFactory.loadAssetIndex(json);
