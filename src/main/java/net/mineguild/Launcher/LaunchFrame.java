@@ -429,6 +429,7 @@ public class LaunchFrame extends JFrame {
     File instancePath =
         new File(MineguildLauncher.getSettings().getInstancesPath(), selectedRepo.getName());
     File backupDirectory = null;
+    if(!remotePack.getFiles().isEmpty()){
     try {
       int result = JOptionPane.NO_OPTION;
       if (localPack != null) {
@@ -468,6 +469,7 @@ public class LaunchFrame extends JFrame {
     } catch (Exception e) {
       Logger.logError("Error during ModPack hash checking!", e);
     }
+    
     MultithreadedDownloadDialog dlDialog =
         new MultithreadedDownloadDialog(dlinfo, "Updating ModPack", this);
     dlDialog.setVisible(true);
@@ -484,6 +486,15 @@ public class LaunchFrame extends JFrame {
         Logger.logError("Unable to save pack!", e);
       }
     }
+    } else {
+      localPack = remotePack;
+      try {
+        JsonWriter.saveModpack(localPack, new File(instancePath, "currentPack.json"));
+      } catch (IOException e) {
+        Logger.logError("Unable to save pack!", e);
+      }
+    }
+    
     if (updated) {
       if (backupDirectory != null) {
         JLabel component = new JLabel();
