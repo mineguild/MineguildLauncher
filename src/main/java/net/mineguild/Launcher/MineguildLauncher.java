@@ -21,15 +21,11 @@ import java.util.zip.ZipFile;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.ProgressMonitorInputStream;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.mineguild.Launcher.download.AssetDownloader;
-import net.mineguild.Launcher.download.DownloadInfo;
-import net.mineguild.Launcher.download.MultithreadedDownloadDialog;
 import net.mineguild.Launcher.log.Console;
 import net.mineguild.Launcher.log.LogSource;
 import net.mineguild.Launcher.log.LogWriter;
@@ -43,10 +39,7 @@ import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.json.JsonFactory;
 import net.mineguild.Launcher.utils.json.JsonWriter;
 import net.mineguild.Launcher.utils.json.Settings;
-import net.mineguild.ModPack.ModPack;
-import net.mineguild.ModPack.ModPackVersion;
 import net.mineguild.ModPack.ModpackRepository;
-import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 import net.mineguild.ModPack.Side;
 
 import org.apache.commons.io.FileUtils;
@@ -82,20 +75,17 @@ public class MineguildLauncher {
       }
       System.exit(0);
     }
-    /*ModpackRepository repo = JsonFactory.loadRepository(new File("defaultrepository.json"));
-    VersionRepository vanilla = repo.getPacks().get("ForgeVanilla");
-    vanilla.setRepoBaseURL("https://mineguild.net/download/mmp/vanilla_forge/");
-    ModPack m = new ModPack();
-    m.setMinecraftVersion("1.8");
-    m.setVersion("1.8");
-    m.setForgeVersion("1.8-11.14.0.1299");
-    // ModPackVersion newer = (ModPackVersion) vanilla.getVersions().toArray()[0];
-    m.setReleaseTime(System.currentTimeMillis());
-    vanilla.getVersions().add(m);
-    repo.getPacks().put("ForgeVanilla", vanilla);
-    JsonWriter.saveModpack(m, new File(m.getHash()));
-    JsonWriter.saveRepository(repo, new File("defaultrepository.json"));
-    System.exit(0);*/
+    /*
+     * ModpackRepository repo = JsonFactory.loadRepository(new File("defaultrepository.json"));
+     * VersionRepository vanilla = repo.getPacks().get("ForgeVanilla");
+     * vanilla.setRepoBaseURL("https://mineguild.net/download/mmp/vanilla_forge/"); ModPack m = new
+     * ModPack(); m.setMinecraftVersion("1.8"); m.setVersion("1.8");
+     * m.setForgeVersion("1.8-11.14.0.1299"); // ModPackVersion newer = (ModPackVersion)
+     * vanilla.getVersions().toArray()[0]; m.setReleaseTime(System.currentTimeMillis());
+     * vanilla.getVersions().add(m); repo.getPacks().put("ForgeVanilla", vanilla);
+     * JsonWriter.saveModpack(m, new File(m.getHash())); JsonWriter.saveRepository(repo, new
+     * File("defaultrepository.json")); System.exit(0);
+     */
     DownloadUtils.ssl_hack();
     mcLogger = new LogWriter(new File(OSUtils.getLocalDir(), "minecraft.log"), LogSource.EXTERNAL);
     Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"),
@@ -115,92 +105,98 @@ public class MineguildLauncher {
           lFrame.loadSettings();
           lFrame.setVisible(true);
 
-          if (settings.getInstancePath().exists() && settings.getInstancePath().isDirectory()) {
-            JOptionPane.showMessageDialog(lFrame,
-                "Migrating MMP to new location. This can take a couple of moments.", "Migration",
-                JOptionPane.INFORMATION_MESSAGE);
-            File newDir = new File(settings.getInstancesPath(), "MMP");
-            Logger.logInfo("Migrating old pack.");
-            FileUtils.moveDirectory(settings.getInstancePath(), newDir);
+          if (settings.getInstancePath() != null) {
+            if (settings.getInstancePath().exists() && settings.getInstancePath().isDirectory()) {
+              JOptionPane.showMessageDialog(lFrame,
+                  "Migrating MMP to new location. This can take a couple of moments.", "Migration",
+                  JOptionPane.INFORMATION_MESSAGE);
+              File newDir = new File(settings.getInstancesPath(), "MMP");
+              Logger.logInfo("Migrating old pack.");
+              FileUtils.moveDirectory(settings.getInstancePath(), newDir);
+              settings.setLastPack("MMP");
+            }
           }
           Thread t = new Thread(new Runnable() {
-            
+
             @Override
             public void run() {
               if (OSUtils.getCurrentOS() == OS.WINDOWS) {
-                try{
-                if (!new File(OSUtils.getLocalDir(), "java").exists()) {
-                  File java = new File(OSUtils.getLocalDir(), "java.zip");
-                  URL javaUrl = null;
-                  boolean corruptZip = false;
-                  if (OSUtils.is64BitWindows()) {
-                    javaUrl = new URL("https://mineguild.net/download/mmp/java64.zip");
-                  } else {
-                    javaUrl = new URL("https://mineguild.net/download/mmp/java.zip");
-                  }
+                try {
+                  if (!new File(OSUtils.getLocalDir(), "java").exists()) {
+                    File java = new File(OSUtils.getLocalDir(), "java.zip");
+                    URL javaUrl = null;
+                    boolean corruptZip = false;
+                    if (OSUtils.is64BitWindows()) {
+                      javaUrl = new URL("https://mineguild.net/download/mmp/java64.zip");
+                    } else {
+                      javaUrl = new URL("https://mineguild.net/download/mmp/java.zip");
+                    }
 
-                  BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(java));
-                  URLConnection con = javaUrl.openConnection();
-                  InputStream is = con.getInputStream();
-                  ProgressMonitorInputStream input =
-                      new ProgressMonitorInputStream(lFrame, "Downloading Java", is);
-                  
-                  ProgressMonitor monitor = input.getProgressMonitor();
-                  monitor.setMaximum(con.getContentLength());
-                  monitor.setMillisToPopup(0);
-                  monitor.setMillisToDecideToPopup(0);
-                  // do some configuration for monitor here
-                  try {
-                    int ch;
-                    do {
-                      try {
-                        ch = input.read();
-                        // note: writing also the last -1 value
-                        out.write(ch);
-                      } catch (Exception e) {
-                        corruptZip = true;
-                        break;
-                      }
-                    } while (ch != -1);
-                  } catch (Exception e) {
-                  } finally {
-                    input.close();
-                    out.close();
-                  }
-                  
-                  if(!corruptZip){
-                    ZipFile zipFile = new ZipFile(java);
-                    Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                    while (entries.hasMoreElements()) {
+                    BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(java));
+                    URLConnection con = javaUrl.openConnection();
+                    InputStream is = con.getInputStream();
+                    ProgressMonitorInputStream input =
+                        new ProgressMonitorInputStream(lFrame, "Downloading Java", is);
+
+                    ProgressMonitor monitor = input.getProgressMonitor();
+                    monitor.setMaximum(con.getContentLength());
+                    monitor.setMillisToPopup(0);
+                    monitor.setMillisToDecideToPopup(0);
+                    // do some configuration for monitor here
+                    try {
+                      int ch;
+                      do {
+                        try {
+                          ch = input.read();
+                          // note: writing also the last -1 value
+                          out.write(ch);
+                        } catch (Exception e) {
+                          corruptZip = true;
+                          break;
+                        }
+                      } while (ch != -1);
+                    } catch (Exception e) {
+                    } finally {
+                      input.close();
+                      out.close();
+                    }
+
+                    if (!corruptZip) {
+                      ZipFile zipFile = new ZipFile(java);
+                      Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                      while (entries.hasMoreElements()) {
                         ZipEntry entry = entries.nextElement();
-                        File entryDestination = new File(new File(OSUtils.getLocalDir(), "java"), entry.getName());
+                        File entryDestination =
+                            new File(new File(OSUtils.getLocalDir(), "java"), entry.getName());
                         entryDestination.getParentFile().mkdirs();
                         if (entry.isDirectory())
-                            entryDestination.mkdirs();
+                          entryDestination.mkdirs();
                         else {
-                            InputStream in = zipFile.getInputStream(entry);
-                            OutputStream outS = new FileOutputStream(entryDestination);
-                            IOUtils.copy(in, outS);
-                            IOUtils.closeQuietly(in);
-                            IOUtils.closeQuietly(outS);
+                          InputStream in = zipFile.getInputStream(entry);
+                          OutputStream outS = new FileOutputStream(entryDestination);
+                          IOUtils.copy(in, outS);
+                          IOUtils.closeQuietly(in);
+                          IOUtils.closeQuietly(outS);
                         }
+                      }
+                      zipFile.close();
+                      settings.getJavaSettings().setJavaPath(
+                          new File(OSUtils.getLocalDir(), "java/bin/javaw.exe").getAbsolutePath());
+                      lFrame.loadSettings();
                     }
-                    zipFile.close();
-                    settings.getJavaSettings().setJavaPath(new File(OSUtils.getLocalDir(), "java/bin/javaw.exe").getAbsolutePath());
-                    lFrame.loadSettings();
-                  }
 
-                }
-                } catch (Exception e){
+                  }
+                } catch (Exception e) {
                   Logger.logError("Error while installing java", e);
                 }
               }
             }
           });
           t.start();
-          
+
           if (settings.getRepositories().isEmpty()) {
             settings.getRepositories().add(Constants.MG_REPOSITORY);
+            settings.setLastPack("MMP");
           }
           lFrame.doVersionCheck();
           parent = lFrame;
