@@ -51,6 +51,7 @@ public class FileAddWorker<T> extends SwingWorker<Map<String, T>, Void> {
             new Parallel.ForEach<File, Entry<T>>(files).withFixedThreads(OSUtils.getNumCores() * 2)
                 .apply(new Parallel.F<File, Entry<T>>() {
 
+                    @SuppressWarnings("unchecked")
                     @Override public Entry<T> apply(File e) {
                         try {
                             ModPackEntry entry = ChecksumUtil.getFile(baseDirectory, e);

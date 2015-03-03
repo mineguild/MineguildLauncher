@@ -39,6 +39,7 @@ public class Settings {
     private @Expose @Getter @Setter List<String> repositories;
     private @Expose @Getter @Setter String lastPack;
     private @Expose @Getter @Setter File instancesPath;
+    private @Expose @Getter @Setter boolean fullscreen = false;
 
     public Settings() {
         minecraftResourcePath = new File(OSUtils.getLocalDir(), "modpack");
@@ -93,5 +94,6 @@ public class Settings {
         }
 
     }
+    
 
 }

@@ -79,26 +79,26 @@ public class ModpackBuilder extends JFrame {
   public static ModPack workPack;
   public static MCLaunchFrame launch;
   public static String forgeVersionIndex;
-  public static String forge1_8_index;
+  //public static String forge1_8_index;
   public static ModpackBuilder instance;
   public static BuilderSettings settings;
   public static File forgeIndex = new File(OSUtils.getLocalDir(), "forgeIndex.html");
-  public static File forge1_8_db = new File(OSUtils.getLocalDir(), "forge1_8.html");
+  //public static File forge1_8_db = new File(OSUtils.getLocalDir(), "forge1_8.html");
   public static File mcIndex = new File(OSUtils.getLocalDir(), "mcVersions.json");
   public static MCVersionIndex mcVersionIndex;
-  private static VersionRepository verRepo;
-  private static ModpackRepository repo;
+  private @Getter static VersionRepository verRepo;
+  private @Getter static ModpackRepository repo;
 
   public static void launch(BuilderSettings settings) throws Exception {
     if (!forgeIndex.exists()) {
       FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/index.html"), forgeIndex);
     }
     forgeVersionIndex = FileUtils.readFileToString(forgeIndex);
-    if (!forge1_8_db.exists()) {
+/*    if (!forge1_8_db.exists()) {
       FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/minecraftforge//1.8"),
           forge1_8_db);
     }
-    forge1_8_index = FileUtils.readFileToString(forge1_8_db);
+    forge1_8_index = FileUtils.readFileToString(forge1_8_db);*/
 
     if (!mcIndex.exists()) {
       FileUtils.copyURLToFile(new URL(
@@ -136,9 +136,9 @@ public class ModpackBuilder extends JFrame {
           FileUtils
               .copyURLToFile(new URL("http://files.minecraftforge.net/index.html"), forgeIndex);
           forgeVersionIndex = FileUtils.readFileToString(forgeIndex);
-          FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/minecraftforge//1.8"),
+          /*FileUtils.copyURLToFile(new URL("http://files.minecraftforge.net/minecraftforge//1.8"),
               forge1_8_db);
-          forge1_8_index = FileUtils.readFileToString(forge1_8_db);
+          forge1_8_index = FileUtils.readFileToString(forge1_8_db);*/
           Object item = forgeVersionBox.getSelectedItem();
           forgeVersionBox.setModel(new JComboBox(getForgeForMC(
               (String) mcVersionBox.getSelectedItem()).toArray()).getModel());
@@ -395,6 +395,9 @@ public class ModpackBuilder extends JFrame {
   }
 
   public static void finishPack() {
+    OpenConnectionDialog dialog = new OpenConnectionDialog();
+    dialog.setVisible(true);
+    System.exit(0);
     try {
       JOptionPane
           .showMessageDialog(
@@ -624,7 +627,7 @@ public class ModpackBuilder extends JFrame {
   public static List<String> getForgeForMC(String mc_version) {
     List<String> versions = Lists.newArrayList();
     Pattern p = Pattern.compile("\\d*\\.\\d*\\.\\d*\\.\\d*");
-    if (mc_version.equals("1.8")) {
+    /*if (mc_version.equals("1.8")) {
       Document d2 = Jsoup.parse(forge1_8_index);
       Element e2 = d2.getElementById(mc_version + "_builds");
       Elements elem2 = e2.getElementsByTag("td");
@@ -637,7 +640,7 @@ public class ModpackBuilder extends JFrame {
         }
 
       }
-    } else {
+    } else {*/
       Document d = Jsoup.parse(forgeVersionIndex);
       Element e = d.getElementById(mc_version + "_builds");
       Elements elem = e.getElementsByTag("td");
@@ -651,7 +654,7 @@ public class ModpackBuilder extends JFrame {
           }
         }
       }
-    }
+    //}
     return versions;
   }
 

@@ -4,12 +4,14 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
 
 import net.mineguild.ModPack.ModPack;
 import net.mineguild.ModPack.ModpackRepository;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,6 +44,10 @@ public class JsonWriter {
   public static void saveModpack(ModPack pack, File json) throws IOException {
     FileUtils.write(json, GSON.toJson(pack, ModPack.class));
   }
+  
+  public static void saveModpack(ModPack pack, OutputStream os) throws IOException {
+    IOUtils.write(GSON.toJson(pack, ModPack.class), os);
+  }
 
   public static void saveRepository(ModpackRepository repo, File json) throws IOException {
     GsonBuilder builder = new GsonBuilder();
@@ -51,6 +57,16 @@ public class JsonWriter {
     builder.setExclusionStrategies(new ModpackExclusionStrategy(null));
     Gson g2 = builder.create();
     FileUtils.write(json, g2.toJson(repo, ModpackRepository.class));
+  }
+  
+  public static void saveRepository(ModpackRepository repo, OutputStream os) throws IOException {
+    GsonBuilder builder = new GsonBuilder();
+    builder.enableComplexMapKeySerialization();
+    builder.setPrettyPrinting();
+    builder.excludeFieldsWithoutExposeAnnotation();
+    builder.setExclusionStrategies(new ModpackExclusionStrategy(null));
+    Gson g2 = builder.create();
+    IOUtils.write(g2.toJson(repo, ModpackRepository.class), os);
   }
 
 }

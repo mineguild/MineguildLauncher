@@ -20,7 +20,7 @@ import net.mineguild.ModPack.ModPackFile;
 
 import org.apache.commons.io.FileUtils;
 
-@SuppressWarnings("serial") public class WorkDialog extends JDialog
+@SuppressWarnings({"serial", "rawtypes", "unchecked"}) public class WorkDialog extends JDialog
     implements PropertyChangeListener {
 
     public static WorkDialog instance;

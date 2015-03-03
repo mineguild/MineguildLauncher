@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -109,7 +110,8 @@ public class LaunchFrame extends JFrame {
     mainPanel.setBorder(null);
     tabbedPane.addTab("Launch", null, mainPanel, null);
     tabbedPane.setEnabledAt(0, true);
-    mainPanel.setLayout(new MigLayout("", "[grow,center][grow][center]", "[][grow][][][grow 50][][][][]"));
+    mainPanel.setLayout(new MigLayout("", "[grow,center][grow][center]",
+        "[][grow][][][grow 50][][][][]"));
 
     modpackSelection = new JComboBox<VersionRepository>();
 
@@ -273,7 +275,7 @@ public class LaunchFrame extends JFrame {
       }
     });
     mainPanel.add(btnLaunch, "cell 0 8 3 1,growx");
-    
+
     customizationPanel = new CustomizationPanel();
     tabbedPane.addTab("Customization", null, customizationPanel, null);
     tabbedPane.setEnabledAt(1, false);
@@ -325,24 +327,37 @@ public class LaunchFrame extends JFrame {
   public void loadSettings() {
     Settings set = MineguildLauncher.getSettings();
     pack();
-    if (set.getLastSize() != null) {
-      if (set.getLastSize().getHeight() > getHeight() && set.getLastSize().getWidth() > getWidth()) {
-        setSize(set.getLastSize());
+    if (!set.isFullscreen()) {
+      if (set.getLastSize() != null) {
+        if (set.getLastSize().getHeight() > getHeight()
+            && set.getLastSize().getWidth() > getWidth()) {
+          setSize(set.getLastSize());
+        }
       }
+    } else {
+      setExtendedState(getExtendedState() | Frame.MAXIMIZED_BOTH);
     }
+
     if (set.getLastLocation() != null) {
       setLocation(set.getLastLocation());
     }
-    
+    // setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+
     settingsPanel.loadSettings();
   }
 
   public void saveSettings() {
     Settings set = MineguildLauncher.getSettings();
     set.setLastLocation(getLocation());
-    if(modpackSelection.getSelectedItem() != null){
+    if (modpackSelection.getSelectedItem() != null) {
       set.setLastPack(((VersionRepository) modpackSelection.getSelectedItem()).getName());
     }
+    if ((getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
+      set.setFullscreen(true);
+    }
+    set.setLastSize(getSize());
+
+
     settingsPanel.saveSettings();
     MineguildLauncher.saveSettingsSilent();
   }
@@ -402,12 +417,12 @@ public class LaunchFrame extends JFrame {
 
   public static String createVersionLabel(ModPack pack) {
     SimpleDateFormat format = new SimpleDateFormat();
-    if(pack.getForgeVersion().isEmpty()){
+    if (pack.getForgeVersion().isEmpty()) {
       return String.format("%s", pack.getMinecraftVersion());
     } else {
       return String.format("<html><b>%s</b> - released %s [MC %s] [Forge %s]", pack.getVersion(),
-        format.format(new Date(pack.getReleaseTime())), pack.getMinecraftVersion(), pack
-            .getForgeVersion().split("-", 2)[1]);
+          format.format(new Date(pack.getReleaseTime())), pack.getMinecraftVersion(), pack
+              .getForgeVersion().split("-", 2)[1]);
     }
   }
 
@@ -429,55 +444,67 @@ public class LaunchFrame extends JFrame {
     File instancePath =
         new File(MineguildLauncher.getSettings().getInstancesPath(), selectedRepo.getName());
     File backupDirectory = null;
-    if(!remotePack.getFiles().isEmpty()){
-    try {
-      int result = JOptionPane.NO_OPTION;
-      if (localPack != null) {
-        result =
-            JOptionPane.showConfirmDialog(this,
-                "Do you want to backup your locally modified files?", "Create backup?",
-                JOptionPane.YES_NO_OPTION);
+    if (!remotePack.getFiles().isEmpty()) {
+      try {
+        int result = JOptionPane.NO_OPTION;
+        if (localPack != null) {
+          result =
+              JOptionPane.showConfirmDialog(this,
+                  "Do you want to backup your locally modified files?", "Create backup?",
+                  JOptionPane.YES_NO_OPTION);
+        }
+        if (result == JOptionPane.YES_OPTION) {
+          backupDirectory = new File(instancePath, "backup");
+          if (backupDirectory.exists() && backupDirectory.isDirectory()) {
+            FileUtils.cleanDirectory(backupDirectory);
+          }
+        }
+        ModPackInstallWorkDialog dialog = new ModPackInstallWorkDialog(this);
+        InstallAction action =
+            MineguildLauncher.forceUpdate ? InstallAction.CLEAR_FORCE : InstallAction.CLEAR;
+        for (String dir : remotePack.getTopLevelDirectories()) { // We don't want to clear
+                                                                 // everything thats in the
+                                                                 // instance... This would include
+                                                                 // saves/screenshots..
+          dialog.start(new ModPackInstallWorker(remotePack, localPack, new File(instancePath, dir),
+              backupDirectory, action));
+        }
+
+        dialog.start(new ModPackInstallWorker(remotePack, localPack, instancePath, backupDirectory,
+            action));
+        /*
+         * if (MineguildLauncher.forceUpdate) { action = InstallAction.CLEAR_FORCE; } else {
+         * ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, backupDirectory); }
+         */
+      } catch (IOException e) {
+        Logger.logError("Couldn't clear folder!", e);
       }
-      if (result == JOptionPane.YES_OPTION) {
-        backupDirectory = new File(instancePath, "backup");
-        if (backupDirectory.exists() && backupDirectory.isDirectory()) {
-          FileUtils.cleanDirectory(backupDirectory);
+      List<DownloadInfo> dlinfo = Lists.newArrayList();
+      try {
+        ModPackInstallWorkDialog dialog = new ModPackInstallWorkDialog(this);
+        dialog.start(new ModPackInstallWorker(remotePack, localPack, instancePath, backupDirectory,
+            InstallAction.CHECK));
+        dlinfo = dialog.getResult();
+      } catch (Exception e) {
+        Logger.logError("Error during ModPack hash checking!", e);
+      }
+
+      MultithreadedDownloadDialog dlDialog =
+          new MultithreadedDownloadDialog(dlinfo, "Updating ModPack", this);
+      dlDialog.setVisible(true);
+      if (!dlDialog.run()) {
+        Logger.logError("No success downloading!");
+        updated = false;
+        JOptionPane.showMessageDialog(this, "Updating didn't finish!", "Update error!",
+            JOptionPane.ERROR_MESSAGE);
+      } else {
+        localPack = remotePack;
+        try {
+          JsonWriter.saveModpack(localPack, new File(instancePath, "currentPack.json"));
+        } catch (IOException e) {
+          Logger.logError("Unable to save pack!", e);
         }
       }
-      ModPackInstallWorkDialog dialog = new ModPackInstallWorkDialog(this);
-      InstallAction action =
-          MineguildLauncher.forceUpdate ? InstallAction.CLEAR_FORCE : InstallAction.CLEAR; 
-      for(String dir : remotePack.getTopLevelDirectories()){ // We don't want to clear everything thats in the instance... This would include saves/screenshots..
-        dialog.start(new ModPackInstallWorker(remotePack, localPack, new File(instancePath, dir), backupDirectory, action));
-      }
-      
-      dialog.start(new ModPackInstallWorker(remotePack, localPack,
-          instancePath, backupDirectory, action));
-      /*
-       * if (MineguildLauncher.forceUpdate) { action = InstallAction.CLEAR_FORCE; } else {
-       * ModPackInstaller.clearFolder(modsDir, remotePack, Side.CLIENT, backupDirectory); }
-       */
-    } catch (IOException e) {
-      Logger.logError("Couldn't clear folder!", e);
-    }
-    List<DownloadInfo> dlinfo = Lists.newArrayList();
-    try {
-      ModPackInstallWorkDialog dialog = new ModPackInstallWorkDialog(this);
-      dialog.start(new ModPackInstallWorker(remotePack, localPack,
-          instancePath, backupDirectory, InstallAction.CHECK));
-      dlinfo = dialog.getResult();
-    } catch (Exception e) {
-      Logger.logError("Error during ModPack hash checking!", e);
-    }
-    
-    MultithreadedDownloadDialog dlDialog =
-        new MultithreadedDownloadDialog(dlinfo, "Updating ModPack", this);
-    dlDialog.setVisible(true);
-    if (!dlDialog.run()) {
-      Logger.logError("No success downloading!");
-      updated = false;
-      JOptionPane.showMessageDialog(this, "Updating didn't finish!", "Update error!",
-          JOptionPane.ERROR_MESSAGE);
     } else {
       localPack = remotePack;
       try {
@@ -486,15 +513,7 @@ public class LaunchFrame extends JFrame {
         Logger.logError("Unable to save pack!", e);
       }
     }
-    } else {
-      localPack = remotePack;
-      try {
-        JsonWriter.saveModpack(localPack, new File(instancePath, "currentPack.json"));
-      } catch (IOException e) {
-        Logger.logError("Unable to save pack!", e);
-      }
-    }
-    
+
     if (updated) {
       if (backupDirectory != null) {
         JLabel component = new JLabel();

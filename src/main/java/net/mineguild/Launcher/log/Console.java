@@ -223,6 +223,7 @@ import net.mineguild.Launcher.utils.PastebinPoster;
                         while (root.getElementCount() > BUFFER_SIZE) {
                             try {
                                 document.remove(0, root.getElement(0).getEndOffset());
+                                scrollToBottom();
                                 
                                 //insertUpdate(e);
                             } catch (BadLocationException localBadLocationException) {
