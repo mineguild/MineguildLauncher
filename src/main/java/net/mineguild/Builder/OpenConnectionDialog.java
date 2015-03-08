@@ -22,20 +22,7 @@ public class OpenConnectionDialog extends JDialog {
   private JComboBox<UploadSettings> comboBox = new JComboBox<UploadSettings>();
   @SuppressWarnings("unused")
   private UploadSettings result = null;
-
-  /**
-   * Launch the application.
-   */
-  public static void main(String[] args) {
-    try {
-      OpenConnectionDialog dialog = new OpenConnectionDialog();
-      dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-      dialog.setVisible(true);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
+  
   /**
    * Create the dialog.
    */
