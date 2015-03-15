@@ -16,7 +16,7 @@ public class ChangelogModEntry implements ChangelogEntry {
       case ADD:
         return String.format("%s(%s) was added.", mod1.getName(), mod1.getVersion());
       case VERSION_CHANGE:
-        return String.format("%s version changed from %s to %s.", mod1.getName(), mod1.getVersion(), mod2.getVersion());
+        return String.format("Mod %s version changed from %s to %s.", mod1.getName(), mod1.getVersion(), mod2.getVersion());
       default:
         return null;
     }
