@@ -25,6 +25,8 @@ public class ChangelogGenerator {
   public Changelog generate() {
     Changelog log = new Changelog();
     List<Mod> toMods = Lists.newArrayList(toPack.getMods().values());
+    List<String> fileReplaces = Lists.newArrayList();
+    List<String> versionChanges = Lists.newArrayList();
     for (Entry<String, ModPackFile> e : fromPack.getFiles().entrySet()) {
       if (toPack.getFilesByHash(e.getValue().getHash()).isEmpty()) {
         if (e.getValue() instanceof Mod) {
@@ -34,6 +36,7 @@ public class ChangelogGenerator {
             if (m.getInfo().getName().equals(from.getInfo().getName())) {
               log.addEntry(ChangelogEntryBuilder.create(from.getInfo(), m.getInfo(),
                   ChangelogModAction.VERSION_CHANGE));
+              versionChanges.add(from.getInfo().getName());
               found = true;
               break;
             }
@@ -46,6 +49,7 @@ public class ChangelogGenerator {
           if (toPack.getOther().containsKey(e.getKey())) {
             log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()), new ModPackEntry(
                 e.getKey(), toPack.getFileByPath(e.getKey())), ChangelogAction.REPLACE));
+            fileReplaces.add(e.getKey());
           } else {
             log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()),
                 null, ChangelogAction.REMOVE));
@@ -55,10 +59,12 @@ public class ChangelogGenerator {
     }
 
     for (Entry<String, ModPackFile> e : toPack.getFiles().entrySet()) {
-      if (fromPack.getFilesByHash(e.getValue().getHash()).isEmpty()) {
+      if (fromPack.getFilesByHash(e.getValue().getHash()).isEmpty() && !fileReplaces.contains(e.getKey())) {
         if (e.getValue() instanceof Mod) {
           Mod from = (Mod) e.getValue();
-          log.addEntry(ChangelogEntryBuilder.create(from.getInfo(), null, ChangelogModAction.ADD));
+          if(!versionChanges.contains(from.getInfo().getName())){
+            log.addEntry(ChangelogEntryBuilder.create(from.getInfo(), null, ChangelogModAction.ADD));
+          }
         } else {
           log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()), null, ChangelogAction.ADD));
         }
