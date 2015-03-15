@@ -2,7 +2,7 @@ package net.mineguild.Launcher.changelog;
 
 import net.mineguild.ModPack.ModInfo;
 
-public class ChangelogModEntry implements ChangelogEntry {
+public class ChangelogModEntry extends ChangelogEntry {
   
   public ModInfo mod1;
   public ModInfo mod2;

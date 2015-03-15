@@ -1,5 +1,6 @@
 package net.mineguild.Launcher.changelog;
 
+import net.mineguild.Launcher.utils.ChecksumUtil.ModPackEntry;
 import net.mineguild.ModPack.ModInfo;
 
 
@@ -9,7 +10,7 @@ public class ChangelogEntryBuilder {
     return new ChangelogTextEntry(entry);
   }
   
-  public static ChangelogEntry create(String file1, String file2, ChangelogFileEntry.ChangelogAction action){
+  public static ChangelogEntry create(ModPackEntry file1, ModPackEntry file2, ChangelogFileEntry.ChangelogAction action){
     ChangelogFileEntry entry = new ChangelogFileEntry();
     entry.action = action;
     entry.file1 = file1;

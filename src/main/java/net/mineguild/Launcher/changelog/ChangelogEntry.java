@@ -1,8 +1,13 @@
 package net.mineguild.Launcher.changelog;
 
 
-public interface ChangelogEntry {
+public abstract class ChangelogEntry {
   
-  String getText();
+  public abstract String getText();
+  
+  @Override
+  public String toString(){
+    return String.format("Entry: %s", getText());
+  }
     
 }

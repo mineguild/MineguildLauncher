@@ -5,7 +5,7 @@ import lombok.Setter;
 
 import com.google.gson.annotations.Expose;
 
-public class ChangelogTextEntry implements ChangelogEntry {
+public class ChangelogTextEntry extends ChangelogEntry {
   
   
   public @Expose @Getter @Setter String text;
