@@ -8,14 +8,15 @@ import javax.swing.table.TableModel;
 @SuppressWarnings("serial")
 public class CustomizationPanel extends JPanel {
   public CustomizationPanel() {
-    
-    JLabel lblAddMods = new JLabel("Add Mods - Overview - Deactivate/Activate Mods - ResourcePacks? ");
+
+    JLabel lblAddMods =
+        new JLabel("Add Mods - Overview - Deactivate/Activate Mods - ResourcePacks? ");
     add(lblAddMods);
   }
-  
-  
-  
-  public static class CustomizationPanelTableModel implements TableModel{
+
+
+
+  public static class CustomizationPanelTableModel implements TableModel {
 
     @Override
     public int getRowCount() {
@@ -24,7 +25,7 @@ public class CustomizationPanel extends JPanel {
 
     @Override
     public int getColumnCount() {
-      return 2; //Name, ModInfo(If existing) 
+      return 2; // Name, ModInfo(If existing)
     }
 
     @Override
@@ -54,21 +55,21 @@ public class CustomizationPanel extends JPanel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void addTableModelListener(TableModelListener l) {
       // TODO Auto-generated method stub
-      
+
     }
 
     @Override
     public void removeTableModelListener(TableModelListener l) {
       // TODO Auto-generated method stub
-      
+
     }
-    
+
   }
 
 }

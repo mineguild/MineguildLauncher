@@ -34,10 +34,10 @@ public class ModPackVersion implements Comparable<ModPackVersion> {
   public String getReleaseDate() {
     return new Date(releaseTime).toString();
   }
-  
+
   @Override
-  public String toString(){
+  public String toString() {
     return String.format("%s (%s)", version, getReleaseDate());
   }
-  
+
 }

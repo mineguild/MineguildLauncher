@@ -9,12 +9,12 @@ import net.mineguild.ModPack.ModpackRepository;
 import net.mineguild.ModPack.ModpackRepository.VersionRepository;
 
 public class VersionCheckWorker extends SwingWorker<Void, Void> {
-  
+
   private LaunchFrame frame;
-  
-  public VersionCheckWorker(LaunchFrame frame){
+
+  public VersionCheckWorker(LaunchFrame frame) {
     this.frame = frame;
-    
+
   }
 
   @Override
@@ -34,8 +34,8 @@ public class VersionCheckWorker extends SwingWorker<Void, Void> {
           }
           if (mRepo.getPacks().containsKey(MineguildLauncher.getSettings().getLastPack())) {
             select = mRepo.getPacks().get(MineguildLauncher.getSettings().getLastPack());
-            frame.getModpackSelection().setSelectedItem(mRepo.getPacks().get(
-                MineguildLauncher.getSettings().getLastPack()));
+            frame.getModpackSelection().setSelectedItem(
+                mRepo.getPacks().get(MineguildLauncher.getSettings().getLastPack()));
           }
         }
       } catch (Exception e) { // TODO Auto-generated catch block
@@ -53,8 +53,7 @@ public class VersionCheckWorker extends SwingWorker<Void, Void> {
     firePropertyChange("done", null, null);
     super.done();
   }
-  
-  
-  
+
+
 
 }

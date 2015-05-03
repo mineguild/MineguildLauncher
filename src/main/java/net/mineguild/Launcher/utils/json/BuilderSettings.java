@@ -53,7 +53,7 @@ public class BuilderSettings {
     public void clearPassword() {
       password = "";
     }
-    
+
     @Override
     public String toString() {
       return name + String.format("<%s>", address);

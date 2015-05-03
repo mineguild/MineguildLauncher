@@ -205,11 +205,13 @@ public class MCLauncher {
 
 
     ProcessBuilder builder = new ProcessBuilder(arguments);
-    
-     StringBuilder tmp = new StringBuilder(); for (String a : builder.command())
-     tmp.append(a).append(' '); Logger.logInfo("Launching: " + tmp.toString());
-     
-    
+
+    StringBuilder tmp = new StringBuilder();
+    for (String a : builder.command())
+      tmp.append(a).append(' ');
+    Logger.logInfo("Launching: " + tmp.toString());
+
+
     builder.directory(gameDir);
     builder.redirectErrorStream(true);
     OSUtils.cleanEnvVars(builder.environment());

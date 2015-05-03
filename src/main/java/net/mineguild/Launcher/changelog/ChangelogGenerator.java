@@ -47,8 +47,9 @@ public class ChangelogGenerator {
           }
         } else {
           if (toPack.getOther().containsKey(e.getKey())) {
-            log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()), new ModPackEntry(
-                e.getKey(), toPack.getFileByPath(e.getKey())), ChangelogAction.REPLACE));
+            log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()),
+                new ModPackEntry(e.getKey(), toPack.getFileByPath(e.getKey())),
+                ChangelogAction.REPLACE));
             fileReplaces.add(e.getKey());
           } else {
             log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()),
@@ -59,14 +60,16 @@ public class ChangelogGenerator {
     }
 
     for (Entry<String, ModPackFile> e : toPack.getFiles().entrySet()) {
-      if (fromPack.getFilesByHash(e.getValue().getHash()).isEmpty() && !fileReplaces.contains(e.getKey())) {
+      if (fromPack.getFilesByHash(e.getValue().getHash()).isEmpty()
+          && !fileReplaces.contains(e.getKey())) {
         if (e.getValue() instanceof Mod) {
           Mod from = (Mod) e.getValue();
-          if(!versionChanges.contains(from.getInfo().getName())){
+          if (!versionChanges.contains(from.getInfo().getName())) {
             log.addEntry(ChangelogEntryBuilder.create(from.getInfo(), null, ChangelogModAction.ADD));
           }
         } else {
-          log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()), null, ChangelogAction.ADD));
+          log.addEntry(ChangelogEntryBuilder.create(new ModPackEntry(e.getKey(), e.getValue()),
+              null, ChangelogAction.ADD));
         }
       }
     }

@@ -45,26 +45,15 @@ public class ConnectionCreationDialog extends JDialog {
     getContentPane().setLayout(new BorderLayout());
     contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
     getContentPane().add(contentPanel, BorderLayout.CENTER);
-    contentPanel.setLayout(new FormLayout(new ColumnSpec[] {
-        FormFactory.RELATED_GAP_COLSPEC,
-        FormFactory.DEFAULT_COLSPEC,
-        FormFactory.RELATED_GAP_COLSPEC,
-        ColumnSpec.decode("default:grow"),},
-      new RowSpec[] {
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,
-        FormFactory.RELATED_GAP_ROWSPEC,
-        FormFactory.DEFAULT_ROWSPEC,}));
+    contentPanel.setLayout(new FormLayout(new ColumnSpec[] {FormFactory.RELATED_GAP_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC,
+        ColumnSpec.decode("default:grow"),}, new RowSpec[] {FormFactory.RELATED_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,}));
     {
       JLabel lblNewLabel = new JLabel("Name");
       contentPanel.add(lblNewLabel, "2, 2, right, default");
@@ -140,45 +129,45 @@ public class ConnectionCreationDialog extends JDialog {
           public void actionPerformed(ActionEvent e) {
             boolean success = true;
             settings.setName(txtUnnamed.getText());
-            if(address.getText().length() > 0){
+            if (address.getText().length() > 0) {
               settings.setAddress(address.getText());
             } else {
               success = false;
               showEmptyError("Address");
             }
-            if(repoPath.getText().length() > 0){
+            if (repoPath.getText().length() > 0) {
               settings.setRepoPath(repoPath.getText());
             } else {
               success = false;
               showEmptyError("RepoPath");
             }
-            if(versionsPath.getText().length() > 0){
+            if (versionsPath.getText().length() > 0) {
               settings.setVersionsPath(versionsPath.getText());
             } else {
               success = false;
               showEmptyError("VersionPath");
             }
-            if(filePath.getText().length() > 0){
+            if (filePath.getText().length() > 0) {
               settings.setFilePath(filePath.getText());
             } else {
               success = false;
               showEmptyError("AssetDir");
             }
-            if(username.getText().length() > 0){
+            if (username.getText().length() > 0) {
               settings.setUsername(username.getText());
             } else {
               success = false;
               showEmptyError("Username");
             }
-            if(password.getPassword().length > 0){
+            if (password.getPassword().length > 0) {
               settings.setPassword(String.copyValueOf(password.getPassword()));
             } else {
               success = false;
               showEmptyError("Password");
             }
-            if(success)
+            if (success)
               dispose();
-            
+
           }
         });
         okButton.setActionCommand("OK");
@@ -191,12 +180,12 @@ public class ConnectionCreationDialog extends JDialog {
         buttonPane.add(cancelButton);
       }
     }
-    
-    
-    
+
+
+
   }
-  
-  public void loadSettings(UploadSettings settings){
+
+  public void loadSettings(UploadSettings settings) {
     this.settings = settings;
     txtUnnamed.setText(settings.getName());
     address.setText(settings.getAddress());
@@ -204,12 +193,13 @@ public class ConnectionCreationDialog extends JDialog {
     versionsPath.setText(settings.getVersionsPath());
     filePath.setText(settings.getFilePath());
     username.setText(settings.getUsername());
-    password.setText(settings.getPassword()); 
+    password.setText(settings.getPassword());
   }
 
-  
-  private void showEmptyError(String field){
-    JOptionPane.showMessageDialog(this, String.format("%s can't be empty!", field), String.format("Error!", field), JOptionPane.ERROR_MESSAGE);
+
+  private void showEmptyError(String field) {
+    JOptionPane.showMessageDialog(this, String.format("%s can't be empty!", field),
+        String.format("Error!", field), JOptionPane.ERROR_MESSAGE);
   }
 
 }

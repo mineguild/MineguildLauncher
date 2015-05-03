@@ -34,7 +34,6 @@ import net.mineguild.Launcher.log.StdOutLogger;
 import net.mineguild.Launcher.minecraft.LoginResponse;
 import net.mineguild.Launcher.minecraft.ProcessMonitor;
 import net.mineguild.Launcher.utils.AuthWorkDialog;
-import net.mineguild.Launcher.utils.DownloadUtils;
 import net.mineguild.Launcher.utils.OSUtils;
 import net.mineguild.Launcher.utils.OSUtils.OS;
 import net.mineguild.Launcher.utils.json.JsonFactory;
@@ -87,11 +86,12 @@ public class MineguildLauncher {
      * JsonWriter.saveModpack(m, new File(m.getHash())); JsonWriter.saveRepository(repo, new
      * File("defaultrepository.json")); System.exit(0);
      */
-    //JsonFactory.loadModpack(new File("packs/b7e3fd89d606bc4439d53ea5020fd00e"));
-    DownloadUtils.ssl_hack();
+    // JsonFactory.loadModpack(new File("packs/b7e3fd89d606bc4439d53ea5020fd00e"));
+    // DownloadUtils.ssl_hack();
     Logger.addListener(new StdOutLogger());
-    //UploadFileUtils.uploadMineguild("C:\\Users\\Korbi\\AppData\\Roaming\\mmp\\modpack\\packs\\MMP", JsonFactory.loadModpack(new File("packs/b7e3fd89d606bc4439d53ea5020fd00e")));
-    //System.exit(0);
+    // UploadFileUtils.uploadMineguild("C:\\Users\\Korbi\\AppData\\Roaming\\mmp\\modpack\\packs\\MMP",
+    // JsonFactory.loadModpack(new File("packs/b7e3fd89d606bc4439d53ea5020fd00e")));
+    // System.exit(0);
     mcLogger = new LogWriter(new File(OSUtils.getLocalDir(), "minecraft.log"), LogSource.EXTERNAL);
     Logger.addListener(new LogWriter(new File(OSUtils.getLocalDir(), "launcher.log"),
         LogSource.LAUNCHER));

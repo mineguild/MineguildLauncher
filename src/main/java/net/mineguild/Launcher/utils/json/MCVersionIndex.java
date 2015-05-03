@@ -6,15 +6,15 @@ import java.util.Map;
 
 public class MCVersionIndex {
 
-    public Map<String, String> latest;
-    public List<MCVersion> versions;
+  public Map<String, String> latest;
+  public List<MCVersion> versions;
 
 
-    public class MCVersion {
-        public String id;
-        public Date time;
-        public Date releaseTime;
-        public String type;
-    }
+  public class MCVersion {
+    public String id;
+    public Date time;
+    public Date releaseTime;
+    public String type;
+  }
 
 }
