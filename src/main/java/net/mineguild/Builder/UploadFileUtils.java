@@ -32,8 +32,8 @@ public class UploadFileUtils {
 
   private static Map<String, ChannelSftp> channels;
 
-  public static void uploadMineguild(String basePath, ModPack pack, UploadSettings set) throws JSchException,
-      SftpException, IOException, InterruptedException {
+  public static void uploadMineguild(String basePath, ModPack pack, UploadSettings set)
+      throws JSchException, SftpException, IOException, InterruptedException {
     // String adress = JOptionPane.showInputDialog("Adress:");
     // String user = JOptionPane.showInputDialog("User:");
     // String password = JOptionPane.showInputDialog("Password:");
@@ -178,13 +178,14 @@ public class UploadFileUtils {
 
       }
     });
-    
+
     Logger.logInfo("Uploading ModPack file");
     c.cd(set.getVersionsPath());
     JsonWriter.saveModpack(pack, c.put(pack.getHash()));
     ModpackBuilder.getVerRepo().getVersions().add(pack);
     Logger.logInfo("Uploading Repository");
-    JsonWriter.saveRepository(ModpackBuilder.getRepo(), c.put(set.getRepoPath(), ChannelSftp.OVERWRITE));
+    JsonWriter.saveRepository(ModpackBuilder.getRepo(),
+        c.put(set.getRepoPath(), ChannelSftp.OVERWRITE));
     Logger.logInfo("Done!");
 
   }

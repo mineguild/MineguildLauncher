@@ -11,14 +11,15 @@ import net.mineguild.ModPack.ModPackInstaller;
 import net.mineguild.ModPack.Side;
 
 public class ModPackInstallWorker extends SwingWorker<List<DownloadInfo>, Void> {
-  
+
   private InstallAction action;
   private ModPack remotePack;
   private ModPack localPack;
   private File instancePath;
   private File backupDirectory;
-  
-  public ModPackInstallWorker(ModPack remotePack, ModPack localPack, File instancePath, File backupDirectory, InstallAction action){
+
+  public ModPackInstallWorker(ModPack remotePack, ModPack localPack, File instancePath,
+      File backupDirectory, InstallAction action) {
     this.action = action;
     this.remotePack = remotePack;
     this.instancePath = instancePath;
@@ -30,15 +31,14 @@ public class ModPackInstallWorker extends SwingWorker<List<DownloadInfo>, Void> 
   protected List<DownloadInfo> doInBackground() throws Exception {
     List<DownloadInfo> dlinfo = null;
     File modsDir = new File(instancePath, "mods");
-    switch(action){
+    switch (action) {
       case CLEAR_FORCE:
         firePropertyChange("status", null, "Clearing mods folder...");
         ModPackInstaller.clearFolder(instancePath, remotePack, Side.CLIENT, backupDirectory);
         break;
       case CLEAR:
         firePropertyChange("status", null, "Clearing whole instance folder...");
-        ModPackInstaller.clearFolder(modsDir, localPack, remotePack, Side.CLIENT,
-            backupDirectory);
+        ModPackInstaller.clearFolder(modsDir, localPack, remotePack, Side.CLIENT, backupDirectory);
         break;
       case CHECK:
         firePropertyChange("status", null, "Checking for needed files...");
@@ -46,19 +46,18 @@ public class ModPackInstallWorker extends SwingWorker<List<DownloadInfo>, Void> 
         break;
       default:
         break;
-      
+
     }
     return dlinfo;
   }
-  
+
   @Override
-  protected void done(){
+  protected void done() {
     firePropertyChange("done", null, null);
   }
-  
-  public static enum InstallAction
-  {
+
+  public static enum InstallAction {
     CLEAR_FORCE, CLEAR, CHECK
   }
-  
+
 }

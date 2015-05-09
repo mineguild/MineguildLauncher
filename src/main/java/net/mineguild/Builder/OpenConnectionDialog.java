@@ -20,9 +20,8 @@ public class OpenConnectionDialog extends JDialog {
   private final JPanel contentPanel = new JPanel();
   private UploadSettings newSettings;
   private JComboBox<UploadSettings> comboBox = new JComboBox<UploadSettings>();
-  @SuppressWarnings("unused")
-  private UploadSettings result = null;
-  
+  @SuppressWarnings("unused") private UploadSettings result = null;
+
   /**
    * Create the dialog.
    */
@@ -120,7 +119,7 @@ public class OpenConnectionDialog extends JDialog {
               for (UploadSettings uS : ModpackBuilder.settings.getUploadSettings()) {
                 comboBox.addItem(uS);
               }
-              
+
             }
           }
         });

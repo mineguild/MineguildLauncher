@@ -195,15 +195,18 @@ public class MCInstaller {
     List<DownloadInfo> list = Lists.newArrayList();
     File forgeJson = new File(gameDirectory, "pack.json");
     Version version = null;
-    if(forgeJson.exists()){
-    version = JsonFactory.loadVersion(forgeJson);
+    if (forgeJson.exists()) {
+      version = JsonFactory.loadVersion(forgeJson);
     } else {
-      version = JsonFactory.loadVersion(new File(launchPath, "versions/{MC_VER}/{MC_VER}.json".replace("{MC_VER}", packbasejson)));
+      version =
+          JsonFactory.loadVersion(new File(launchPath, "versions/{MC_VER}/{MC_VER}.json".replace(
+              "{MC_VER}", packbasejson)));
     }
 
 
     File json =
-        new File(launchPath, "assets/indexes/{MC_VER}.json".replace("{MC_VER}", version.getAssets()));
+        new File(launchPath,
+            "assets/indexes/{MC_VER}.json".replace("{MC_VER}", version.getAssets()));
     if (MineguildLauncher.forceUpdate || !json.exists()) {
       FileUtils.copyURLToFile(
           new URL("https://s3.amazonaws.com/Minecraft.Download/indexes/${version}.json".replace(

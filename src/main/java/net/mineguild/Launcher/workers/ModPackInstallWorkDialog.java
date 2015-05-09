@@ -30,7 +30,7 @@ public class ModPackInstallWorkDialog extends JDialog implements PropertyChangeL
     super(owner, ModalityType.APPLICATION_MODAL);
     instance = this;
     setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("/icon.png")));
-    
+
     JPanel panel = new JPanel();
     panel.setBorder(new EmptyBorder(10, 10, 10, 10));
     getContentPane().add(panel, BorderLayout.CENTER);

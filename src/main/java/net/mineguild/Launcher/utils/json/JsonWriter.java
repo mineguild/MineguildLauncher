@@ -44,7 +44,7 @@ public class JsonWriter {
   public static void saveModpack(ModPack pack, File json) throws IOException {
     FileUtils.write(json, GSON.toJson(pack, ModPack.class));
   }
-  
+
   public static void saveModpack(ModPack pack, OutputStream os) throws IOException {
     IOUtils.write(GSON.toJson(pack, ModPack.class), os);
   }
@@ -58,7 +58,7 @@ public class JsonWriter {
     Gson g2 = builder.create();
     FileUtils.write(json, g2.toJson(repo, ModpackRepository.class));
   }
-  
+
   public static void saveRepository(ModpackRepository repo, OutputStream os) throws IOException {
     GsonBuilder builder = new GsonBuilder();
     builder.enableComplexMapKeySerialization();

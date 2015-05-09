@@ -105,7 +105,7 @@ public class JsonFactory {
     FileReader reader = new FileReader(repositoryFile);
     return GSON.fromJson(reader, ModpackRepository.class);
   }
-  
+
   public static ModpackRepository loadRepository(File f) throws Exception {
     FileReader reader = new FileReader(f);
     return GSON.fromJson(reader, ModpackRepository.class);
